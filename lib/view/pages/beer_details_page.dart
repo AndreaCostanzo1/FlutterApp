@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_beertastic/view/components/buttons/custom_backgrounded_icon_button.dart';
+
 Color bottomBarColor = Colors.amber[400];
 Color bottomBarSquareColor = Colors.amber[600];
 
@@ -32,9 +34,9 @@ class DetailsScreen extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 42.0),
-                itemRow(Icons.star, 'water', 'every 7 days'),
+                itemRow(Icons.color_lens, 'water', 'every 7 days'),
                 SizedBox(height: 22.0),
-                itemRow(Icons.ac_unit, 'Humidity', 'up to 82%'),
+                itemRow(Icons.bubble_chart, 'Humidity', 'up to 82%'),
                 SizedBox(height: 22.0),
                 itemRow(Icons.straighten, 'Size', '38" - 48"tdll'),
               ],
@@ -99,34 +101,15 @@ class DetailsScreen extends StatelessWidget {
               children: <Widget>[
                 Container(
                   width: MediaQuery.of(context).size.width / 2,
-                  child: Icon(
-                    Icons.arrow_drop_down,
-                    color: Colors.white,
+                  child: IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-                Container(
-                    height: 80.0,
-                    width: MediaQuery.of(context).size.width / 2,
-                    decoration: BoxDecoration(
-                        color: Color(0xff2c2731),
-                        borderRadius:
-                        BorderRadius.only(topLeft: Radius.circular(48.0))),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(
-                          Icons.add_shopping_cart,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          width: 6.0,
-                        ),
-                        Text(
-                          'add to cart',
-                          style: TextStyle(color: Colors.white),
-                        )
-                      ],
-                    ))
+                CustomBackgroundedIconButton(topLeftRadius: Radius.circular(48.0),),
               ],
             ),
           )
