@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 const Color defaultCommentTextColor = Colors.white70;
-const Color defaultBottomBarColor = Color(0xffffca28);
+const Color defaultBottomBarTextColor = Colors.white;
 const Color defaultBottomBarSquareColor = Color(0xffffb300);
 
 class BeerBottomBarSmall extends StatelessWidget {
@@ -13,7 +13,7 @@ class BeerBottomBarSmall extends StatelessWidget {
   BeerBottomBarSmall(
     this.beer, {
     this.commentTextColor = defaultCommentTextColor,
-    this.bottomBarTextColor = defaultBottomBarColor,
+    this.bottomBarTextColor = defaultBottomBarTextColor,
     this.bottomBarSquareColor = defaultBottomBarSquareColor,
   });
 
@@ -31,7 +31,7 @@ class BeerBottomBarSmall extends StatelessWidget {
                 style: TextStyle(
                   color: bottomBarTextColor,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16.0,
+                  fontSize: 12.0,
                 )),
             Spacer(),
             SizedBox(height: 4.0),
@@ -39,7 +39,7 @@ class BeerBottomBarSmall extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
-                  height: 100.0,
+                  height: 70.0,
                   width: MediaQuery.of(context).size.width / 2 - 50,
                   decoration: BoxDecoration(
                       color: bottomBarSquareColor,
@@ -57,25 +57,28 @@ class BeerBottomBarSmall extends StatelessWidget {
                             style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 42.0),
+                                fontSize: 28.0),
                           ),
                           SizedBox(width: 8.0),
                           Text(
                             '\%',
                             style: TextStyle(
-                                color: Colors.white70, fontSize: 18.0),
+                                color: Colors.white70, fontSize: 12.0),
                           )
                         ],
                       ),
                       Text(
                         'alcohol',
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
                       )
                     ],
                   ),
                 ),
                 Container(
-                  height: 100.0,
+                  height: 70.0,
                   width: MediaQuery.of(context).size.width / 2 - 50,
                   decoration: BoxDecoration(
                       color: bottomBarSquareColor,
@@ -93,20 +96,23 @@ class BeerBottomBarSmall extends StatelessWidget {
                             style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 42.0),
+                                fontSize: 28.0),
                           ),
                           SizedBox(width: 8.0),
                           Text(
                             '\°c',
                             style: TextStyle(
-                                color: Colors.white70, fontSize: 18.0),
-                          )
+                                color: Colors.white70, fontSize: 12.0),
+                          ),
                         ],
                       ),
                       Text(
                         'Temperature',
-                        style: TextStyle(color: Colors.white70),
-                      )
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ),
