@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_beertastic/view/pages/beer_details_page.dart';
+import 'package:flutter_beertastic/view/pages/beer_reviews_page.dart';
 
 class BeerMainFragmentMedium extends StatelessWidget {
   final Map beer;
@@ -65,22 +66,30 @@ class _Rating extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget>[
-        SizedBox(width: 4.0),
-        Text(
-          rating,
-          style: Theme.of(context).textTheme.display1,
+    return GestureDetector(
+      onTap: ()=> Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BeerReviewsPage(),
         ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 5.0),
-          child: Icon(
-            Icons.star,
-            color: Theme.of(context).textTheme.display1.color,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          SizedBox(width: 4.0),
+          Text(
+            rating,
+            style: Theme.of(context).textTheme.display1,
           ),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.only(bottom: 5.0),
+            child: Icon(
+              Icons.star,
+              color: Theme.of(context).textTheme.display1.color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
