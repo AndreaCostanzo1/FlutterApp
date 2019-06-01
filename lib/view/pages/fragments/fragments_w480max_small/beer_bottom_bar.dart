@@ -27,12 +27,11 @@ class BeerBottomBarSmall extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             SizedBox(height: 12.0),
-            Text('Information',
-                style: TextStyle(
-                  color: bottomBarTextColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12.0,
-                )),
+            Text(
+              'Information',
+              style:
+                  Theme.of(context).textTheme.display2.copyWith(fontSize: 12),
+            ),
             Spacer(),
             SizedBox(height: 4.0),
             Row(
@@ -54,25 +53,18 @@ class BeerBottomBarSmall extends StatelessWidget {
                         children: <Widget>[
                           Text(
                             beer['alcohol'],
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 28.0),
+                            style: Theme.of(context).textTheme.display2,
                           ),
                           SizedBox(width: 8.0),
                           Text(
                             '\%',
-                            style: TextStyle(
-                                color: Colors.white70, fontSize: 12.0),
-                          )
+                            style: Theme.of(context).textTheme.overline,
+                          ),
                         ],
                       ),
                       Text(
                         'alcohol',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
+                        style: Theme.of(context).textTheme.overline,
                       )
                     ],
                   ),
@@ -93,25 +85,18 @@ class BeerBottomBarSmall extends StatelessWidget {
                         children: <Widget>[
                           Text(
                             beer['temperature'],
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 28.0),
+                            style: Theme.of(context).textTheme.display2,
                           ),
                           SizedBox(width: 8.0),
                           Text(
                             '\°c',
-                            style: TextStyle(
-                                color: Colors.white70, fontSize: 12.0),
+                            style: Theme.of(context).textTheme.overline,
                           ),
                         ],
                       ),
                       Text(
                         'Temperature',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
+                        style: Theme.of(context).textTheme.overline,
                       ),
                     ],
                   ),

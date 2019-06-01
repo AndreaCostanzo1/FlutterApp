@@ -6,12 +6,10 @@ import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/be
 import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/beer_main_fragment.dart';
 import 'package:flutter_beertastic/view/pages/utils/size_computer.dart';
 
-
 Map beer = {
   'name': 'Beck\'s',
   'producer': 'Beck\'s producer',
-  'image':
-      'http://www.stickpng.com/assets/images/585e639ecb11b227491c33ff.png',
+  'image': 'http://www.stickpng.com/assets/images/585e639ecb11b227491c33ff.png',
   'rating': '4.5',
   'alcohol': '4.5',
   'temperature': '5',
@@ -27,24 +25,24 @@ class BeerPage extends StatefulWidget {
 }
 
 class _BeerState extends State<BeerPage> {
-
-  final Map<String,StatelessWidget> widgetsByDimensions ={
+  final Map<String, StatelessWidget> widgetsByDimensions = {
     SizeComputer.small: _SmallPage(),
     SizeComputer.medium: _MediumPage(),
   };
 
-
   @override
   Widget build(BuildContext context) {
-    return widgetsByDimensions[SizeComputer.computeSize(MediaQuery.of(context).size.width)];
+    return widgetsByDimensions[
+        SizeComputer.computeSize(MediaQuery.of(context).size.width)];
   }
 }
 
-class _SmallPage extends StatelessWidget{
+class _SmallPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Theme.of(context).accentColor,
+    return Theme(
+      child: Scaffold(
+        backgroundColor: Theme.of(context).primaryColor,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -53,16 +51,46 @@ class _SmallPage extends StatelessWidget{
             ),
             BeerBottomBarSmall(beer),
           ],
-        ));
+        ),
+      ),
+      //theme of the page
+      data: Theme.of(context).copyWith(
+        textTheme: TextTheme(
+            title: TextStyle(
+              fontSize: 32.0,
+              color: Theme.of(context).textTheme.title.color,
+              fontWeight: FontWeight.bold,
+            ),
+            subtitle: TextStyle(
+              color: Theme.of(context).textTheme.subtitle.color,
+              fontSize: 11,
+              fontWeight: FontWeight.normal,
+            ),
+            display1: TextStyle(
+              color: Theme.of(context).textTheme.display1.color,
+              fontSize: 22.0,
+              fontWeight: FontWeight.bold,
+            ),
+            display2: TextStyle(
+              color: Theme.of(context).textTheme.display2.color,
+              fontSize: 28.0,
+              fontWeight: FontWeight.bold,
+            ),
+            overline: Theme.of(context).textTheme.overline.copyWith(
+                  fontSize: 12.0,
+                  letterSpacing: 0,
+                )),
+      ),
+    );
   }
-
 }
 
-class _MediumPage extends StatelessWidget{
+class _MediumPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-        backgroundColor: Theme.of(context).accentColor,
+    return Theme(
+      child: Scaffold(
+        backgroundColor: Theme.of(context).primaryColor,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -73,9 +101,37 @@ class _MediumPage extends StatelessWidget{
               beer,
             )
           ],
-        ));
+        ),
+      ),
+      //Theme of the page
+      data: Theme.of(context).copyWith(
+        textTheme: TextTheme(
+          title: TextStyle(
+            fontSize: 48.0,
+            color: Theme.of(context).textTheme.title.color,
+            fontWeight: FontWeight.bold,
+          ),
+          subtitle: TextStyle(
+            color: Theme.of(context).textTheme.subtitle.color,
+            fontSize: 14,
+            fontWeight: FontWeight.normal,
+          ),
+          display1: TextStyle(
+            color: Theme.of(context).textTheme.display1.color,
+            fontSize: 32.0,
+            fontWeight: FontWeight.bold,
+          ),
+          display2: TextStyle(
+            color: Theme.of(context).textTheme.display2.color,
+            fontSize: 42.0,
+            fontWeight: FontWeight.bold,
+          ),
+          overline: Theme.of(context).textTheme.overline.copyWith(
+                fontSize: 18.0,
+                letterSpacing: 0,
+              ),
+        ),
+      ),
+    );
   }
-
 }
-
-

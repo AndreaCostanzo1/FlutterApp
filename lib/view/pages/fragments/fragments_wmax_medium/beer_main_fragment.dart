@@ -4,19 +4,9 @@ Color bottomBarColor = Colors.amber[400];
 Color bottomBarSquareColor = Colors.amber[600];
 
 class BeerMainFragmentMedium extends StatelessWidget {
-  final Color mainColor;
-  final Color actionButtonColor;
-  final Color textColor;
-  final Color commentTextColor;
   final Map beer;
 
-  BeerMainFragmentMedium(
-    this.beer, {
-    this.mainColor = Colors.white,
-    this.actionButtonColor = Colors.amber,
-    this.textColor = Colors.black,
-    this.commentTextColor = Colors.black45,
-  });
+  BeerMainFragmentMedium(this.beer);
 
   @override
   Widget build(BuildContext context) {
@@ -26,31 +16,22 @@ class BeerMainFragmentMedium extends StatelessWidget {
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(bottomLeft: Radius.circular(108.0)),
-          color: mainColor,
+          color: Theme.of(context).backgroundColor,
         ),
         child: Padding(
           padding: const EdgeInsets.all(32.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              _Title(
-                beer['name'],
-                textColor,
-              ),
+              _Title(beer['name']),
               Text(
                 beer['producer'],
-                style: TextStyle(color: commentTextColor),
+                style: Theme.of(context).textTheme.subtitle,
               ),
               SizedBox(height: 12.0),
-              _Rating(
-                beer['rating'],
-                actionButtonColor,
-              ),
+              _Rating(beer['rating']),
               Spacer(),
-              _ButtonAndImageRow(
-                beer['image'],
-                actionButtonColor,
-              ),
+              _ButtonAndImageRow(beer['image']),
               SizedBox(height: 16.0)
             ],
           ),
@@ -62,12 +43,8 @@ class BeerMainFragmentMedium extends StatelessWidget {
 
 class _Title extends StatelessWidget {
   final String beerName;
-  final Color textColor;
 
-  _Title(
-    this.beerName,
-    this.textColor,
-  );
+  _Title(this.beerName);
 
   @override
   Widget build(BuildContext context) {
@@ -76,11 +53,7 @@ class _Title extends StatelessWidget {
       width: 300.0,
       child: Text(
         beerName,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 48.0,
-          color: textColor,
-        ), //TextStyle
+        style: Theme.of(context).textTheme.title,
       ), //Text
     );
   }
@@ -88,9 +61,8 @@ class _Title extends StatelessWidget {
 
 class _Rating extends StatelessWidget {
   final String rating;
-  final Color ratingColor;
 
-  _Rating(this.rating, this.ratingColor);
+  _Rating(this.rating);
 
   @override
   Widget build(BuildContext context) {
@@ -100,17 +72,13 @@ class _Rating extends StatelessWidget {
         SizedBox(width: 4.0),
         Text(
           rating,
-          style: TextStyle(
-            color: ratingColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 32.0,
-          ),
+          style: Theme.of(context).textTheme.display1,
         ),
         Padding(
           padding: const EdgeInsets.only(bottom: 5.0),
           child: Icon(
             Icons.star,
-            color: ratingColor,
+            color: Theme.of(context).textTheme.display1.color,
           ),
         ),
       ],
@@ -120,12 +88,8 @@ class _Rating extends StatelessWidget {
 
 class _ButtonAndImageRow extends StatelessWidget {
   final String imageUrl;
-  final Color actionButtonColor;
 
-  _ButtonAndImageRow(
-    this.imageUrl,
-    this.actionButtonColor,
-  );
+  _ButtonAndImageRow(this.imageUrl);
 
   @override
   Widget build(BuildContext context) {
@@ -141,8 +105,11 @@ class _ButtonAndImageRow extends StatelessWidget {
                   builder: (context) => DetailsScreen(),
                 ),
               ),
-          backgroundColor: actionButtonColor,
-          child: Icon(Icons.local_bar),
+          backgroundColor: Theme.of(context).primaryColor,
+          child: Icon(
+            Icons.local_bar,
+            color: Theme.of(context).backgroundColor,
+          ),
         ),
         Container(
           width: 200.0,

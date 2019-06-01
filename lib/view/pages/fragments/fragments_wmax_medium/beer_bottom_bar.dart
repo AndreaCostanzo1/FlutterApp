@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
 
-const Color defaultTextColor = Colors.white;
-const Color defaultCommentTextColor = Colors.white70;
-const Color defaultBottomBarColor = Color(0xffffca28);
-const Color defaultBottomBarSquareColor = Color(0xffffb300);
+const double defaultTextOverLineTextSize = 14;
 
 class BeerBottomBarMedium extends StatelessWidget {
   final Map beer;
-  final Color bottomBarTextColor;
-  final Color bottomBarSquareColor;
-  final Color commentTextColor;
+  final double squareTextOverLineSize;
 
   BeerBottomBarMedium(
     this.beer, {
-    this.commentTextColor = defaultCommentTextColor,
-    this.bottomBarTextColor = defaultBottomBarColor,
-    this.bottomBarSquareColor = defaultBottomBarSquareColor,
+    this.squareTextOverLineSize=  defaultTextOverLineTextSize,
   });
 
   @override
@@ -29,11 +22,10 @@ class BeerBottomBarMedium extends StatelessWidget {
           children: <Widget>[
             SizedBox(height: 12.0),
             Text('Information',
-                style: TextStyle(
-                  color: bottomBarTextColor,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16.0,
-                )),
+                style: Theme.of(context).textTheme.display2.copyWith(
+                  fontSize: 16,
+                ),
+            ),
             Spacer(),
             SizedBox(height: 4.0),
             Row(
@@ -43,7 +35,7 @@ class BeerBottomBarMedium extends StatelessWidget {
                   height: 100.0,
                   width: MediaQuery.of(context).size.width / 2 - 50,
                   decoration: BoxDecoration(
-                      color: bottomBarSquareColor,
+                      color: Theme.of(context).primaryColorDark,
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(32.0),
                           topRight: Radius.circular(32.0))),
@@ -55,22 +47,18 @@ class BeerBottomBarMedium extends StatelessWidget {
                         children: <Widget>[
                           Text(
                             beer['alcohol'],
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 42.0),
+                            style: Theme.of(context).textTheme.display2,
                           ),
                           SizedBox(width: 8.0),
                           Text(
                             '\%',
-                            style: TextStyle(
-                                color: Colors.white70, fontSize: 18.0),
-                          )
+                            style: Theme.of(context).textTheme.overline,
+                          ),
                         ],
                       ),
                       Text(
                         'alcohol',
-                        style: TextStyle(color: Colors.white70),
+                        style: Theme.of(context).textTheme.overline.copyWith(fontSize: 14),
                       )
                     ],
                   ),
@@ -79,7 +67,7 @@ class BeerBottomBarMedium extends StatelessWidget {
                   height: 100.0,
                   width: MediaQuery.of(context).size.width / 2 - 50,
                   decoration: BoxDecoration(
-                      color: bottomBarSquareColor,
+                      color: Theme.of(context).primaryColorDark,
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(32.0),
                           topRight: Radius.circular(32.0))),
@@ -91,22 +79,18 @@ class BeerBottomBarMedium extends StatelessWidget {
                         children: <Widget>[
                           Text(
                             beer['temperature'],
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 42.0),
+                            style: Theme.of(context).textTheme.display2,
                           ),
                           SizedBox(width: 8.0),
                           Text(
                             '\°c',
-                            style: TextStyle(
-                                color: Colors.white70, fontSize: 18.0),
+                            style: Theme.of(context).textTheme.overline,
                           )
                         ],
                       ),
                       Text(
                         'Temperature',
-                        style: TextStyle(color: Colors.white70),
+                        style: Theme.of(context).textTheme.overline.copyWith(fontSize: 14),
                       )
                     ],
                   ),
