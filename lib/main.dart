@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:flutter_beertastic/view/pages/beer_page.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(MyApp());
+  debugPaintSizeEnabled=false;
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.

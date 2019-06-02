@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_beertastic/view/components/icons/custom_icons.dart';
 import 'package:flutter_beertastic/view/pages/beer_details_page.dart';
 import 'package:flutter_beertastic/view/pages/beer_reviews_page.dart';
 
@@ -117,7 +118,7 @@ class _ButtonAndImageRow extends StatelessWidget {
                 ),
             backgroundColor: Theme.of(context).primaryColor,
             child: Icon(
-              Icons.local_bar,
+              CustomIcons.beer,
               size: 20,
               color: Theme.of(context).backgroundColor,
             ),

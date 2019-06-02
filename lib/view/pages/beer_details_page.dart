@@ -1,9 +1,12 @@
+import 'package:flare_flutter/flare_actor.dart';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_beertastic/view/components/buttons/custom_backgrounded_icon_button.dart';
+import 'package:flutter_beertastic/view/components/icons/custom_icons.dart';
 
-Color bottomBarColor = Colors.amber[400];
-Color bottomBarSquareColor = Colors.amber[600];
+Color bottomBarColor = Colors.amber[300];
+Color bottomBarSquareColor = Colors.amber[500];
 
 class DetailsScreen extends StatelessWidget {
   @override
@@ -17,11 +20,6 @@ class DetailsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('greenery nyc',
-                    style: TextStyle(
-                        color: Colors.white,
-                        letterSpacing: 1.1,
-                        fontSize: 22.0)),
                 SizedBox(height: 32.0),
                 Container(
                   width: 200.0,
@@ -33,16 +31,30 @@ class DetailsScreen extends StatelessWidget {
                         fontSize: 48.0),
                   ),
                 ),
-                SizedBox(height: 42.0),
-                itemRow(Icons.color_lens, 'water', 'every 7 days'),
-                SizedBox(height: 22.0),
-                itemRow(Icons.bubble_chart, 'Humidity', 'up to 82%'),
-                SizedBox(height: 22.0),
-                itemRow(Icons.straighten, 'Size', '38" - 48"tdll'),
+                SizedBox(height: 32.0),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                      color: Colors.amber[50],
+                      borderRadius: BorderRadius.circular(16)),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      SizedBox(height: 16.0),
+                      itemRow(CustomIcons.beer, 'Style', 'Lager'),
+                      SizedBox(height: 16.0),
+                      colorRow(),
+                      SizedBox(height: 16.0),
+                      itemRow(Icons.bubble_chart, 'Carbonation', 'up to 82%'),
+                      SizedBox(height: 16.0),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-          SizedBox(height: 32.0),
+          SizedBox(height: 18.0),
           Padding(
             padding: const EdgeInsets.only(left: 48.0),
             child: Container(
@@ -63,7 +75,7 @@ class DetailsScreen extends StatelessWidget {
                         color: Colors.white,
                         fontSize: 22.0,
                         fontWeight: FontWeight.w500),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -109,7 +121,9 @@ class DetailsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                CustomBackgroundedIconButton(topLeftRadius: Radius.circular(48.0),),
+                CustomBackgroundedIconButton(
+                  topLeftRadius: Radius.circular(48.0),
+                ),
               ],
             ),
           )
@@ -118,7 +132,7 @@ class DetailsScreen extends StatelessWidget {
     );
   }
 
-  itemRow(icon, name, title) {
+  Widget itemRow(icon, name, title) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
@@ -126,16 +140,54 @@ class DetailsScreen extends StatelessWidget {
           children: <Widget>[
             Icon(
               icon,
-              color: Colors.white,
+              color: Colors.black,
+              size: 28,
             ),
             SizedBox(width: 6.0),
             Text(
               name,
-              style: TextStyle(color: Colors.white, fontSize: 20.0),
+              style: TextStyle(color: Colors.black, fontSize: 20.0),
             )
           ],
         ),
-        Text(title, style: TextStyle(color: Colors.white54, fontSize: 20.0))
+        Row(
+          children: <Widget>[
+            Text(title, style: TextStyle(color: Colors.black, fontSize: 20.0)),
+            SizedBox(
+              width: 2,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget colorRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Icon(
+              Icons.color_lens,
+              color: Colors.black,
+              size: 28,
+            ),
+            SizedBox(width: 6.0),
+            Text(
+              'Color',
+              style: TextStyle(color: Colors.black, fontSize: 20.0),
+            ),
+          ],
+        ),
+        Container(
+          width: 156,
+          height: 40,
+          child: FlareActor(
+            "assets/animations/simple_color_bar.flr",
+            animation: '3',
+          ),
+        ),
       ],
     );
   }

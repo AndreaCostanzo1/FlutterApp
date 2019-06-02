@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class CustomBackgroundedIconButton extends StatefulWidget {
   final Radius topLeftRadius;
@@ -8,6 +9,7 @@ class CustomBackgroundedIconButton extends StatefulWidget {
   final Color backgroundColor;
   final Color outlineColor;
   final Color pressedColor;
+  final double buttonHeight;
 
   CustomBackgroundedIconButton({
     this.backgroundColor=const Color(0xff2c2731),
@@ -17,6 +19,7 @@ class CustomBackgroundedIconButton extends StatefulWidget {
     this.topRightRadius = Radius.zero,
     this.bottomLeftRadius = Radius.zero,
     this.bottomRightRadius = Radius.zero,
+    this.buttonHeight= 80.0
   });
 
 
@@ -26,9 +29,12 @@ class CustomBackgroundedIconButton extends StatefulWidget {
 class _ButtonState extends State<CustomBackgroundedIconButton> {
 
   bool pressed=false;
+  Offset position;
+
 
   doSomething(TapDownDetails details){ //fix function name
     setState(() {
+      position=details.globalPosition;
       pressed=true;
     });
   }
@@ -39,8 +45,12 @@ class _ButtonState extends State<CustomBackgroundedIconButton> {
     });
   }
 
-  doSomethingElse2(LongPressEndDetails details){ //fix function name
+  doSomethingElse2(LongPressEndDetails details, BuildContext context){ //fix function name
     setState(() {
+      double minX= (MediaQuery.of(context).size.width/2)+5;
+      double minY= MediaQuery.of(context).size.height-widget.buttonHeight+5;
+      var a = details.globalPosition.dx;
+      if(details.globalPosition.dx>minX&&details.globalPosition.dy>minY) print('$minX, $a'); //fixme
       pressed=false;
     });
   }
@@ -56,12 +66,12 @@ class _ButtonState extends State<CustomBackgroundedIconButton> {
       onTap: () => print('tap'), //fixme
       onTapDown: (details) => doSomething(details),
       onTapUp: (details) => doSomethingElse(details),
-      onLongPressEnd: (details)=>doSomethingElse2(details),
+      onLongPressEnd: (details)=>doSomethingElse2(details,context),
       child: AnimatedContainer(
-        height: 80.0,
-        duration: Duration(seconds: 1),
+        height: widget.buttonHeight,
+        duration: Duration(milliseconds: 300),
         width: MediaQuery.of(context).size.width / 2,
-        curve: Curves.fastLinearToSlowEaseIn,
+        curve: Curves.ease,
         decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius:

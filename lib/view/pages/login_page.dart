@@ -25,7 +25,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Image.asset('images/logo.png'),
+                Image.asset('assets/images/logo.png'),
                 SizedBox(
                   height: 25,
                 ),
