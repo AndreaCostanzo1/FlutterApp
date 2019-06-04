@@ -19,20 +19,19 @@ class BeerPage extends StatefulWidget {
   BeerPage({Key key, this.title}) : super(key: key);
 
   final String title;
-
-  @override
-  _BeerState createState() => _BeerState();
-}
-
-class _BeerState extends State<BeerPage> {
   final Map<String, StatelessWidget> widgetsByDimensions = {
     SizeComputer.small: _SmallPage(),
     SizeComputer.medium: _MediumPage(),
   };
 
   @override
+  _BeerState createState() => _BeerState();
+}
+
+class _BeerState extends State<BeerPage> {
+  @override
   Widget build(BuildContext context) {
-    return widgetsByDimensions[
+    return widget.widgetsByDimensions[
         SizeComputer.computeSize(MediaQuery.of(context).size.width)];
   }
 }
