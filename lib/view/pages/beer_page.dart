@@ -55,7 +55,7 @@ class _SmallPage extends StatelessWidget {
       ),
       //theme of the page
       data: Theme.of(context).copyWith(
-        textTheme: BeerPageTextThemeSmall.textTheme,
+        textTheme: BeerPageThemeSmall.textTheme,
       ),
     );
   }

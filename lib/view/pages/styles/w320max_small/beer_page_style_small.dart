@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class BeerPageTextThemeSmall {
+class BeerPageThemeSmall {
   static const TextTheme textTheme = const TextTheme(
     title: TextStyle(
       fontSize: 32.0,

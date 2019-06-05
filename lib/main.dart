@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-import 'package:flutter_beertastic/view/pages/beer_page.dart';
+import 'package:flutter_beertastic/view/pages/login.dart';
 
 void main() {
   runApp(MyApp());
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
             display2: TextStyle(color: Colors.white),
             overline: TextStyle(color: Colors.white70),
           )),
-      home: BeerPage(title: 'Flutter Demo Home Page'),
+      home: AuthenticationPage(),
     );
   }
 }
