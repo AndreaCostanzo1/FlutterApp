@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_beertastic/view/components/text_fields/fancy_text_field.dart';
 
-class LoginForm extends StatefulWidget{
+class LoginForm extends StatefulWidget {
   @override
   _LoginFormState createState() => _LoginFormState();
 }
 
 class _LoginFormState extends State<LoginForm> {
-
   TextEditingController emailTextFieldController = new TextEditingController();
-  FocusNode emailFocus= new FocusNode();
-  TextEditingController passwordTextFieldController = new TextEditingController();
-  FocusNode passwordFocus= new FocusNode();
+  FocusNode emailFocus = new FocusNode();
+  TextEditingController passwordTextFieldController =
+      new TextEditingController();
+  FocusNode passwordFocus = new FocusNode();
+
+  bool emailError;
+  bool passwordError;
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +41,7 @@ class _LoginFormState extends State<LoginForm> {
                   label: 'Email address',
                   icon: Icons.mail_outline,
                   nextFocus: passwordFocus,
+                  error: emailError,
                 ),
                 Container(
                   width: 250.0,
@@ -50,6 +54,7 @@ class _LoginFormState extends State<LoginForm> {
                   label: 'Password',
                   icon: Icons.lock_outline,
                   suffixIcon: Icons.remove_red_eye,
+                  error: passwordError,
                 )
               ],
             ),
@@ -85,8 +90,8 @@ class _LoginFormState extends State<LoginForm> {
             highlightColor: Colors.transparent,
             splashColor: ThemeColors.loginGradientEnd,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  vertical: 10.0, horizontal: 42.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 42.0),
               child: Text(
                 "LOGIN",
                 style: TextStyle(
@@ -100,6 +105,13 @@ class _LoginFormState extends State<LoginForm> {
         ),
       ],
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    emailError=false;
+    passwordError=false;
   }
 
   @override
