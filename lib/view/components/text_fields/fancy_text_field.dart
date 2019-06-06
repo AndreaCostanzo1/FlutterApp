@@ -42,9 +42,10 @@ class _FancyTextFieldState extends State<FancyTextField> {
         obscureText: _obscureText,
         keyboardType: TextInputType.emailAddress,
         style: TextStyle(
-            fontFamily: "WorkSansSemiBold",
-            fontSize: 16.0,
-            color: Colors.black),
+          fontFamily: "WorkSansSemiBold",
+          fontSize: 16.0,
+          color: _error ? Colors.red : Colors.black,
+        ),
         decoration: InputDecoration(
           border: InputBorder.none,
           icon: widget.icon != null

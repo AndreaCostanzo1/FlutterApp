@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "865286954793",
+    "firebase_url": "https://flutter-beertastic.firebaseio.com",
+    "project_id": "flutter-beertastic",
+    "storage_bucket": "flutter-beertastic.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:865286954793:android:c6180f38cb19d41f",
+        "android_client_info": {
+          "package_name": "beertastic.sanag.com.flutter_beertastic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "865286954793-d0p4m78j7p198n5l3npmeiqp3e0tto5q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "beertastic.sanag.com.flutter_beertastic",
+            "certificate_hash": "844ecdebcaac4290d476fee8a84d1cea809f524d"
+          }
+        },
+        {
+          "client_id": "865286954793-8m8rqkld724m83gj9l17gomrc2nvb8bg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKmlc3BZaeylhz-yA1gpnt7KDeYL_Waxc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "865286954793-8m8rqkld724m83gj9l17gomrc2nvb8bg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

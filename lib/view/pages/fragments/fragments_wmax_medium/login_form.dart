@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_beertastic/view/components/text_fields/fancy_text_field.dart';
@@ -19,7 +21,6 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Stack(
       alignment: Alignment.topCenter,
       overflow: Overflow.visible,
@@ -100,7 +101,11 @@ class _LoginFormState extends State<LoginForm> {
                     fontFamily: "WorkSansBold"),
               ),
             ),
-            onPressed: () => {},
+            onPressed: () => {
+                  FirebaseAuth.instance.signInWithEmailAndPassword(
+                      email: emailTextFieldController.text,
+                      password: passwordTextFieldController.text),
+                },
           ),
         ),
       ],
@@ -110,8 +115,8 @@ class _LoginFormState extends State<LoginForm> {
   @override
   void initState() {
     super.initState();
-    emailError=false;
-    passwordError=false;
+    emailError = false;
+    passwordError = false;
   }
 
   @override
