@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -7,104 +6,141 @@ import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/lo
 import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/register_form.dart';
 
 
-class AuthenticationPage extends StatefulWidget {
+class AuthenticationPage extends StatelessWidget {
   AuthenticationPage({Key key}) : super(key: key);
 
-  @override
-  _AuthenticationPageState createState() => new _AuthenticationPageState();
-}
-
-class _AuthenticationPageState extends State<AuthenticationPage>
-    with SingleTickerProviderStateMixin {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
-  PageController _pageController;
-
-  Color left = Colors.black;
-  Color right = Colors.white;
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData(
-        cardColor: Colors.white,
-        primaryColorLight: Color(0xFFFFFF8D),
-        primaryColorDark: Color(0xFFFF6F00),
-        buttonColor: Colors.white,
-      ),
-      child: new Scaffold(
-        key: _scaffoldKey,
-        body: NotificationListener<OverscrollIndicatorNotification>(
-          onNotification: (overscroll) {
-            overscroll.disallowGlow();
-          },
-          child: SingleChildScrollView(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              decoration: new BoxDecoration(
-                gradient: new LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColorLight,
-                      Theme.of(context).primaryColorDark,
-                    ],
-                    begin: const FractionalOffset(0.0, 0.0),
-                    end: const FractionalOffset(1.0, 1.0),
-                    stops: [0.0, 1.0],
-                    tileMode: TileMode.clamp),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(top: 75.0),
-                    child: new Image(
-                        width: 250.0,
-                        height: 191.0,
-                        fit: BoxFit.fill,
-                        image: NetworkImage(
-                            'http://www.stickpng.com/assets/images/585e639ecb11b227491c33ff.png')),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 20.0),
-                    child: CustomLabeledSwitch(_pageController,left,right),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: PageView(
-                      controller: _pageController,
-                      onPageChanged: (i) => changePage(i),
-                      children: <Widget>[
-                        new ConstrainedBox(
-                          constraints: const BoxConstraints.expand(),
-                          child: _buildSignIn(context),
-                        ),
-                        new ConstrainedBox(
-                          constraints: const BoxConstraints.expand(),
-                          child: _buildSignUp(context),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+    return new Scaffold(
+      body: NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (overScroll) {
+          overScroll.disallowGlow();
+        },
+        child: SingleChildScrollView(
+          child: Container(
+            width: MediaQuery
+                .of(context)
+                .size
+                .width,
+            height: MediaQuery
+                .of(context)
+                .size
+                .height,
+            decoration: new BoxDecoration(
+              gradient: new LinearGradient(
+                  colors: [
+                    Theme
+                        .of(context)
+                        .primaryColorLight,
+                    Theme
+                        .of(context)
+                        .primaryColorDark,
+                  ],
+                  begin: const FractionalOffset(0.0, 0.0),
+                  end: const FractionalOffset(1.0, 1.0),
+                  stops: [0.0, 1.0],
+                  tileMode: TileMode.clamp),
             ),
+            child: _PageContainer(),
           ),
         ),
       ),
     );
   }
 
+}
+
+class _PageContainer extends StatefulWidget {
   @override
-  void dispose() {
-    _pageController?.dispose();
-    super.dispose();
+  __PageContainerState createState() => __PageContainerState();
+}
+
+class __PageContainerState extends State<_PageContainer>
+    with SingleTickerProviderStateMixin {
+
+  int _page;
+  Color right = Colors.white;
+  Color left = Colors.black;
+  FocusNode _changePageFocus;
+  PageController _pageController;
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<OverscrollIndicatorNotification>(
+      onNotification: (overScroll) {
+        overScroll.disallowGlow();
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(top: 75.0),
+            child: new Image(
+              width: 200.0,
+              height: 200.0,
+              fit: BoxFit.contain,
+              image: AssetImage('assets/images/logo.png'),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 20.0),
+            child: CustomLabeledSwitch(_pageController, left, right),
+          ),
+          Expanded(
+            flex: 2,
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (i) => changePage(i, context),
+              children: <Widget>[
+                new ConstrainedBox(
+                  constraints: const BoxConstraints.expand(),
+                  child: SignInScreen(_page),
+                ),
+                new ConstrainedBox(
+                  constraints: const BoxConstraints.expand(),
+                  child: _buildSignUp(context),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void changePage(int i, context) {
+    _page = i;
+    if (i == 0) {
+      setState(() {
+        right = Theme
+            .of(context)
+            .cardColor;
+        left = Theme
+            .of(context)
+            .textTheme
+            .title
+            .color;
+      });
+    } else if (i == 1) {
+      setState(() {
+        right = Theme
+            .of(context)
+            .textTheme
+            .title
+            .color;
+        left = Theme
+            .of(context)
+            .cardColor;
+      });
+    }
+    FocusScope.of(context).requestFocus(_changePageFocus);
   }
 
   @override
   void initState() {
     super.initState();
-
+    _changePageFocus= FocusNode();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -113,23 +149,35 @@ class _AuthenticationPageState extends State<AuthenticationPage>
     _pageController = PageController();
   }
 
-  void changePage(int i){
-    if (i == 0) {
-      setState(() {
-        right = Colors.white;
-        left = Colors.black;
-      });
-    } else if (i == 1) {
-      setState(() {
-        right = Colors.black;
-        left = Colors.white;
-      });
-    }
+  @override
+  void dispose() {
+    super.dispose();
+    _pageController?.dispose();
+    _changePageFocus.dispose();
   }
 
 
+  Widget _buildSignUp(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(top: 23.0),
+      child: Column(
+        children: <Widget>[
+          SignUpForm(),
+        ],
+      ),
+    );
+  }
+}
 
-  Widget _buildSignIn(BuildContext context) {
+
+class SignInScreen extends StatelessWidget {
+
+  final int _page;
+
+  SignInScreen(this._page);
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(top: 23.0),
       child: Column(
@@ -152,33 +200,9 @@ class _AuthenticationPageState extends State<AuthenticationPage>
       ),
     );
   }
-
-  Widget _buildSignUp(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(top: 23.0),
-      child: Column(
-        children: <Widget>[
-          SignUpForm(),
-        ],
-      ),
-    );
-  }
-
-
 }
 
-class ThemeColors {
-  const ThemeColors();
 
-  static const Color loginGradientStart = const Color(0xFFFFFF8D);
-  static const Color loginGradientEnd = const Color(0xFFFF6F00);
 
-  static const primaryGradient = const LinearGradient(
-    colors: const [loginGradientStart, loginGradientEnd],
-    stops: const [0.0, 1.0],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  );
-}
 
 

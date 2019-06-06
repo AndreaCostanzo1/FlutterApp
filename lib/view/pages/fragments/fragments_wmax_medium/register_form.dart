@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/view/components/text_fields/fancy_text_field.dart';
 
 class SignUpForm extends StatefulWidget {
+  final String registerEmailStateKey = 'registerEmail';
+  final String registerPasswordStateKey = 'registerPassword';
+  final String registerConfirmStateKey = 'registerConfirm';
+
   @override
   _SignUpFormState createState() => _SignUpFormState();
 }
@@ -72,20 +76,20 @@ class _SignUpFormState extends State<SignUpForm> {
             borderRadius: BorderRadius.all(Radius.circular(5.0)),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: ThemeColors.loginGradientStart,
+                color: Theme.of(context).primaryColorLight,
                 offset: Offset(1.0, 6.0),
                 blurRadius: 20.0,
               ),
               BoxShadow(
-                color: ThemeColors.loginGradientEnd,
+                color: Theme.of(context).primaryColorDark,
                 offset: Offset(1.0, 6.0),
                 blurRadius: 20.0,
               ),
             ],
             gradient: new LinearGradient(
                 colors: [
-                  ThemeColors.loginGradientEnd,
-                  ThemeColors.loginGradientStart
+                  Theme.of(context).primaryColorDark,
+                  Theme.of(context).primaryColorLight,
                 ],
                 begin: const FractionalOffset(0.2, 0.2),
                 end: const FractionalOffset(1.0, 1.0),
@@ -94,7 +98,7 @@ class _SignUpFormState extends State<SignUpForm> {
           ),
           child: MaterialButton(
             highlightColor: Colors.transparent,
-            splashColor: ThemeColors.loginGradientEnd,
+            splashColor: Theme.of(context).primaryColorDark,
             child: Padding(
               padding: const EdgeInsets.symmetric(
                   vertical: 10.0, horizontal: 42.0),
@@ -123,18 +127,4 @@ class _SignUpFormState extends State<SignUpForm> {
     confirmPasswordTextFieldController.dispose();
     confirmPasswordFocus.dispose();
   }
-}
-
-class ThemeColors {
-  const ThemeColors();
-
-  static const Color loginGradientStart = const Color(0xFFFFFF8D);
-  static const Color loginGradientEnd = const Color(0xFFFF6F00);
-
-  static const primaryGradient = const LinearGradient(
-    colors: const [loginGradientStart, loginGradientEnd],
-    stops: const [0.0, 1.0],
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-  );
 }

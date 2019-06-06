@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 
 void main() {
   runApp(MyApp());
-  debugPaintSizeEnabled = false;
 }
 
 class MyApp extends StatelessWidget {
@@ -28,8 +27,11 @@ class MyApp extends StatelessWidget {
                 brightness: Brightness.light,
                 primarySwatch: Colors.amber,
                 backgroundColor: Colors.white,
-                primaryColorDark: Colors.amber[600],
-                primaryColor: Colors.amber[400],
+                cardColor: Colors.white,
+                primaryColorDark: Color(0xFFFF6F00),
+                primaryColor: Colors.amber[600],
+                primaryColorLight: Color(0xFFFFFF8D),
+                errorColor: Color(0xffb00020),
                 textTheme: TextTheme(
                   title: TextStyle(color: Colors.black),
                   subtitle: TextStyle(color: Colors.black45),
