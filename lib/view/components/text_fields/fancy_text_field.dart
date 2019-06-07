@@ -8,13 +8,15 @@ class FancyTextField extends StatefulWidget {
   final TextEditingController fancyTextFieldController;
   final FocusNode nextFocus;
   final bool error;
+  final EdgeInsets insets;
 
   FancyTextField(this.fancyTextFieldController, this.fancyTextFieldFocusNode,
       {this.label = '',
       @required this.icon,
       this.suffixIcon,
       this.nextFocus,
-      this.error = false});
+      this.error = false,
+      this.insets = const EdgeInsets.only(top: 20.0, bottom: 20.0, left: 25.0, right: 25.0)});
 
   @override
   _FancyTextFieldState createState() =>
@@ -34,8 +36,7 @@ class _FancyTextFieldState extends State<FancyTextField> {
   Widget build(BuildContext context) {
     return Padding(
       key: key,
-      padding:
-          EdgeInsets.only(top: 20.0, bottom: 20.0, left: 25.0, right: 25.0),
+      padding: widget.insets,
       child: TextFormField(
         focusNode: widget.fancyTextFieldFocusNode,
         onFieldSubmitted: (term) => handleSubmission(context),

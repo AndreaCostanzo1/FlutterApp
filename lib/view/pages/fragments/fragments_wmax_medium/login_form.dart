@@ -43,7 +43,6 @@ class _LoginFormState extends State<LoginForm> {
               ),
               child: Container(
                 width: 300.0,
-                height: 190.0,
                 child: Column(
                   children: <Widget>[
                     FancyTextField(
@@ -186,9 +185,7 @@ class _LoginFormState extends State<LoginForm> {
     return text == null ? '' : text;
   }
 
-  void _resetError() {
-    _authBLoC.resetError();
-  }
+
 }
 
 class _ErrorTextComputer {

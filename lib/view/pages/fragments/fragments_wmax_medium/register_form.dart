@@ -41,6 +41,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   emailFocus,
                   label: 'Email address',
                   icon: Icons.mail_outline,
+                  insets: EdgeInsets.only(top: 15.0, bottom: 15.0, left: 25.0, right: 25.0),
                 ),
                 Container(
                   width: 250.0,
@@ -53,6 +54,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   label: 'Password',
                   icon: Icons.lock_outline,
                   suffixIcon: Icons.remove_red_eye,
+                  insets: EdgeInsets.only(top: 15.0, bottom: 15.0, left: 25.0, right: 25.0),
                 ),
                 Container(
                   width: 250.0,
@@ -65,13 +67,14 @@ class _SignUpFormState extends State<SignUpForm> {
                   label: 'Confirm password',
                   icon: Icons.lock_outline,
                   suffixIcon: Icons.remove_red_eye,
+                  insets: EdgeInsets.only(top: 15.0, bottom: 15.0, left: 25.0, right: 25.0),
                 ),
               ],
             ),
           ),
         ),
         Container(
-          margin: EdgeInsets.only(top: 250.0),
+          margin: EdgeInsets.only(top: 225.0),
           decoration: new BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(5.0)),
             boxShadow: <BoxShadow>[
