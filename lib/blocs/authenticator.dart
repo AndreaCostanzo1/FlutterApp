@@ -52,7 +52,7 @@ class Authenticator implements AuthenticatorInterface {
       _remoteErrorController.sink.add(_staticError);
     } else {
       FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password)
+          .createUserWithEmailAndPassword(email: email, password: password)
           .catchError((error) => _handleError(error));
     }
   }
@@ -64,7 +64,7 @@ class Authenticator implements AuthenticatorInterface {
     RemoteError remoteError = errors[errorText];
     if (remoteError == null) {
       remoteError = RemoteError.NOT_DEFINED;
-      print('errorText');
+      print(remoteError);
       //todo insert firebase logger
     }
     _remoteError = remoteError;
