@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
                 primaryColor: Colors.amber[600],
                 primaryColorLight: Color(0xFFFFFF8D),
                 errorColor: Color(0xffb00020),
+                dividerColor: Colors.grey[400],
                 textTheme: TextTheme(
                   title: TextStyle(color: Colors.black),
                   subtitle: TextStyle(color: Colors.black45),

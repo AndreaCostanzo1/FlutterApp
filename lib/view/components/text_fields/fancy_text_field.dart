@@ -16,7 +16,8 @@ class FancyTextField extends StatefulWidget {
       this.suffixIcon,
       this.nextFocus,
       this.error = false,
-      this.insets = const EdgeInsets.only(top: 20.0, bottom: 20.0, left: 25.0, right: 25.0)});
+      this.insets = const EdgeInsets.only(
+          top: 20.0, bottom: 20.0, left: 25.0, right: 25.0)});
 
   @override
   _FancyTextFieldState createState() =>
@@ -24,9 +25,7 @@ class FancyTextField extends StatefulWidget {
 }
 
 class _FancyTextFieldState extends State<FancyTextField> {
-  GlobalKey<_FancyTextFieldState> key = GlobalKey();
   bool _obscureText;
-  String _content;
 
   TextInputAction onSubmitAction;
 
@@ -35,7 +34,6 @@ class _FancyTextFieldState extends State<FancyTextField> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      key: key,
       padding: widget.insets,
       child: TextFormField(
         focusNode: widget.fancyTextFieldFocusNode,
@@ -46,7 +44,9 @@ class _FancyTextFieldState extends State<FancyTextField> {
         style: TextStyle(
           fontFamily: "WorkSansSemiBold",
           fontSize: 16.0,
-          color: widget.error ? Theme.of(context).errorColor : Theme.of(context).textTheme.title.color,
+          color: widget.error
+              ? Theme.of(context).errorColor
+              : Theme.of(context).textTheme.title.color,
         ),
         decoration: InputDecoration(
           border: InputBorder.none,
@@ -59,7 +59,8 @@ class _FancyTextFieldState extends State<FancyTextField> {
               : null,
           hintText: widget.label,
           hintStyle: TextStyle(fontFamily: "WorkSansSemiBold", fontSize: 17.0),
-          suffixIcon: _setIcon(),
+          suffixIcon: _MySuffixIcon(
+              widget.suffixIcon, widget.error, () => _toggleTextObscuration()),
         ),
       ),
     );
@@ -68,26 +69,8 @@ class _FancyTextFieldState extends State<FancyTextField> {
   @override
   void initState() {
     super.initState();
-    widget.fancyTextFieldController.text = _content;
     onSubmitAction =
         widget.nextFocus != null ? TextInputAction.next : TextInputAction.done;
-  }
-
-  Widget _setIcon() {
-    return widget.suffixIcon != null
-        ? GestureDetector(
-            onTap: _toggleTextObscuration,
-            child: Icon(
-              widget.suffixIcon,
-              size: 15.0,
-              color: Theme.of(context).textTheme.title.color,
-            ),
-          )
-        : Icon(
-            Icons.error,
-            color: widget.error? Theme.of(context).errorColor: Theme.of(context).cardColor,
-            size: 15,
-          );
   }
 
   void _toggleTextObscuration() {
@@ -100,5 +83,37 @@ class _FancyTextFieldState extends State<FancyTextField> {
     if (widget.nextFocus != null) {
       FocusScope.of(context).requestFocus(widget.nextFocus);
     }
+  }
+}
+
+class _MySuffixIcon extends StatelessWidget {
+  final IconData _suffixIcon;
+  final bool _error;
+  final VoidCallback _callback;
+
+  _MySuffixIcon(this._suffixIcon, this._error, this._callback);
+
+  @override
+  Widget build(BuildContext context) {
+    return _error
+        ? Icon(
+            Icons.error,
+            color: Theme.of(context).errorColor,
+            size: 15,
+          )
+        : _suffixIcon != null
+            ? GestureDetector(
+                onTap: _callback,
+                child: Icon(
+                  _suffixIcon,
+                  size: 15.0,
+                  color: Theme.of(context).textTheme.title.color,
+                ),
+              )
+            : Icon(
+                Icons.error,
+                color: Theme.of(context).cardColor,
+                size: 15,
+              );
   }
 }

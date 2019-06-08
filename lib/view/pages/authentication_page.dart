@@ -5,6 +5,10 @@ import 'package:flutter_beertastic/view/components/others/custom_labeled_switch.
 import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/login_form.dart';
 import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/register_form.dart';
 
+import 'package:flutter_beertastic/blocs/authenticator.dart';
+
+import 'package:provider/provider.dart';
+
 
 class AuthenticationPage extends StatelessWidget {
   AuthenticationPage({Key key}) : super(key: key);
@@ -12,38 +16,33 @@ class AuthenticationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      body: NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (overScroll) {
-          overScroll.disallowGlow();
-        },
-        child: SingleChildScrollView(
-          child: Container(
-            width: MediaQuery
-                .of(context)
-                .size
-                .width,
-            height: MediaQuery
-                .of(context)
-                .size
-                .height,
-            decoration: new BoxDecoration(
-              gradient: new LinearGradient(
-                  colors: [
-                    Theme
-                        .of(context)
-                        .primaryColorLight,
-                    Theme
-                        .of(context)
-                        .primaryColorDark,
-                  ],
-                  begin: const FractionalOffset(0.0, 0.0),
-                  end: const FractionalOffset(1.0, 1.0),
-                  stops: [0.0, 1.0],
-                  tileMode: TileMode.clamp),
-            ),
-            child: _PageContainer(),
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Container(
+          width: MediaQuery
+              .of(context)
+              .size
+              .width,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height,
+          decoration: new BoxDecoration(
+            gradient: new LinearGradient(
+                colors: [
+                  Theme
+                      .of(context)
+                      .primaryColorLight,
+                  Theme
+                      .of(context)
+                      .primaryColorDark,
+                ],
+                begin: const FractionalOffset(0.0, 0.0),
+                end: const FractionalOffset(1.0, 1.0),
+                stops: [0.0, 1.0],
+                tileMode: TileMode.clamp),
           ),
+          child: _PageContainer(),
         ),
       ),
     );
@@ -64,6 +63,7 @@ class __PageContainerState extends State<_PageContainer>
   Color left = Colors.black;
   FocusNode _changePageFocus;
   PageController _pageController;
+  final AuthenticatorInterface _authBLoC = Authenticator();
 
   @override
   Widget build(BuildContext context) {
@@ -89,19 +89,22 @@ class __PageContainerState extends State<_PageContainer>
           ),
           Expanded(
             flex: 2,
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: (i) => changePage(i, context),
-              children: <Widget>[
-                new ConstrainedBox(
-                  constraints: const BoxConstraints.expand(),
-                  child: SignInScreen(_page),
-                ),
-                new ConstrainedBox(
-                  constraints: const BoxConstraints.expand(),
-                  child: _buildSignUp(context),
-                ),
-              ],
+            child: Provider<AuthenticatorInterface>.value(
+              value: _authBLoC,
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (i) => changePage(i, context),
+                children: <Widget>[
+                  new ConstrainedBox(
+                    constraints: const BoxConstraints.expand(),
+                    child: SignInScreen(_page),
+                  ),
+                  new ConstrainedBox(
+                    constraints: const BoxConstraints.expand(),
+                    child: _buildSignUp(context),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -135,6 +138,7 @@ class __PageContainerState extends State<_PageContainer>
       });
     }
     FocusScope.of(context).requestFocus(_changePageFocus);
+    _authBLoC.resetState();
   }
 
   @override
@@ -154,6 +158,7 @@ class __PageContainerState extends State<_PageContainer>
     super.dispose();
     _pageController?.dispose();
     _changePageFocus.dispose();
+    _authBLoC.dispose();
   }
 
 

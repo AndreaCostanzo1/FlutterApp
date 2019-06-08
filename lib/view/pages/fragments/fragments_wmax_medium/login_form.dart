@@ -4,6 +4,8 @@ import 'package:flutter_beertastic/view/components/text_fields/fancy_text_field.
 
 import 'package:flutter_beertastic/blocs/authenticator.dart';
 
+import 'package:provider/provider.dart';
+
 class LoginForm extends StatefulWidget {
   @override
   _LoginFormState createState() => _LoginFormState();
@@ -16,12 +18,13 @@ class _LoginFormState extends State<LoginForm> {
   final FocusNode _passwordFocus = FocusNode();
   FocusNode _snackFocus;
 
-  final Authenticator _authBLoC = Authenticator();
+  Authenticator _authBLoC;
 
   bool logging;
 
   @override
   Widget build(BuildContext context) {
+    _authBLoC=Provider.of<AuthenticatorInterface>(context);
     return StreamBuilder(
       stream: _authBLoC.remoteError,
       builder: (context, snapshot) {
@@ -56,7 +59,7 @@ class _LoginFormState extends State<LoginForm> {
                     Container(
                       width: 250.0,
                       height: 1.0,
-                      color: Colors.grey[400],
+                      color: Theme.of(context).dividerColor,
                     ),
                     FancyTextField(
                       _passwordTextFieldController,
@@ -71,7 +74,7 @@ class _LoginFormState extends State<LoginForm> {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(top: 170.0),
+              margin: EdgeInsets.only(top: 165.0),
               decoration: new BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(5.0)),
                 boxShadow: <BoxShadow>[
@@ -110,7 +113,8 @@ class _LoginFormState extends State<LoginForm> {
                         fontFamily: "WorkSansBold"),
                   ),
                 ),
-                onPressed: () => _tryLogin(),
+                onPressed: () => _authBLoC.logWithEmailAndPassword(
+                    _emailTextFieldController.text, _passwordTextFieldController.text),
               ),
             ),
           ],
@@ -122,8 +126,8 @@ class _LoginFormState extends State<LoginForm> {
   @override
   void initState() {
     super.initState();
-    _emailFocus.addListener(()=>{});
-    _authBLoC.resetError();
+    _emailFocus.addListener(() => {if(_emailFocus.hasFocus) _authBLoC?.resetState()});
+    _passwordFocus.addListener(() => {if(_passwordFocus.hasFocus)_authBLoC?.resetState()});
   }
 
   @override
@@ -132,8 +136,7 @@ class _LoginFormState extends State<LoginForm> {
     _disposeAndUnFocus();
     _emailTextFieldController.dispose();
     _passwordTextFieldController.dispose();
-    _authBLoC.resetError();
-    _authBLoC.dispose();
+    _authBLoC?.resetState();
     _snackFocus?.dispose();
   }
 
@@ -144,19 +147,14 @@ class _LoginFormState extends State<LoginForm> {
     _passwordFocus.dispose();
   }
 
-  void _tryLogin() {
-    setState(() {});
-    _authBLoC.logWithEmailAndPassword(
-        _emailTextFieldController.text, _passwordTextFieldController.text);
-  }
-
   bool _computeEmailError(RemoteError error) {
     return error == RemoteError.EMAIL_FORMAT ||
         error == RemoteError.USER_NOT_FOUND;
   }
 
   bool _computePasswordError(RemoteError error) {
-    return error == RemoteError.PASSWORD_FORMAT;
+    return error == RemoteError.PASSWORD_FORMAT ||
+        error==RemoteError.WRONG_PASSWORD;
   }
 
   void _showError(BuildContext context, RemoteError remoteError) async {
@@ -191,7 +189,9 @@ class _LoginFormState extends State<LoginForm> {
 class _ErrorTextComputer {
   final Map<RemoteError, String> _errorTexts = {
     RemoteError.EMAIL_FORMAT: 'Insert a valid email please!',
-    RemoteError.USER_NOT_FOUND: 'User doesn\'t exist! Use sign up instead'
+    RemoteError.USER_NOT_FOUND: 'User doesn\'t exist! Use sign up instead',
+    RemoteError.PASSWORD_FORMAT: 'Password must have at least 6 characters',
+    RemoteError.WRONG_PASSWORD: 'The password is wrong!'
   };
 
   Map<RemoteError, String> get errorTexts => _errorTexts;
