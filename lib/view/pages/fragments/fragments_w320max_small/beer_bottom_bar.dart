@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
 
-const Color defaultCommentTextColor = Colors.white70;
-const Color defaultBottomBarTextColor = Colors.white;
-const Color defaultBottomBarSquareColor = Color(0xffffb300);
+const double defaultTextOverLineTextSize = 10;
 
 class BeerBottomBarSmall extends StatelessWidget {
   final Map beer;
-  final Color bottomBarTextColor;
-  final Color bottomBarSquareColor;
-  final Color commentTextColor;
+  final double squareTextOverLineSize;
 
   BeerBottomBarSmall(
     this.beer, {
-    this.commentTextColor = defaultCommentTextColor,
-    this.bottomBarTextColor = defaultBottomBarTextColor,
-    this.bottomBarSquareColor = defaultBottomBarSquareColor,
+    this.squareTextOverLineSize = defaultTextOverLineTextSize,
   });
 
   @override
@@ -41,7 +35,7 @@ class BeerBottomBarSmall extends StatelessWidget {
                   height: 70.0,
                   width: MediaQuery.of(context).size.width / 2 - 50,
                   decoration: BoxDecoration(
-                      color: bottomBarSquareColor,
+                      color: Theme.of(context).primaryColor,
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(32.0),
                           topRight: Radius.circular(32.0))),
@@ -64,7 +58,7 @@ class BeerBottomBarSmall extends StatelessWidget {
                       ),
                       Text(
                         'alcohol',
-                        style: Theme.of(context).textTheme.overline,
+                        style: Theme.of(context).textTheme.overline.copyWith(fontSize: squareTextOverLineSize),
                       )
                     ],
                   ),
@@ -73,7 +67,7 @@ class BeerBottomBarSmall extends StatelessWidget {
                   height: 70.0,
                   width: MediaQuery.of(context).size.width / 2 - 50,
                   decoration: BoxDecoration(
-                      color: bottomBarSquareColor,
+                      color: Theme.of(context).primaryColor,
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(32.0),
                           topRight: Radius.circular(32.0))),
@@ -96,7 +90,7 @@ class BeerBottomBarSmall extends StatelessWidget {
                       ),
                       Text(
                         'Temperature',
-                        style: Theme.of(context).textTheme.overline,
+                        style: Theme.of(context).textTheme.overline.copyWith(fontSize: squareTextOverLineSize),
                       ),
                     ],
                   ),

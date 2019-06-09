@@ -7,11 +7,9 @@ import 'package:provider/provider.dart';
 const double defaultTextOverLineTextSize = 14;
 
 class BeerBottomBarMedium extends StatelessWidget {
-  final Map beer;
   final double squareTextOverLineSize;
 
-  BeerBottomBarMedium(
-    this.beer, {
+  BeerBottomBarMedium({
     this.squareTextOverLineSize=  defaultTextOverLineTextSize,
   });
 
@@ -39,7 +37,7 @@ class BeerBottomBarMedium extends StatelessWidget {
                   height: 100.0,
                   width: MediaQuery.of(context).size.width / 2 - 50,
                   decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColorDark,
+                      color: Theme.of(context).primaryColor,
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(32.0),
                           topRight: Radius.circular(32.0))),
@@ -50,7 +48,7 @@ class BeerBottomBarMedium extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Text(
-                            beer['alcohol'],
+                            Provider.of<Beer>(context).alcohol.toString(),
                             style: Theme.of(context).textTheme.display2,
                           ),
                           SizedBox(width: 8.0),
@@ -62,7 +60,7 @@ class BeerBottomBarMedium extends StatelessWidget {
                       ),
                       Text(
                         'alcohol',
-                        style: Theme.of(context).textTheme.overline.copyWith(fontSize: 14),
+                        style: Theme.of(context).textTheme.overline.copyWith(fontSize: squareTextOverLineSize),
                       )
                     ],
                   ),
@@ -71,7 +69,7 @@ class BeerBottomBarMedium extends StatelessWidget {
                   height: 100.0,
                   width: MediaQuery.of(context).size.width / 2 - 50,
                   decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColorDark,
+                      color: Theme.of(context).primaryColor,
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(32.0),
                           topRight: Radius.circular(32.0))),
@@ -82,7 +80,7 @@ class BeerBottomBarMedium extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Text(
-                            beer['temperature'],
+                            Provider.of<Beer>(context).temperature.toString(),
                             style: Theme.of(context).textTheme.display2,
                           ),
                           SizedBox(width: 8.0),
@@ -94,7 +92,7 @@ class BeerBottomBarMedium extends StatelessWidget {
                       ),
                       Text(
                         'Temperature',
-                        style: Theme.of(context).textTheme.overline.copyWith(fontSize: 14),
+                        style: Theme.of(context).textTheme.overline.copyWith(fontSize: squareTextOverLineSize),
                       )
                     ],
                   ),

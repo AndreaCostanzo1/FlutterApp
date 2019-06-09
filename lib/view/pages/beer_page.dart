@@ -7,7 +7,8 @@ import 'package:flutter_beertastic/view/pages/fragments/fragments_w320max_small/
 import 'package:flutter_beertastic/view/pages/fragments/fragments_w320max_small/beer_main_fragment.dart';
 import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/beer_bottom_bar.dart';
 import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/beer_main_fragment.dart';
-import 'package:flutter_beertastic/view/pages/styles/w320max_small/beer_page_style_small.dart';
+import 'package:flutter_beertastic/view/pages/styles/w320max_small/beer_page_style.dart';
+import 'package:flutter_beertastic/view/pages/styles/wmax_medium/beer_page_style.dart';
 import 'package:flutter_beertastic/view/utils/size_computer.dart';
 
 import 'package:provider/provider.dart';
@@ -88,7 +89,7 @@ class _SmallPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Theme(
       child: Scaffold(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: BeerPageThemeSmall().canvasColor,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -101,6 +102,7 @@ class _SmallPage extends StatelessWidget {
       ),
       //theme of the page
       data: Theme.of(context).copyWith(
+        canvasColor: BeerPageThemeSmall().canvasColor,
         textTheme: BeerPageThemeSmall().textTheme,
       ),
     );
@@ -112,48 +114,21 @@ class _MediumPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Theme(
       child: Scaffold(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: BeerPageThemeMedium().canvasColor,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             BeerMainFragmentMedium(
               beer,
             ),
-            BeerBottomBarMedium(
-              beer,
-            )
+            BeerBottomBarMedium()
           ],
         ),
       ),
       //Theme of the page
       data: Theme.of(context).copyWith(
-        textTheme: TextTheme(
-          title: TextStyle(
-            fontSize: 48.0,
-            color: Theme.of(context).textTheme.title.color,
-            fontWeight: FontWeight.bold,
-          ),
-          subtitle: TextStyle(
-            color: Theme.of(context).textTheme.subtitle.color,
-            fontSize: 14,
-            fontWeight: FontWeight.normal,
-          ),
-          display1: TextStyle(
-            color: Theme.of(context).textTheme.display1.color,
-            fontSize: 32.0,
-            fontWeight: FontWeight.bold,
-          ),
-          display2: TextStyle(
-            color: Theme.of(context).textTheme.display2.color,
-            fontSize: 42.0,
-            fontWeight: FontWeight.bold,
-          ),
-          overline: Theme.of(context).textTheme.overline.copyWith(
-                fontSize: 18.0,
-                letterSpacing: 0,
-              ),
-        ),
-      ),
+          canvasColor: BeerPageThemeMedium().canvasColor,
+          textTheme: BeerPageThemeMedium().textTheme),
     );
   }
 }

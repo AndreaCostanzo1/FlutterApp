@@ -116,7 +116,7 @@ class _ButtonAndImageRow extends StatelessWidget {
                     builder: (context) => DetailsScreen(),
                   ),
                 ),
-            backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: Theme.of(context).canvasColor,
             child: Icon(
               CustomIcons.beer,
               size: 20,
