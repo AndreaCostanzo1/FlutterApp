@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_beertastic/model/beer.dart';
+
+import 'package:provider/provider.dart';
+
 const double defaultTextOverLineTextSize = 14;
 
 class BeerBottomBarMedium extends StatelessWidget {

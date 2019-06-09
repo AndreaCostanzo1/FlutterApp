@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:flutter_beertastic/view/pages/beer_page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.title}) : super(key: key);
@@ -25,7 +26,7 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 OutlineButton(onPressed: ()=> FirebaseAuth.instance.signOut(), child: Text('Sign out'),),
-                OutlineButton(onPressed: ()=> _launchCameraX(context), child: Text('CameraX'),),
+                CameraXButton(),
               ],
             ), //column
           ),
@@ -34,7 +35,21 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+}
+
+class CameraXButton extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return OutlineButton(onPressed: ()=> _launchCameraX(context), child: Text('CameraX'),);
+  }
+
   void _launchCameraX(BuildContext context) async {
-    MethodChannel("CAMERA_X").invokeMethod('SCAN');
+    String result = await MethodChannel("CAMERA_X").invokeMethod('SCAN');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BeerPage(result),
+      ),
+    );
   }
 }

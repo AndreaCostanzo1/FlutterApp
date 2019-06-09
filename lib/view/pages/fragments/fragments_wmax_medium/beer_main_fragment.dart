@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_beertastic/model/beer.dart';
 import 'package:flutter_beertastic/view/components/icons/custom_icons.dart';
 import 'package:flutter_beertastic/view/pages/beer_details_page.dart';
 import 'package:flutter_beertastic/view/pages/beer_reviews_page.dart';
+
+import 'package:provider/provider.dart';
 
 class BeerMainFragmentMedium extends StatelessWidget {
   final Map beer;
@@ -24,13 +27,13 @@ class BeerMainFragmentMedium extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              _Title(beer['name']),
+              _Title(Provider.of<Beer>(context).name),
               Text(
-                beer['producer'],
+                Provider.of<Beer>(context).producer,
                 style: Theme.of(context).textTheme.subtitle,
               ),
               SizedBox(height: 12.0),
-              _Rating(beer['rating']),
+              _Rating(Provider.of<Beer>(context).rating.toString()),
               Spacer(),
               _ButtonAndImageRow(beer['image']),
               SizedBox(height: 16.0)
