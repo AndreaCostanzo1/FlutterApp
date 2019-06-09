@@ -1,4 +1,4 @@
-package beertastic.sanag.com.flutter_beertastic.view_model;
+package beertastic.sanag.com.flutter_beertastic.view_model.tools;
 
 import android.graphics.Bitmap;
 import android.util.Log;

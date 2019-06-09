@@ -32,6 +32,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".view.CameraActivity" android:theme="@style/beertastic_theme"/>
+        <activity android:name=".view.ScannerActivity" android:theme="@style/beertastic_theme"/>
     </application>
 </manifest>

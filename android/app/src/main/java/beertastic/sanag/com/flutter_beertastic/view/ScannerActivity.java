@@ -2,12 +2,8 @@ package beertastic.sanag.com.flutter_beertastic.view;
 
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.ImageFormat;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -21,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraX;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageAnalysisConfig;
-import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.core.PreviewConfig;
 import androidx.core.app.ActivityCompat;
@@ -29,23 +24,25 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 import java.util.List;
 import java.util.Optional;
 
 import beertastic.sanag.com.flutter_beertastic.R;
-import beertastic.sanag.com.flutter_beertastic.view_model.BarcodesScanner;
+import beertastic.sanag.com.flutter_beertastic.view_model.ScannerViewModel;
+import beertastic.sanag.com.flutter_beertastic.view_model.tools.BarcodesScanner;
 
-public class CameraActivity extends AppCompatActivity implements LifecycleOwner {
+public class ScannerActivity extends AppCompatActivity implements LifecycleOwner {
 
-    TextureView textureView;
-    LifecycleRegistry lifecycleRegistry;
+    private TextureView textureView;
+    private LifecycleRegistry lifecycleRegistry;
+    private ScannerViewModel viewModel;
+    private ImageAnalysis imageAnalysis;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +51,7 @@ public class CameraActivity extends AppCompatActivity implements LifecycleOwner 
         lifecycleRegistry = new LifecycleRegistry(this);
         getComponents();
         checkCameraPermission();
+        setUpViewModel();
         lifecycleRegistry.markState(Lifecycle.State.CREATED);
     }
 
@@ -131,38 +129,43 @@ public class CameraActivity extends AppCompatActivity implements LifecycleOwner 
                         .build();
 
         int deviceRotation = getWindowManager().getDefaultDisplay().getRotation();
-        ImageAnalysis imageAnalysis = new ImageAnalysis(config);
+        imageAnalysis = new ImageAnalysis(config);
 
         imageAnalysis.setAnalyzer(
-                (image, rotationDegrees) -> BarcodesScanner.getInstance().scanYUVImage(image.getPlanes()[0].getBuffer(), deviceRotation, this::handleScanResult));
+                (image, rotationDegrees) -> BarcodesScanner.getInstance()
+                        .scanYUVImage(image.getPlanes()[0].getBuffer(), deviceRotation,
+                                (barcodesList)->viewModel.handleScanResult(barcodesList)));
 
         PreviewConfig previewConfig = new PreviewConfig.Builder().setTargetResolution(new Size(textureView.getWidth()/2, textureView.getHeight()/2)).build();
         Preview preview = new Preview(previewConfig);
 
 
         preview.setOnPreviewOutputUpdateListener(
-                previewOutput -> {
-                    textureView.setSurfaceTexture(previewOutput.getSurfaceTexture());
-                });
+                previewOutput -> textureView.setSurfaceTexture(previewOutput.getSurfaceTexture()));
 
         CameraX.bindToLifecycle(this, imageAnalysis, preview);
     }
 
-    private void handleScanResult(Task<List<FirebaseVisionBarcode>> listener) {
-        if (listener.isSuccessful()) {
-            Optional.ofNullable(listener.getResult())
-                    .ifPresent(result -> {
-                                if (result.size() > 0) Log.wtf("AHAHAHHAHA", result.get(0).getRawValue());
-                            }
-                    );
-        }
-    }
+
 
 
     @NonNull
     @Override
     public Lifecycle getLifecycle() {
         return lifecycleRegistry;
+    }
+
+    private void setUpViewModel() {
+        viewModel = ViewModelProviders.of(this).get(ScannerViewModel.class);
+        viewModel.getQrData().observe(this, this::setActivityResult);
+    }
+
+    private void setActivityResult(String qrData) {
+        CameraX.unbind(imageAnalysis);
+        Intent intent = new Intent();
+        intent.putExtra(getResources().getString(R.string.qr_code_data_extra),qrData);
+        setResult(RESULT_OK,intent);
+        finish();
     }
 
 
