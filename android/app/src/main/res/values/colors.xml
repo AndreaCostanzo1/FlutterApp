@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="beertastic_colorPrimary">#008577</color>
+    <color name="beertastic_colorPrimaryDark">#00574B</color>
+    <color name="beertastic_colorAccent">#D81B60</color>
+    <color name="beertastic_ochreYellow">#eac326</color>
+    <color name="beertastic_darkYellow">#bf9b07</color>
+    <color name="beertastic_black">#000000</color>
+    <color name="beertastic_white">#ffffff</color>
+    <color name="beertastic_background_light">#fffafafa</color>
+    <color name="beertastic_blue_facebook">#3B5998</color>
+    <color name="beertastic_search_grey">#E6E6E6</color>
+    <color name="beertastic_light_grey">#8b8b8b</color>
+    <color name="beertastic_grey">#64BEBEBE</color>
+    <color name="beertastic_dark_grey">#64202020</color>
+    <color name="beertastic_green_continue">#5bd990</color>
+
+</resources>

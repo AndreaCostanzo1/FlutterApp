@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -33,7 +34,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _launchCameraX(BuildContext context){
-
+  void _launchCameraX(BuildContext context) async {
+    MethodChannel("CAMERA_X").invokeMethod('SCAN');
   }
 }
