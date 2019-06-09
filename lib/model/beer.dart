@@ -7,6 +7,7 @@ class Beer {
   final double _rating;
   final double _alcohol;
   final double _temperature;
+  final String _beerImageUrl;
 
   Beer.fromSnapshot(DocumentSnapshot snapshot)
       : _documentID = snapshot?.documentID,
@@ -14,7 +15,8 @@ class Beer {
         _producer = snapshot['producer'],
         _rating = snapshot['rating'].toDouble(),
         _alcohol = snapshot['alcohol'].toDouble(),
-        _temperature = snapshot['temperature'].toDouble();
+        _temperature = snapshot['temperature'].toDouble(),
+        _beerImageUrl = snapshot['imageUrl'];
 
   String get name => _name;
 
@@ -25,4 +27,6 @@ class Beer {
   double get alcohol => _alcohol;
 
   double get temperature => _temperature;
+
+  String get beerImageUrl => _beerImageUrl;
 }

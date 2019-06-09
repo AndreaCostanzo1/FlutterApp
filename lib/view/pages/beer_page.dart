@@ -96,7 +96,7 @@ class _SmallPage extends StatelessWidget {
             BeerMainFragmentSmall(
               beer,
             ),
-            BeerBottomBarSmall(beer),
+            BeerBottomBarSmall(),
           ],
         ),
       ),
@@ -118,10 +118,8 @@ class _MediumPage extends StatelessWidget {
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            BeerMainFragmentMedium(
-              beer,
-            ),
-            BeerBottomBarMedium()
+            BeerMainFragmentMedium(),
+            BeerBottomBarMedium(),
           ],
         ),
       ),

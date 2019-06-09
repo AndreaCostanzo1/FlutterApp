@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_beertastic/model/beer.dart';
+
+import 'package:provider/provider.dart';
+
 const double defaultTextOverLineTextSize = 10;
 
 class BeerBottomBarSmall extends StatelessWidget {
-  final Map beer;
   final double squareTextOverLineSize;
 
-  BeerBottomBarSmall(
-    this.beer, {
+  BeerBottomBarSmall({
     this.squareTextOverLineSize = defaultTextOverLineTextSize,
   });
 
@@ -46,7 +48,7 @@ class BeerBottomBarSmall extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Text(
-                            beer['alcohol'],
+                            Provider.of<Beer>(context).alcohol.toString(),
                             style: Theme.of(context).textTheme.display2,
                           ),
                           SizedBox(width: 8.0),
@@ -78,7 +80,7 @@ class BeerBottomBarSmall extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
                           Text(
-                            beer['temperature'],
+                            Provider.of<Beer>(context).temperature.toString(),
                             style: Theme.of(context).textTheme.display2,
                           ),
                           SizedBox(width: 8.0),

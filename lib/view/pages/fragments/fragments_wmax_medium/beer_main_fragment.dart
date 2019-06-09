@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:flutter_beertastic/model/beer.dart';
 import 'package:flutter_beertastic/view/components/icons/custom_icons.dart';
 import 'package:flutter_beertastic/view/pages/beer_details_page.dart';
@@ -8,9 +10,7 @@ import 'package:flutter_beertastic/view/pages/beer_reviews_page.dart';
 import 'package:provider/provider.dart';
 
 class BeerMainFragmentMedium extends StatelessWidget {
-  final Map beer;
-
-  BeerMainFragmentMedium(this.beer);
+  BeerMainFragmentMedium();
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ class BeerMainFragmentMedium extends StatelessWidget {
               SizedBox(height: 12.0),
               _Rating(Provider.of<Beer>(context).rating.toString()),
               Spacer(),
-              _ButtonAndImageRow(beer['image']),
+              _ButtonAndImageRow(),
               SizedBox(height: 16.0)
             ],
           ),
@@ -71,12 +71,12 @@ class _Rating extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: ()=> Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => BeerReviewsPage(),
-        ),
-      ),
+      onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BeerReviewsPage(),
+            ),
+          ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
@@ -99,9 +99,7 @@ class _Rating extends StatelessWidget {
 }
 
 class _ButtonAndImageRow extends StatelessWidget {
-  final String imageUrl;
-
-  _ButtonAndImageRow(this.imageUrl);
+  _ButtonAndImageRow();
 
   @override
   Widget build(BuildContext context) {
@@ -126,14 +124,20 @@ class _ButtonAndImageRow extends StatelessWidget {
         Container(
           width: 200.0,
           height: 330.0,
-          child: Image.network(
-            imageUrl,
-            fit: BoxFit.contain,
+          child: StreamBuilder(
+            stream: FirebaseStorage.instance
+                .ref()
+                .child(Provider.of<Beer>(context).beerImageUrl)
+                .getDownloadURL()
+                .asStream(),
+            builder: (context, urlSnapshot) {
+              return urlSnapshot.data != null
+                  ? Image.network(urlSnapshot.data)
+                  : Container();
+            },
           ),
         )
       ],
     );
   }
 }
-
-
