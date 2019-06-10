@@ -64,7 +64,23 @@ flutter:
   fonts:
     - family:  CustomIcons
       fonts:
-      - asset: assets/icons/beer_icon.ttf
+        - asset: assets/icons/beer_icon.ttf
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans-Regular.ttf
+    - family: NotoSans-Bold
+      fonts:
+        - asset: assets/fonts/NotoSans-Bold.ttf
+    - family: Moon-Light
+      fonts:
+        - asset: assets/fonts/Moon2.0-Light.otf
+    - family: Moon
+      fonts:
+        - asset: assets/fonts/Moon2.0-Regular.otf
+    - family: Moon-Bold
+      fonts:
+        - asset: assets/fonts/Moon2.0-Bold.otf
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

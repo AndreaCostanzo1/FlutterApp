@@ -5,16 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import beertastic.sanag.com.flutter_beertastic.view.ScannerActivity;
 import io.flutter.app.FlutterActivity;
@@ -68,4 +59,9 @@ public class MainActivity extends FlutterActivity {
     }
     return null;
   }
+
+  //get single document from collection group
+//  FirebaseFirestore.getInstance().collectionGroup(collectionID).getFirestore()
+//                .collection(collectionID).document(beer).get()
+//                .addOnCompleteListener(snapshotTask-> sendResultBack(snapshotTask, result));
 }
