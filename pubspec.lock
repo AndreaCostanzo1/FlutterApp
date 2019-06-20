@@ -42,7 +42,7 @@ packages:
       name: cloud_firestore
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.5"
+    version: "0.12.5+2"
   collection:
     dependency: transitive
     description:
@@ -63,27 +63,27 @@ packages:
       name: firebase_auth
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.11.1+6"
+    version: "0.11.1+7"
   firebase_core:
     dependency: "direct main"
     description:
       name: firebase_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.0+4"
+    version: "0.4.0+6"
   firebase_storage:
     dependency: "direct main"
     description:
       name: firebase_storage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.1"
+    version: "3.0.2"
   flare_dart:
     dependency: transitive
     description:
       path: flare_dart
       ref: dev
-      resolved-ref: "6606b73bf4f7b87105a6febfbb5f2167cf8b8977"
+      resolved-ref: "8f04aa6d355b3b5c0ed1ba515988347510cefbb6"
       url: "git://github.com/2d-inc/Flare-Flutter.git"
     source: git
     version: "1.4.1"
@@ -92,7 +92,7 @@ packages:
     description:
       path: flare_flutter
       ref: dev
-      resolved-ref: "6606b73bf4f7b87105a6febfbb5f2167cf8b8977"
+      resolved-ref: "8f04aa6d355b3b5c0ed1ba515988347510cefbb6"
       url: "git://github.com/2d-inc/Flare-Flutter.git"
     source: git
     version: "1.5.1"
@@ -215,7 +215,7 @@ packages:
       name: synchronized
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.0+1"
   term_glyph:
     dependency: transitive
     description:
