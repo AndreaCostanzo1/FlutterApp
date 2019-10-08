@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -9,45 +11,37 @@ import 'package:flutter_beertastic/blocs/authenticator.dart';
 
 import 'package:provider/provider.dart';
 
-
 class AuthenticationPage extends StatelessWidget {
   AuthenticationPage({Key key}) : super(key: key);
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          width: MediaQuery
-              .of(context)
-              .size
-              .width,
-          height: MediaQuery
-              .of(context)
-              .size
-              .height,
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
           decoration: new BoxDecoration(
-            gradient: new LinearGradient(
-                colors: [
-                  Theme
-                      .of(context)
-                      .primaryColorLight,
-                  Theme
-                      .of(context)
-                      .primaryColorDark,
-                ],
-                begin: const FractionalOffset(0.0, 0.0),
-                end: const FractionalOffset(1.0, 1.0),
-                stops: [0.0, 1.0],
-                tileMode: TileMode.clamp),
+            image: new DecorationImage(
+              image: new NetworkImage("https://firebasestorage.googleapis.com/v0/b/flutter-beertastic.appspot.com/o/Background.jpg?alt=media&token=25ecda05-de61-4cfa-8eb1-e50277501e08"),
+              fit: BoxFit.cover,
+            ),
           ),
-          child: _PageContainer(),
+          child: new Stack(
+            children: <Widget>[
+              new BackdropFilter(
+                filter: new ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0),
+                child: new Container(
+                  decoration: new BoxDecoration(color: Colors.black.withOpacity(0.1)),
+                ),
+              ),
+              _PageContainer(),
+            ],
+          ),
         ),
       ),
     );
   }
-
 }
 
 class _PageContainer extends StatefulWidget {
@@ -57,7 +51,6 @@ class _PageContainer extends StatefulWidget {
 
 class __PageContainerState extends State<_PageContainer>
     with SingleTickerProviderStateMixin {
-
   int _page;
   Color right = Colors.white;
   Color left = Colors.black;
@@ -116,25 +109,13 @@ class __PageContainerState extends State<_PageContainer>
     _page = i;
     if (i == 0) {
       setState(() {
-        right = Theme
-            .of(context)
-            .cardColor;
-        left = Theme
-            .of(context)
-            .textTheme
-            .title
-            .color;
+        right = Theme.of(context).cardColor;
+        left = Theme.of(context).textTheme.title.color;
       });
     } else if (i == 1) {
       setState(() {
-        right = Theme
-            .of(context)
-            .textTheme
-            .title
-            .color;
-        left = Theme
-            .of(context)
-            .cardColor;
+        right = Theme.of(context).textTheme.title.color;
+        left = Theme.of(context).cardColor;
       });
     }
     FocusScope.of(context).requestFocus(_changePageFocus);
@@ -144,7 +125,7 @@ class __PageContainerState extends State<_PageContainer>
   @override
   void initState() {
     super.initState();
-    _changePageFocus= FocusNode();
+    _changePageFocus = FocusNode();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -161,7 +142,6 @@ class __PageContainerState extends State<_PageContainer>
     _authBLoC.dispose();
   }
 
-
   Widget _buildSignUp(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(top: 23.0),
@@ -174,9 +154,7 @@ class __PageContainerState extends State<_PageContainer>
   }
 }
 
-
 class SignInScreen extends StatelessWidget {
-
   final int _page;
 
   SignInScreen(this._page);
@@ -206,8 +184,3 @@ class SignInScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
