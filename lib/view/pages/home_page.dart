@@ -49,49 +49,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: Color(0xfffffbf0),
+    return Scaffold(
+      backgroundColor: Color(0xfffffbf0),
       body: Container(
         child: ListView(
           scrollDirection: Axis.vertical,
           children: <Widget>[
-            Stack(
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.all(15),
-                  constraints: BoxConstraints.expand(height: 165),
-                  decoration: BoxDecoration(
-                      gradient: new LinearGradient(
-                          colors: [
-                            Theme.of(context).primaryColorLight,
-                            Theme.of(context).primaryColorDark
-                          ],
-                          begin: const FractionalOffset(1.0, 1.0),
-                          end: const FractionalOffset(0.2, 0.2),
-                          stops: [0.0, 1.0],
-                          tileMode: TileMode.clamp),
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(30),
-                          bottomRight: Radius.circular(30))),
-                  child: Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        _TitleBar(
-                            'Discover',
-                            TextStyle(
-                                fontFamily: 'Montserrat Bold',
-                                fontSize: 28,
-                                color: Color(0xf2f2f2f2)))
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.only(top: 80),
-                  child: _BlogArticles(),
-                ),
-              ],
-            ),
+            _TopPage(),
             SizedBox(height: 8),
             _TitleBar(
               'This week in Milan',
@@ -125,7 +89,7 @@ class _BlogArticles extends StatefulWidget {
 class _BlogArticlesState extends State<_BlogArticles> {
   PageController pageController = PageController(viewportFraction: 0.86);
 
-  double containerHeight=200;
+  double containerHeight = 200;
 
   int currentPage;
 
@@ -142,7 +106,8 @@ class _BlogArticlesState extends State<_BlogArticles> {
           return AnimatedContainer(
             child: SingleChildScrollView(
               child: Container(
-                padding: EdgeInsets.only(top: containerHeight*0.615, right: 15),
+                padding:
+                    EdgeInsets.only(top: containerHeight * 0.615, right: 15),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
@@ -227,9 +192,7 @@ class _TitleBar extends StatelessWidget {
   _TitleBar(this.title, this.textStyle);
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(top: 16, left: 16, bottom: 8),
       child: Column(
@@ -254,13 +217,57 @@ class _TitleBar extends StatelessWidget {
   }
 }
 
+class _TopPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.all(15),
+          constraints: BoxConstraints.expand(height: 165),
+          decoration: BoxDecoration(
+              gradient: new LinearGradient(
+                  colors: [
+                    Theme.of(context).primaryColorLight,
+                    Theme.of(context).primaryColorDark
+                  ],
+                  begin: const FractionalOffset(1.0, 1.0),
+                  end: const FractionalOffset(0.2, 0.2),
+                  stops: [0.0, 1.0],
+                  tileMode: TileMode.clamp),
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30))),
+          child: Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _TitleBar(
+                    'Discover',
+                    TextStyle(
+                        fontFamily: 'Montserrat Bold',
+                        fontSize: 28,
+                        color: Color(0xf2f2f2f2)))
+              ],
+            ),
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.only(top: 80),
+          child: _BlogArticles(),
+        ),
+      ],
+    );
+  }
+}
+
 class _Events extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double cardWidth = MediaQuery.of(context).size.width * 0.87;
-    double cardHeight = 210;
-    double proportionImageTitle = 0.63;
-    double dateContainerSize = 63;
+    double cardHeight = 240;
+    double proportionImageTitle = 0.57;
+    double dateContainerSize = 53;
     return Column(
       children: data.map((brewery) {
         return Container(
@@ -289,59 +296,21 @@ class _Events extends StatelessWidget {
                     ),
                   ],
                 ),
-                Container(
-                  width: dateContainerSize,
-                  height: dateContainerSize,
-                  margin: EdgeInsets.fromLTRB(
-                      cardWidth * 0.761, cardHeight * 0.47, 0, 0),
-                  child: Stack(
-                    children: <Widget>[
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Container(
-                          color: Colors.white,
-                        ),
-                      ),
-                      Container(
-                        height: dateContainerSize*0.95,
-                        width: dateContainerSize,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              '11',
-                              style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: 29,
-                                fontFamily: 'Open Sans SemiBold'
-                              ),
-                            ),
-                            Text(
-                              'JEN',
-                              style: TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 13,
-                                  fontFamily: 'Open Sans Bold'
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black45,
-                        blurRadius: 7,
-                      ),
-                    ],
-                  ),
+                _DateBox(
+                  dateContainerSize,
+                  cardWidth,
+                  cardHeight,
+                  day: '11',
+                  monthAbbreviation: 'JEN',
                 ),
-                Container(
-                  child: Column( /*TODO*/),
-                ),
+                _EventBody(
+                  dateContainerSize,
+                  cardWidth,
+                  cardHeight,
+                  title: 'Compleanno birrificio',
+                  subTitle: 'Questa piccola descrizione breve',
+                  place: 'Birrificio di Lambrate',
+                )
               ],
             ),
           ),
@@ -358,6 +327,139 @@ class _Events extends StatelessWidget {
         );
       }).toList(),
       crossAxisAlignment: CrossAxisAlignment.center,
+    );
+  }
+}
+
+class _DateBox extends StatelessWidget {
+  final double dateContainerSize;
+  final double cardWidth;
+  final double cardHeight;
+  final String day;
+  final String monthAbbreviation;
+
+  _DateBox(this.dateContainerSize, this.cardWidth, this.cardHeight,
+      {this.day, this.monthAbbreviation});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: dateContainerSize,
+      height: dateContainerSize,
+      margin: EdgeInsets.fromLTRB(cardWidth * 0.061, cardHeight * 0.43, 0, 0),
+      child: Stack(
+        children: <Widget>[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              color: Colors.white,
+            ),
+          ),
+          Container(
+            height: dateContainerSize * 0.95,
+            width: dateContainerSize,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  day,
+                  style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 24,
+                      fontFamily: 'Open Sans SemiBold'),
+                ),
+                Text(
+                  monthAbbreviation,
+                  style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 10.5,
+                      fontFamily: 'Open Sans Bold'),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black45,
+            blurRadius: 7,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EventBody extends StatelessWidget {
+  final double dateContainerSize;
+  final double cardWidth;
+  final double cardHeight;
+  final String title;
+  final String subTitle;
+  final String place;
+
+  _EventBody(this.dateContainerSize, this.cardWidth, this.cardHeight,
+      {this.title, this.subTitle, this.place});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(
+          top: cardHeight * 0.675,
+          left: cardWidth * 0.04,
+          right: cardWidth * 0.04),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            title,
+            style: TextStyle(fontFamily: 'Montserrat Bold', fontSize: 21),
+          ),
+          Container(
+            //small padding to make sub-event element look nicer
+            padding: EdgeInsets.symmetric(horizontal: 1),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  subTitle,
+                  style: TextStyle(
+                    fontFamily: 'Montserrat Regular',
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
+                ),
+                SizedBox(
+                  height: 6,
+                ),
+                Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.place,
+                      color: Colors.black54,
+                      size: 17,
+                    ),
+                    SizedBox(
+                      width: 3,
+                    ),
+                    Text(
+                      place,
+                      style: TextStyle(
+                        fontFamily: 'Montserrat Regular',
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          )
+        ],
+      ),
     );
   }
 }
