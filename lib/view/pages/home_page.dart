@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_beertastic/view/pages/article_page.dart';
 
-import 'package:flutter_beertastic/view/pages/beer_page.dart';
 
 List data = [
   {
@@ -56,7 +55,7 @@ class _HomePageState extends State<HomePage> {
           scrollDirection: Axis.vertical,
           children: <Widget>[
             _TopPage(),
-            SizedBox(height: 8),
+            SizedBox(height: 10),
             _TitleBar(
               'This week in Milan',
               TextStyle(
@@ -97,42 +96,54 @@ class _BlogArticlesState extends State<_BlogArticles> {
   Widget build(BuildContext context) {
     return Container(
       height: containerHeight,
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: EdgeInsets.only(top: 8),
       child: PageView(
         controller: pageController,
         scrollDirection: Axis.horizontal,
         children: data.map((article) {
           bool activePage = data.indexOf(article) == currentPage;
           return AnimatedContainer(
-            child: SingleChildScrollView(
-              child: Container(
-                padding:
-                    EdgeInsets.only(top: containerHeight * 0.615, right: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    Container(
-                      padding: EdgeInsets.only(),
-                      child: Text(
-                        'My title is big',
-                        style: TextStyle(
-                            color: Color(0xF2F2F2F2),
-                            fontSize: 28,
-                            fontFamily: 'PlayfairDisplay Bold'),
-                      ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ArticlePage(),
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  child: Container(
+                    padding:
+                        EdgeInsets.only(top: containerHeight * 0.615, right: 15),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: <Widget>[
+                        Container(
+                          padding: EdgeInsets.only(),
+                          child: Text(
+                            'My title is big',
+                            style: TextStyle(
+                                color: Color(0xF2F2F2F2),
+                                fontSize: 28,
+                                fontFamily: 'PlayfairDisplay Bold'),
+                          ),
+                        ),
+                        activePage
+                            ? Container(
+                                child: Text(
+                                  'Lorem ipsum dolor sic amet',
+                                  style: TextStyle(
+                                      color: Color(0xF2F2F2F2),
+                                      fontSize: 16,
+                                      fontFamily: 'Montserrat Regular'),
+                                ),
+                              )
+                            : Container(),
+                      ],
                     ),
-                    activePage
-                        ? Container(
-                            child: Text(
-                              'Lorem ipsum dolor sic amet',
-                              style: TextStyle(
-                                  color: Color(0xF2F2F2F2),
-                                  fontSize: 16,
-                                  fontFamily: 'Montserrat Regular'),
-                            ),
-                          )
-                        : Container(),
-                  ],
+                  ),
                 ),
               ),
             ),

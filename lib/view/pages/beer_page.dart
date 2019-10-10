@@ -50,6 +50,7 @@ class _BeerState extends State<BeerPage> {
             : snapshot.data.exists
                 ? Provider<Beer>.value(
                     value: Beer.fromSnapshot(snapshot.data),
+                    //extract the page depending on dimension
                     child: widget.widgetsByDimensions[SizeComputer.computeSize(
                         MediaQuery.of(context).size.width)],
                   )
