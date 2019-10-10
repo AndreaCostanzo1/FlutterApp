@@ -125,12 +125,14 @@ class _BlogArticles extends StatefulWidget {
 class _BlogArticlesState extends State<_BlogArticles> {
   PageController pageController = PageController(viewportFraction: 0.86);
 
+  double containerHeight=200;
+
   int currentPage;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 200,
+      height: containerHeight,
       margin: EdgeInsets.symmetric(vertical: 8),
       child: PageView(
         controller: pageController,
@@ -140,17 +142,17 @@ class _BlogArticlesState extends State<_BlogArticles> {
           return AnimatedContainer(
             child: SingleChildScrollView(
               child: Container(
-                padding: EdgeInsets.only(top: 130, right: 15),
+                padding: EdgeInsets.only(top: containerHeight*0.615, right: 15),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
                     Container(
                       padding: EdgeInsets.only(),
                       child: Text(
-                        'My title',
+                        'My title is big',
                         style: TextStyle(
                             color: Color(0xF2F2F2F2),
-                            fontSize: 25,
+                            fontSize: 28,
                             fontFamily: 'PlayfairDisplay Bold'),
                       ),
                     ),
