@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/view/pages/article_page.dart';
 
-
 List data = [
   {
     'name': 'Antelope Canyon',
@@ -147,49 +146,74 @@ class _BlogArticlesState extends State<_BlogArticles> {
         children: data.map((article) {
           bool activePage = data.indexOf(article) == currentPage;
           return AnimatedContainer(
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ArticlePage(),
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  child: Container(
-                    padding:
-                        EdgeInsets.only(top: containerHeight * 0.615, right: 15),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.only(),
-                          child: Text(
-                            'My title is big',
-                            style: TextStyle(
-                                color: Color(0xF2F2F2F2),
-                                fontSize: 28,
-                                fontFamily: 'PlayfairDisplay Bold'),
-                          ),
-                        ),
-                        activePage
-                            ? Container(
-                                child: Text(
-                                  'Lorem ipsum dolor sic amet',
-                                  style: TextStyle(
-                                      color: Color(0xF2F2F2F2),
-                                      fontSize: 16,
-                                      fontFamily: 'Montserrat Regular'),
-                                ),
-                              )
-                            : Container(),
-                      ],
+            child: Stack(
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Hero(
+                      tag: '', //TODO animate transition
+                      child: Image(
+                        image: NetworkImage(article['image']),
+                        colorBlendMode: BlendMode.darken,
+                        color: Colors.black38,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
-              ),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ArticlePage(),
+                      ),
+                    ),
+                    child: SingleChildScrollView(
+                      //single child scroll view needed to render subtitle,
+                      //but shouldn't be scrollable
+                      physics: NeverScrollableScrollPhysics(), //This disallow scroll with touch screen
+                      child: Container(
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        padding: EdgeInsets.only(
+                            top: containerHeight * 0.615, right: 15),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: <Widget>[
+                            Container(
+                              padding: EdgeInsets.only(),
+                              child: Text(
+                                'My title is big',
+                                style: TextStyle(
+                                    color: Color(0xF2F2F2F2),
+                                    fontSize: 28,
+                                    fontFamily: 'PlayfairDisplay Bold'),
+                              ),
+                            ),
+                            activePage
+                                ? Container(
+                                    child: Text(
+                                      'Lorem ipsum dolor sic amet',
+                                      style: TextStyle(
+                                          color: Color(0xF2F2F2F2),
+                                          fontSize: 16,
+                                          fontFamily: 'Montserrat Regular'),
+                                    ),
+                                  )
+                                : Container(),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             margin: EdgeInsets.only(
                 top: activePage ? 0 : 20,
@@ -197,11 +221,6 @@ class _BlogArticlesState extends State<_BlogArticles> {
                 bottom: activePage ? 10 : 15),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              image: DecorationImage(
-                colorFilter: ColorFilter.mode(Colors.black26, BlendMode.darken),
-                image: NetworkImage(article['image']),
-                fit: BoxFit.cover,
-              ),
               boxShadow: [
                 BoxShadow(
                     color: Colors.black87,
@@ -271,8 +290,6 @@ class _TitleBar extends StatelessWidget {
     );
   }
 }
-
-
 
 class _Events extends StatelessWidget {
   @override
