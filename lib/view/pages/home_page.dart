@@ -49,24 +49,23 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xfffffbf0),
-      body: Container(
-        child: ListView(
-          scrollDirection: Axis.vertical,
-          children: <Widget>[
-            _TopPage(),
-            SizedBox(height: 10),
-            _TitleBar(
-              'This week in Milan',
-              TextStyle(
-                  fontSize: 25,
-                  fontFamily: 'Montserrat Bold',
-                  color: Colors.black87),
-            ),
-            _Events(),
-            SizedBox(height: 24),
-            _BottomBar(),
-          ],
-        ),
+      body: ListView(
+        padding: EdgeInsets.all(0), //ListView has default top padding, to override it we insert padding = 0;
+        scrollDirection: Axis.vertical,
+        children: <Widget>[
+          _TopPage(),
+          SizedBox(height: 10),
+          _TitleBar(
+            'This week in Milan',
+            TextStyle(
+                fontSize: 25,
+                fontFamily: 'Montserrat Bold',
+                color: Colors.black87),
+          ),
+          _Events(),
+          SizedBox(height: 24),
+          _BottomBar(),
+        ],
       ), //center
     );
   }
@@ -85,7 +84,6 @@ class _TopPage extends StatelessWidget {
     return Stack(
       children: <Widget>[
         Container(
-          padding: EdgeInsets.all(15),
           constraints: BoxConstraints.expand(height: 165),
           decoration: BoxDecoration(
               gradient: new LinearGradient(
@@ -101,6 +99,7 @@ class _TopPage extends StatelessWidget {
                   bottomLeft: Radius.circular(30),
                   bottomRight: Radius.circular(30))),
           child: Container(
+            padding: EdgeInsets.all(15),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -154,7 +153,7 @@ class _BlogArticlesState extends State<_BlogArticles> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Hero(
-                      tag: '', //TODO animate transition
+                      tag: article['name'], //TODO animate transition
                       child: Image(
                         image: NetworkImage(article['image']),
                         colorBlendMode: BlendMode.darken,
@@ -171,7 +170,7 @@ class _BlogArticlesState extends State<_BlogArticles> {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ArticlePage(),
+                        builder: (context) => ArticlePage(data[currentPage]),
                       ),
                     ),
                     child: SingleChildScrollView(

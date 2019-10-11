@@ -103,7 +103,18 @@ flutter:
     - family: Montserrat Regular
       fonts:
         - asset: assets/fonts/Montserrat-Regular.ttf
-
+    - family: TimeBurner Regular
+      fonts:
+        - asset: assets/fonts/timeburnernormal.ttf
+    - family: TimeBurner Bold
+      fonts:
+        - asset: assets/fonts/timeburnerbold.ttf
+    - family: Audrey Bold
+      fonts:
+        - asset: assets/fonts/Audrey-Bold.otf
+    - family: Canvas Bold
+      fonts:
+        - asset: assets/fonts/Canvas-Bold.otf
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 
