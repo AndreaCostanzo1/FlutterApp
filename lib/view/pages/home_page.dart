@@ -80,6 +80,50 @@ class _BottomBar extends StatelessWidget {
   }
 }
 
+class _TopPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        Container(
+          padding: EdgeInsets.all(15),
+          constraints: BoxConstraints.expand(height: 165),
+          decoration: BoxDecoration(
+              gradient: new LinearGradient(
+                  colors: [
+                    Theme.of(context).primaryColorLight,
+                    Theme.of(context).primaryColorDark
+                  ],
+                  begin: const FractionalOffset(1.0, 1.0),
+                  end: const FractionalOffset(0.2, 0.2),
+                  stops: [0.0, 1.0],
+                  tileMode: TileMode.clamp),
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30),
+                  bottomRight: Radius.circular(30))),
+          child: Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _TitleBar(
+                    'Discover',
+                    TextStyle(
+                        fontFamily: 'Montserrat Bold',
+                        fontSize: 28,
+                        color: Color(0xf2f2f2f2)))
+              ],
+            ),
+          ),
+        ),
+        Container(
+          padding: EdgeInsets.only(top: 80),
+          child: _BlogArticles(),
+        ),
+      ],
+    );
+  }
+}
+
 class _BlogArticles extends StatefulWidget {
   @override
   _BlogArticlesState createState() => _BlogArticlesState();
@@ -228,49 +272,7 @@ class _TitleBar extends StatelessWidget {
   }
 }
 
-class _TopPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        Container(
-          padding: EdgeInsets.all(15),
-          constraints: BoxConstraints.expand(height: 165),
-          decoration: BoxDecoration(
-              gradient: new LinearGradient(
-                  colors: [
-                    Theme.of(context).primaryColorLight,
-                    Theme.of(context).primaryColorDark
-                  ],
-                  begin: const FractionalOffset(1.0, 1.0),
-                  end: const FractionalOffset(0.2, 0.2),
-                  stops: [0.0, 1.0],
-                  tileMode: TileMode.clamp),
-              borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30))),
-          child: Container(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _TitleBar(
-                    'Discover',
-                    TextStyle(
-                        fontFamily: 'Montserrat Bold',
-                        fontSize: 28,
-                        color: Color(0xf2f2f2f2)))
-              ],
-            ),
-          ),
-        ),
-        Container(
-          padding: EdgeInsets.only(top: 80),
-          child: _BlogArticles(),
-        ),
-      ],
-    );
-  }
-}
+
 
 class _Events extends StatelessWidget {
   @override
