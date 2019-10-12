@@ -5,9 +5,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.util.Log;
 import android.util.Size;
 import android.view.TextureView;
 import android.widget.Toast;
@@ -17,30 +14,29 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraX;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageAnalysisConfig;
+import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.core.PreviewConfig;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.LifecycleRegistry;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
+import com.google.common.primitives.Bytes;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import beertastic.sanag.com.flutter_beertastic.R;
 import beertastic.sanag.com.flutter_beertastic.view_model.ScannerViewModel;
 import beertastic.sanag.com.flutter_beertastic.view_model.tools.BarcodesScanner;
 
-public class ScannerActivity extends AppCompatActivity implements LifecycleOwner {
+public class ScannerActivity extends AppCompatActivity {
 
     private TextureView textureView;
-    private LifecycleRegistry lifecycleRegistry;
     private ScannerViewModel viewModel;
     private ImageAnalysis imageAnalysis;
 
@@ -48,35 +44,9 @@ public class ScannerActivity extends AppCompatActivity implements LifecycleOwner
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.beertastic_activity_camera);
-        lifecycleRegistry = new LifecycleRegistry(this);
         getComponents();
         checkCameraPermission();
         setUpViewModel();
-        lifecycleRegistry.markState(Lifecycle.State.CREATED);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        lifecycleRegistry.markState(Lifecycle.State.DESTROYED);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        lifecycleRegistry.markState(Lifecycle.State.CREATED);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        lifecycleRegistry.markState(Lifecycle.State.STARTED);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        lifecycleRegistry.markState(Lifecycle.State.RESUMED);
     }
 
     @Override
@@ -97,6 +67,7 @@ public class ScannerActivity extends AppCompatActivity implements LifecycleOwner
             //permission not granted
             handlePermissionRequest();
         } else {
+
             setUpCameraX();
         }
     }
@@ -119,24 +90,21 @@ public class ScannerActivity extends AppCompatActivity implements LifecycleOwner
 
     private void setUpCameraX() {
         CameraX.unbindAll();
-        HandlerThread thread = new HandlerThread("CameraX");
-        thread.start();
+        Executor executor = Executors.newSingleThreadExecutor();
         ImageAnalysisConfig config =
                 new ImageAnalysisConfig.Builder()
-                        .setTargetResolution(new Size(textureView.getWidth(), textureView.getHeight()))
-                        .setCallbackHandler(new Handler(thread.getLooper()))
+                        .setTargetResolution(new Size(1280, 720))
+                        .setBackgroundExecutor(executor)
                         .setImageReaderMode(ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE)
                         .build();
 
         int deviceRotation = getWindowManager().getDefaultDisplay().getRotation();
         imageAnalysis = new ImageAnalysis(config);
 
-        imageAnalysis.setAnalyzer(
-                (image, rotationDegrees) -> BarcodesScanner.getInstance()
-                        .scanYUVImage(image.getPlanes()[0].getBuffer(), deviceRotation,
-                                (barcodesList)->viewModel.handleScanResult(barcodesList)));
+        imageAnalysis.setAnalyzer(executor,
+                (image, rotationDegrees) -> analyzeImage(image,rotationDegrees,deviceRotation));
 
-        PreviewConfig previewConfig = new PreviewConfig.Builder().setTargetResolution(new Size(textureView.getWidth()/2, textureView.getHeight()/2)).build();
+        PreviewConfig previewConfig = new PreviewConfig.Builder().setTargetResolution(new Size(textureView.getWidth(), textureView.getHeight())).build();
         Preview preview = new Preview(previewConfig);
 
 
@@ -146,13 +114,18 @@ public class ScannerActivity extends AppCompatActivity implements LifecycleOwner
         CameraX.bindToLifecycle(this, imageAnalysis, preview);
     }
 
-
-
-
-    @NonNull
-    @Override
-    public Lifecycle getLifecycle() {
-        return lifecycleRegistry;
+    private void analyzeImage(ImageProxy image, int rotationDegrees, int deviceRotation) {
+        ImageProxy.PlaneProxy[] proxyList = image.getPlanes();
+        byte[] y= new byte[proxyList[0].getBuffer().remaining()];
+        proxyList[0].getBuffer().get(y);
+        byte[] u= new byte[proxyList[1].getBuffer().remaining()];
+        proxyList[1].getBuffer().get(u);
+        byte[] v= new byte[proxyList[2].getBuffer().remaining()];
+        proxyList[2].getBuffer().get(v);
+        byte[] imageByteArray = Bytes.concat(y,u,v);
+        BarcodesScanner.getInstance()
+                .scanYUVImage(imageByteArray, deviceRotation,
+                        (barcodesList)->viewModel.handleScanResult(barcodesList));
     }
 
     private void setUpViewModel() {

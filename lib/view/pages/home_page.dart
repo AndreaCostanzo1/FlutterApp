@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/view/pages/article_page.dart';
 import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/home_fragment.dart';
+import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/search_fragment.dart';
 
 List data = [
   {
@@ -84,5 +85,6 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _bottomNavBarIndex = 0;
     _map[0] = HomeFragment();
+    _map[1] = SearchFragment();
   }
 }

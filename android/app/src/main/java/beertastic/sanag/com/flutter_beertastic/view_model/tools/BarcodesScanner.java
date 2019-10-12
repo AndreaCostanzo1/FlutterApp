@@ -72,15 +72,15 @@ public class BarcodesScanner {
 
     }
 
-    public void scanYUVImage(ByteBuffer imageBuffer, int surfaceOrientation,  OnCompleteListener<List<FirebaseVisionBarcode>> listener){
-        Integer rotation = ORIENTATIONS.get(surfaceOrientation);
+    public void scanYUVImage(byte[] imageBuffer, int surfaceOrientation,  OnCompleteListener<List<FirebaseVisionBarcode>> listener){
+        int rotation = ORIENTATIONS.get(surfaceOrientation);
         FirebaseVisionImageMetadata metadata = new FirebaseVisionImageMetadata.Builder()
                 .setWidth(1280)   // 480x360 is typically sufficient for  image recognition
                 .setHeight(720)
                 .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21)
                 .setRotation(rotation)
                 .build();
-        detector.detectInImage(FirebaseVisionImage.fromByteBuffer(imageBuffer,metadata))
+        detector.detectInImage(FirebaseVisionImage.fromByteArray(imageBuffer,metadata))
                 //add a listener to handle positive result
                 .addOnCompleteListener(listener);
     }
