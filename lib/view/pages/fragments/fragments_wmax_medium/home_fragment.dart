@@ -88,18 +88,21 @@ class _TopPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                _TitleBar(
-                    'Discover',
-                    TextStyle(
-                        fontFamily: 'Montserrat Bold',
-                        fontSize: 28,
-                        color: Color(0xf2f2f2f2)))
+                Container(
+                  margin: EdgeInsets.only(top: 11),
+                  child: _TitleBar(
+                      'Discover',
+                      TextStyle(
+                          fontFamily: 'Montserrat Bold',
+                          fontSize: 28,
+                          color: Color(0xf2f2f2f2))),
+                )
               ],
             ),
           ),
         ),
         Container(
-          padding: EdgeInsets.only(top: 80),
+          padding: EdgeInsets.only(top: 90),
           child: _BlogArticles(),
         ),
       ],
@@ -132,9 +135,6 @@ class _BlogArticlesState extends State<_BlogArticles> {
         scrollDirection: Axis.horizontal,
         children: data.map((article) {
           bool activePage = data.indexOf(article) == currentPage;
-          print((data.indexOf(article) + 1).toString() +
-              '. ' +
-              activePage.toString());
           return AnimatedContainer(
             child: Stack(
               children: <Widget>[
