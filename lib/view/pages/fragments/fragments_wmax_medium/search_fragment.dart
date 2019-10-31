@@ -4,6 +4,39 @@ import 'package:flutter_beertastic/model/beer.dart';
 
 import '../../beer_page.dart';
 
+List data = [
+  {
+    'name': 'Antelope Canyon',
+    'image':
+        'https://images.unsplash.com/photo-1527498913931-c302284a62af?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=934&q=80',
+    'description':
+        'Over the years, Lover Antelope Canyon has become a favorite gathering pace for photographers tourists, and visitors from the world.',
+    'date': 'Mar 20, 2019',
+    'rating': '4.7',
+    'cost': '\$40.00'
+  },
+  {
+    'name': 'Genteng Lembang',
+    'image':
+        'https://images.unsplash.com/photo-1548560781-a7a07d9d33db?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=581&q=80',
+    'description':
+        'Over the years, Lover Antelope Canyon has become a favorite gathering pace for photographers tourists, and visitors from the world.',
+    'date': 'Mar 24, 2019',
+    'rating': '4,83',
+    'cost': '\$50.00'
+  },
+  {
+    'name': 'Kamchatka Peninsula',
+    'image':
+        'https://images.unsplash.com/photo-1542869781-a272dedbc93e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=983&q=80',
+    'description':
+        'Over the years, Lover Antelope Canyon has become a favorite gathering pace for photographers tourists, and visitors from the world.',
+    'date': 'Apr 18, 2019',
+    'rating': '4,7',
+    'cost': '\$30.00'
+  },
+];
+
 class SearchFragment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -14,7 +47,6 @@ class SearchFragment extends StatelessWidget {
             height: 160,
           ),
           Container(
-            height: 560,
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
                 color: Colors.white,
@@ -36,7 +68,9 @@ class SearchFragment extends StatelessWidget {
                           width: 270,
                           child: TextFormField(
                             decoration: InputDecoration.collapsed(
-                                hintText: 'Search', hintStyle: TextStyle(fontFamily: 'Open Sans SemiBold')),
+                                hintText: 'Search',
+                                hintStyle: TextStyle(
+                                    fontFamily: 'Open Sans SemiBold')),
                           ),
                         ),
                         Icon(Icons.build)
@@ -47,6 +81,8 @@ class SearchFragment extends StatelessWidget {
                       color: Color(0xFFf4f2e4),
                       borderRadius: BorderRadius.circular(30)),
                 ),
+                SizedBox(height: 35,),
+                PostGallery(),
               ],
             ),
           )
@@ -62,6 +98,191 @@ class SearchFragment extends StatelessWidget {
             end: const FractionalOffset(0.1, 0.1),
             stops: [0.5, 1.0],
             tileMode: TileMode.clamp),
+      ),
+    );
+  }
+}
+
+class PostGallery extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      child: Column(
+
+        children: <Widget>[
+          PostSubGallery1(),
+          SizedBox(height: 20,),
+          PostSubGallery2(),
+          SizedBox(height: 20,),
+          PostSubGallery3(),
+        ],
+      ),
+    );
+  }
+}
+
+class PostSubGallery1 extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 25),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Container(
+            height: MediaQuery.of(context).size.width*0.567,
+            width: MediaQuery.of(context).size.width*0.567,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.black
+                ),
+              ),
+            ),
+          ),
+          Container(
+            height: MediaQuery.of(context).size.width*0.567,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Container(
+                  height: MediaQuery.of(context).size.width*0.265,
+                  width: MediaQuery.of(context).size.width*0.265,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.black
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: MediaQuery.of(context).size.width*0.265,
+                  width: MediaQuery.of(context).size.width*0.265,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.black
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class PostSubGallery2 extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 25),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Container(
+            height: MediaQuery.of(context).size.width*0.265,
+            width: MediaQuery.of(context).size.width*0.265,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.black
+                ),
+              ),
+            ),
+          ),
+
+          Container(
+            height: MediaQuery.of(context).size.width*0.265,
+            width: MediaQuery.of(context).size.width*0.265,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.black
+                ),
+              ),
+            ),
+          ),
+          Container(
+            height: MediaQuery.of(context).size.width*0.265,
+            width: MediaQuery.of(context).size.width*0.265,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.black
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+class PostSubGallery3 extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 25),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Container(
+            height: MediaQuery.of(context).size.width*0.567,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Container(
+                  height: MediaQuery.of(context).size.width*0.265,
+                  width: MediaQuery.of(context).size.width*0.265,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.black
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: MediaQuery.of(context).size.width*0.265,
+                  width: MediaQuery.of(context).size.width*0.265,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: Colors.black
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            height: MediaQuery.of(context).size.width*0.567,
+            width: MediaQuery.of(context).size.width*0.567,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                decoration: BoxDecoration(
+                    color: Colors.black
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
