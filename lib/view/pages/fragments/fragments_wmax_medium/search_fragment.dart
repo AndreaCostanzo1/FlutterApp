@@ -73,7 +73,7 @@ class SearchFragment extends StatelessWidget {
                                     fontFamily: 'Open Sans SemiBold')),
                           ),
                         ),
-                        Icon(Icons.build)
+                        Icon(Icons.center_focus_strong)
                       ],
                     ),
                   ),
