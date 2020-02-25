@@ -37,43 +37,86 @@ List data = [
   },
 ];
 
-class SearchFragment extends StatelessWidget {
+class SearchFragment extends StatefulWidget {
+  @override
+  _SearchFragmentState createState() => _SearchFragmentState();
+}
+
+class _SearchFragmentState extends State<SearchFragment> {
+  bool focused;
+  FocusNode focusNode;
+
+  void unfocusSearch() {
+    focusNode.unfocus();
+    setState(() {
+      focused = false;
+    });
+  }
+
+  @override
+  void initState() {
+    focused = focused ?? false;
+    focusNode = FocusNode();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       child: ListView(
+        physics:
+            focused ? NeverScrollableScrollPhysics() : ClampingScrollPhysics(),
+        padding: EdgeInsets.all(0),
         children: <Widget>[
-          Container(
-            height: 160,
+          AnimatedContainer(
+            height: focused ? 0 : 160,
+            duration: Duration(milliseconds: 100),
           ),
-          Container(
+          AnimatedContainer(
             width: MediaQuery.of(context).size.width,
+            duration: Duration(milliseconds: 100),
             decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30))),
+                borderRadius: focused
+                    ? BorderRadius.zero
+                    : BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30))),
             child: Column(
               children: <Widget>[
                 Container(
-                  margin:
-                      EdgeInsets.only(top: 35, left: 30, right: 30, bottom: 10),
+                  margin: EdgeInsets.only(
+                      top: focused ? 45 : 35, left: 30, right: 30, bottom: 10),
                   height: 50,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    padding: const EdgeInsets.only(left: 20.0, right: 7),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
                         Container(
                           width: 270,
                           child: TextFormField(
+                            focusNode: focusNode,
+                            onTap: () => setState(() => focused = true),
+                            onFieldSubmitted: (text) => unfocusSearch(),
                             decoration: InputDecoration.collapsed(
                                 hintText: 'Search',
                                 hintStyle: TextStyle(
                                     fontFamily: 'Open Sans SemiBold')),
                           ),
                         ),
-                        Icon(Icons.center_focus_strong)
+                        focused
+                            ? Container()
+                            : IconButton(
+                                padding: EdgeInsets.all(0),
+                                icon: Icon(Icons.center_focus_strong),
+                                onPressed: () {})
                       ],
                     ),
                   ),
@@ -81,8 +124,14 @@ class SearchFragment extends StatelessWidget {
                       color: Color(0xFFf4f2e4),
                       borderRadius: BorderRadius.circular(30)),
                 ),
-                SizedBox(height: 35,),
-                PostGallery(),
+                SizedBox(
+                  height: 35,
+                ),
+                focused
+                    ? Container(
+                        height: MediaQuery.of(context).size.height,
+                      )
+                    : PostGallery(),
               ],
             ),
           )
@@ -103,18 +152,21 @@ class SearchFragment extends StatelessWidget {
   }
 }
 
-class PostGallery extends StatelessWidget{
+class PostGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width,
       child: Column(
-
         children: <Widget>[
           PostSubGallery1(),
-          SizedBox(height: 20,),
+          SizedBox(
+            height: 20,
+          ),
           PostSubGallery2(),
-          SizedBox(height: 20,),
+          SizedBox(
+            height: 20,
+          ),
           PostSubGallery3(),
         ],
       ),
@@ -122,7 +174,7 @@ class PostGallery extends StatelessWidget{
   }
 }
 
-class PostSubGallery1 extends StatelessWidget{
+class PostSubGallery1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -131,43 +183,37 @@ class PostSubGallery1 extends StatelessWidget{
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            height: MediaQuery.of(context).size.width*0.567,
-            width: MediaQuery.of(context).size.width*0.567,
+            height: MediaQuery.of(context).size.width * 0.567,
+            width: MediaQuery.of(context).size.width * 0.567,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.black
-                ),
+                decoration: BoxDecoration(color: Colors.black),
               ),
             ),
           ),
           Container(
-            height: MediaQuery.of(context).size.width*0.567,
+            height: MediaQuery.of(context).size.width * 0.567,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
-                  height: MediaQuery.of(context).size.width*0.265,
-                  width: MediaQuery.of(context).size.width*0.265,
+                  height: MediaQuery.of(context).size.width * 0.265,
+                  width: MediaQuery.of(context).size.width * 0.265,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.black
-                      ),
+                      decoration: BoxDecoration(color: Colors.black),
                     ),
                   ),
                 ),
                 Container(
-                  height: MediaQuery.of(context).size.width*0.265,
-                  width: MediaQuery.of(context).size.width*0.265,
+                  height: MediaQuery.of(context).size.width * 0.265,
+                  width: MediaQuery.of(context).size.width * 0.265,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.black
-                      ),
+                      decoration: BoxDecoration(color: Colors.black),
                     ),
                   ),
                 ),
@@ -180,7 +226,7 @@ class PostSubGallery1 extends StatelessWidget{
   }
 }
 
-class PostSubGallery2 extends StatelessWidget{
+class PostSubGallery2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -189,39 +235,32 @@ class PostSubGallery2 extends StatelessWidget{
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            height: MediaQuery.of(context).size.width*0.265,
-            width: MediaQuery.of(context).size.width*0.265,
+            height: MediaQuery.of(context).size.width * 0.265,
+            width: MediaQuery.of(context).size.width * 0.265,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.black
-                ),
-              ),
-            ),
-          ),
-
-          Container(
-            height: MediaQuery.of(context).size.width*0.265,
-            width: MediaQuery.of(context).size.width*0.265,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.black
-                ),
+                decoration: BoxDecoration(color: Colors.black),
               ),
             ),
           ),
           Container(
-            height: MediaQuery.of(context).size.width*0.265,
-            width: MediaQuery.of(context).size.width*0.265,
+            height: MediaQuery.of(context).size.width * 0.265,
+            width: MediaQuery.of(context).size.width * 0.265,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.black
-                ),
+                decoration: BoxDecoration(color: Colors.black),
+              ),
+            ),
+          ),
+          Container(
+            height: MediaQuery.of(context).size.width * 0.265,
+            width: MediaQuery.of(context).size.width * 0.265,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                decoration: BoxDecoration(color: Colors.black),
               ),
             ),
           ),
@@ -230,7 +269,8 @@ class PostSubGallery2 extends StatelessWidget{
     );
   }
 }
-class PostSubGallery3 extends StatelessWidget{
+
+class PostSubGallery3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -239,31 +279,27 @@ class PostSubGallery3 extends StatelessWidget{
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            height: MediaQuery.of(context).size.width*0.567,
+            height: MediaQuery.of(context).size.width * 0.567,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
-                  height: MediaQuery.of(context).size.width*0.265,
-                  width: MediaQuery.of(context).size.width*0.265,
+                  height: MediaQuery.of(context).size.width * 0.265,
+                  width: MediaQuery.of(context).size.width * 0.265,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.black
-                      ),
+                      decoration: BoxDecoration(color: Colors.black),
                     ),
                   ),
                 ),
                 Container(
-                  height: MediaQuery.of(context).size.width*0.265,
-                  width: MediaQuery.of(context).size.width*0.265,
+                  height: MediaQuery.of(context).size.width * 0.265,
+                  width: MediaQuery.of(context).size.width * 0.265,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Container(
-                      decoration: BoxDecoration(
-                          color: Colors.black
-                      ),
+                      decoration: BoxDecoration(color: Colors.black),
                     ),
                   ),
                 ),
@@ -271,14 +307,12 @@ class PostSubGallery3 extends StatelessWidget{
             ),
           ),
           Container(
-            height: MediaQuery.of(context).size.width*0.567,
-            width: MediaQuery.of(context).size.width*0.567,
+            height: MediaQuery.of(context).size.width * 0.567,
+            width: MediaQuery.of(context).size.width * 0.567,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Container(
-                decoration: BoxDecoration(
-                    color: Colors.black
-                ),
+                decoration: BoxDecoration(color: Colors.black),
               ),
             ),
           ),
