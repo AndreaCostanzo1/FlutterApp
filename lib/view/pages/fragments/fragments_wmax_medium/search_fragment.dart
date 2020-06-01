@@ -46,6 +46,13 @@ class _SearchFragmentState extends State<SearchFragment> {
   bool focused;
   FocusNode focusNode;
 
+  void search(String text){
+    if(text=='') unfocusSearch();
+    else{
+      //TODO: perform search
+    }
+  }
+
   void unfocusSearch() {
     focusNode.unfocus();
     setState(() {
@@ -104,7 +111,7 @@ class _SearchFragmentState extends State<SearchFragment> {
                           child: TextFormField(
                             focusNode: focusNode,
                             onTap: () => setState(() => focused = true),
-                            onFieldSubmitted: (text) => unfocusSearch(),
+                            onFieldSubmitted: (text) => search(text),
                             decoration: InputDecoration.collapsed(
                                 hintText: 'Search',
                                 hintStyle: TextStyle(
@@ -113,10 +120,7 @@ class _SearchFragmentState extends State<SearchFragment> {
                         ),
                         focused
                             ? Container()
-                            : IconButton(
-                                padding: EdgeInsets.all(0),
-                                icon: Icon(Icons.center_focus_strong),
-                                onPressed: () {})
+                            : ScannerButton(),
                       ],
                     ),
                   ),
@@ -128,6 +132,9 @@ class _SearchFragmentState extends State<SearchFragment> {
                   height: 35,
                 ),
                 focused
+                    /*TODO: Create a class SearchResult and switch with this container
+                    * add also the BLoC with the stream for the results
+                    */
                     ? Container(
                         height: MediaQuery.of(context).size.height,
                       )
@@ -365,5 +372,26 @@ class SearchField extends SearchDelegate<Beer> {
   Widget buildSuggestions(BuildContext context) {
     // TODO: implement buildSuggestions
     return null;
+  }
+}
+
+class ScannerButton extends StatelessWidget{
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      padding: EdgeInsets.all(0),
+      icon: Icon(Icons.center_focus_strong),
+      onPressed: () => openScanner(context),);
+  }
+
+
+  void openScanner(BuildContext context) async {
+    String result = await MethodChannel("CAMERA_X").invokeMethod('SCAN');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BeerPage(result),
+      ),
+    );
   }
 }

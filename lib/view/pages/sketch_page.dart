@@ -304,23 +304,3 @@ class __TopTitleState extends State<_TopTitle> {
     });
   }
 }
-
-class CameraXButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return OutlineButton(
-      onPressed: () => _launchCameraX(context),
-      child: Text('CameraX'),
-    );
-  }
-
-  void _launchCameraX(BuildContext context) async {
-    String result = await MethodChannel("CAMERA_X").invokeMethod('SCAN');
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BeerPage(result),
-      ),
-    );
-  }
-}
