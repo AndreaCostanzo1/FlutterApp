@@ -8,6 +8,8 @@ abstract class AuthenticatorInterface {
   void signUpWithEmailAndPassword(
       String email, String password, String confirm);
 
+  void logOut();
+
   void resetState();
 
   void dispose();
@@ -55,6 +57,11 @@ class Authenticator implements AuthenticatorInterface {
           .createUserWithEmailAndPassword(email: email, password: password)
           .catchError((error) => _handleError(error));
     }
+  }
+
+  @override
+  void logOut() {
+    FirebaseAuth.instance.signOut().catchError((error) => _handleError(error));
   }
 
   //fixme when a more effective way is available

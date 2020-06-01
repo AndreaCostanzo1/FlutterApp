@@ -1,13 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_beertastic/blocs/authenticator.dart';
+import 'package:flutter_beertastic/view/components/buttons/custom_profile_list_item.dart';
+import 'package:flutter_beertastic/view/pages/styles/wmax_medium/profile_fragment_style.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
-class ProfileFragment extends StatelessWidget {
+
+class ProfileFragment extends StatefulWidget {
+
+  @override
+  _ProfileFragmentState createState() => _ProfileFragmentState();
+}
+
+class _ProfileFragmentState extends State<ProfileFragment> {
+
   @override
   Widget build(BuildContext context) {
+    ScreenUtil.init(context, height: 896, width: 414, allowFontScaling: true);
     return Container(
+      decoration: BoxDecoration(
+          gradient: new LinearGradient(
+              colors: [
+                Theme.of(context).primaryColorLight,
+                Theme.of(context).primaryColorDark
+              ],
+              begin: const FractionalOffset(1.0, 1.0),
+              end: const FractionalOffset(0.2, 0.2),
+              stops: [0.0, 1.0],
+              tileMode: TileMode.clamp),
+          ),
       child: Column(
         children: <Widget>[
+          SizedBox(height: SpacingUnit.w * 3),
           _ProfileSection(),
-          //TODO: INSERT ELEMENT SUCK AS TICKET LABEL, etc.
+          _ProfileItems(),
         ],
       ),
     );
@@ -17,51 +43,121 @@ class ProfileFragment extends StatelessWidget {
 class _ProfileSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Stack(
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Container(
-          constraints: BoxConstraints.expand(height: 175),
-          decoration: BoxDecoration(
-              gradient: new LinearGradient(
-                  colors: [
-                    Theme.of(context).primaryColorLight,
-                    Theme.of(context).primaryColorDark
+        Expanded(
+          child: Column(
+            children: <Widget>[
+              Container(
+                height: SpacingUnit.w * 10,
+                width: SpacingUnit.w * 10,
+                margin: EdgeInsets.only(top: SpacingUnit.w * 3),
+                child: Stack(
+                  children: <Widget>[
+                    CircleAvatar(
+                      radius: SpacingUnit.w * 5,
+                    ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Container(
+                        height: SpacingUnit.w * 2.5,
+                        width: SpacingUnit.w * 2.5,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).accentColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          heightFactor: SpacingUnit.w * 1.5,
+                          widthFactor: SpacingUnit.w * 1.5,
+                          child: Icon(
+                            LineAwesomeIcons.pen,
+                            color: DarkPrimaryColor,
+                            size: ScreenUtil().setSp(SpacingUnit.w * 1.5),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
-                  begin: const FractionalOffset(1.0, 1.0),
-                  end: const FractionalOffset(0.1, 0.1),
-                  stops: [0.0, 0.8],
-                  tileMode: TileMode.clamp),
+                ),
               ),
-          child: Container(
-            padding: EdgeInsets.all(15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  height: 95,
-                  width: 95,
-                  margin: EdgeInsets.only(top: 11),
-                  child: ClipOval(
-                    child: Image(image: NetworkImage('https://images.unsplash.com/photo-1548560781-a7a07d9d33db?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=581&q=80'),fit: BoxFit.cover,),
+              SizedBox(height: SpacingUnit.w * 2),
+              Text(
+                'Mario Rossi',
+                style: titleTextStyle,
+              ),
+              SizedBox(height: SpacingUnit.w * 0.5),
+              Text(
+                'mymail.address@gmail.com',
+                style: captionTextStyle,
+              ),
+              SizedBox(height: SpacingUnit.w * 2),
+              Container(
+                height: SpacingUnit.w * 4,
+                width: SpacingUnit.w * 20,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(SpacingUnit.w * 3),
+                  color: Theme.of(context).accentColor,
+                ),
+                child: Center(
+                  child: Text(
+                    'Main Button',
+                    style: buttonTextStyle,
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.all(15),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text("Andrea Costanzo"),
-                      Text("andrea.costanzo96@gmail.com")
-                    ],
-                  ),
-                )
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 }
+
+class _ProfileItems extends StatelessWidget{
+
+  final AuthenticatorInterface _authBLoC = Authenticator();
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: _authBLoC.remoteError,
+      builder: (context, snapshot){
+        //TODO: Manage errors (see login_form line 31)
+        return Expanded(
+          child: ScrollConfiguration(
+            behavior: _HideGlowBehaviour(),
+            child: ListView(
+              children: <Widget>[
+                ProfileListItem(
+                  icon: LineAwesomeIcons.cog,
+                  text: 'Settings',
+                  color: Theme.of(context).backgroundColor,
+                  onTap: () => print('tap'),
+                ),
+                ProfileListItem(
+                  icon: LineAwesomeIcons.alternate_sign_out,
+                  text: 'Logout',
+                  color: Theme.of(context).backgroundColor,
+                  onTap: () => _authBLoC.logOut(),
+                  hasNavigation: false,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+}
+
+class _HideGlowBehaviour extends ScrollBehavior {
+  @override
+  Widget buildViewportChrome(
+      BuildContext context, Widget child, AxisDirection axisDirection) {
+    return child;
+  }
+}
+
