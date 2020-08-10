@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_beertastic/view/pages/event_page.dart';
 
 import '../../article_page.dart';
 
@@ -301,7 +302,7 @@ class _Events extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
             child: Material(
               child: InkWell(
-                onTap: () => print('tap'),
+                onTap: () => _openEventPage(context),
                 child: Stack(
                   children: <Widget>[
                     Column(
@@ -355,6 +356,15 @@ class _Events extends StatelessWidget {
         );
       }).toList(),
       crossAxisAlignment: CrossAxisAlignment.center,
+    );
+  }
+
+  _openEventPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EventPage(),
+      ),
     );
   }
 }
