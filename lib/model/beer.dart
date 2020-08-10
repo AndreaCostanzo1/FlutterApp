@@ -18,6 +18,8 @@ class Beer {
         _temperature = snapshot['temperature'].toDouble(),
         _beerImageUrl = snapshot['imageUrl'];
 
+  String get id => _documentID;
+
   String get name => _name;
 
   String get producer => _producer;

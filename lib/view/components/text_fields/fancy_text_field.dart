@@ -46,14 +46,14 @@ class _FancyTextFieldState extends State<FancyTextField> {
           fontSize: 16.0,
           color: widget.error
               ? Theme.of(context).errorColor
-              : Theme.of(context).textTheme.title.color,
+              : Theme.of(context).textTheme.headline6.color,
         ),
         decoration: InputDecoration(
           border: InputBorder.none,
           icon: widget.icon != null
               ? Icon(
                   widget.icon,
-                  color: Theme.of(context).textTheme.title.color,
+                  color: Theme.of(context).textTheme.headline6.color,
                   size: 22.0,
                 )
               : null,
@@ -107,7 +107,7 @@ class _MySuffixIcon extends StatelessWidget {
                 child: Icon(
                   _suffixIcon,
                   size: 15.0,
-                  color: Theme.of(context).textTheme.title.color,
+                  color: Theme.of(context).textTheme.headline6.color,
                 ),
               )
             : Icon(

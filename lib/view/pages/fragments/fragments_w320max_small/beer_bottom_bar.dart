@@ -26,7 +26,7 @@ class BeerBottomBarSmall extends StatelessWidget {
             Text(
               'Information',
               style:
-                  Theme.of(context).textTheme.display2.copyWith(fontSize: 12),
+                  Theme.of(context).textTheme.headline3.copyWith(fontSize: 12),
             ),
             Spacer(),
             SizedBox(height: 4.0),
@@ -49,7 +49,7 @@ class BeerBottomBarSmall extends StatelessWidget {
                         children: <Widget>[
                           Text(
                             Provider.of<Beer>(context).alcohol.toString(),
-                            style: Theme.of(context).textTheme.display2,
+                            style: Theme.of(context).textTheme.headline3,
                           ),
                           SizedBox(width: 8.0),
                           Text(
@@ -81,7 +81,7 @@ class BeerBottomBarSmall extends StatelessWidget {
                         children: <Widget>[
                           Text(
                             Provider.of<Beer>(context).temperature.toString(),
-                            style: Theme.of(context).textTheme.display2,
+                            style: Theme.of(context).textTheme.headline3,
                           ),
                           SizedBox(width: 8.0),
                           Text(

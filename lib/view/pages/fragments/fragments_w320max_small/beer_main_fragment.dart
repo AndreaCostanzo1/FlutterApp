@@ -27,7 +27,7 @@ class BeerMainFragmentSmall extends StatelessWidget {
               _Title(beer['name']),
               Text(
                 beer['producer'],
-                style: Theme.of(context).textTheme.subtitle,
+                style: Theme.of(context).textTheme.subtitle2,
               ),
               SizedBox(height: 8.0),
               _Rating(beer['rating']),
@@ -54,7 +54,7 @@ class _Title extends StatelessWidget {
       width: 160.0,
       child: Text(
         beerName,
-        style: Theme.of(context).textTheme.title,
+        style: Theme.of(context).textTheme.headline6,
       ), //Text
     );
   }
@@ -78,12 +78,12 @@ class _Rating extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
           SizedBox(width: 4.0),
-          Text(rating, style: Theme.of(context).textTheme.display1),
+          Text(rating, style: Theme.of(context).textTheme.headline4),
           Padding(
             padding: const EdgeInsets.only(bottom: 4.0),
             child: Icon(
               Icons.star,
-              color: Theme.of(context).textTheme.display1.color,
+              color: Theme.of(context).textTheme.headline4.color,
               size: 14,
             ),
           ),

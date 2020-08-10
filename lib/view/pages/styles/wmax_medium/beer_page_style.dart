@@ -13,22 +13,22 @@ class BeerPageThemeMedium {
   final Color canvasColor = Colors.amber[400];
 
   final TextTheme textTheme = const TextTheme(
-    title: TextStyle(
+    headline6: TextStyle(
       fontSize: 48.0,
       color: Colors.black,
       fontWeight: FontWeight.bold,
     ),
-    subtitle: TextStyle(
+    subtitle2: TextStyle(
       color: Colors.black45,
       fontSize: 14,
       fontWeight: FontWeight.normal,
     ),
-    display1: TextStyle(
+    headline4: TextStyle(
       color: Color(0xffffca28),
       fontSize: 32.0,
       fontWeight: FontWeight.bold,
     ),
-    display2: TextStyle(
+    headline3: TextStyle(
       color: Colors.white,
       fontSize: 42.0,
       fontWeight: FontWeight.bold,

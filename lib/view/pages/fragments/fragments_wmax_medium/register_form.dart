@@ -134,7 +134,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   child: Text(
                     "SIGN UP",
                     style: TextStyle(
-                        color: Theme.of(context).textTheme.display2.color,
+                        color: Theme.of(context).textTheme.headline3.color,
                         fontSize: 25.0,
                         fontFamily: "WorkSansBold"),
                   ),

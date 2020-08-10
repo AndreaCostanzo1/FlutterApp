@@ -30,7 +30,7 @@ class BeerMainFragmentMedium extends StatelessWidget {
               _Title(Provider.of<Beer>(context).name),
               Text(
                 Provider.of<Beer>(context).producer,
-                style: Theme.of(context).textTheme.subtitle,
+                style: Theme.of(context).textTheme.subtitle2,
               ),
               SizedBox(height: 12.0),
               _Rating(Provider.of<Beer>(context).rating.toString()),
@@ -57,7 +57,7 @@ class _Title extends StatelessWidget {
       width: 300.0,
       child: Text(
         beerName,
-        style: Theme.of(context).textTheme.title,
+        style: Theme.of(context).textTheme.headline6,
       ), //Text
     );
   }
@@ -83,13 +83,13 @@ class _Rating extends StatelessWidget {
           SizedBox(width: 4.0),
           Text(
             rating,
-            style: Theme.of(context).textTheme.display1,
+            style: Theme.of(context).textTheme.headline4,
           ),
           Padding(
             padding: const EdgeInsets.only(bottom: 5.0),
             child: Icon(
               Icons.star,
-              color: Theme.of(context).textTheme.display1.color,
+              color: Theme.of(context).textTheme.headline4.color,
             ),
           ),
         ],

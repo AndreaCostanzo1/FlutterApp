@@ -110,11 +110,11 @@ class __PageContainerState extends State<_PageContainer>
     if (i == 0) {
       setState(() {
         right = Theme.of(context).cardColor;
-        left = Theme.of(context).textTheme.title.color;
+        left = Theme.of(context).textTheme.headline6.color;
       });
     } else if (i == 1) {
       setState(() {
-        right = Theme.of(context).textTheme.title.color;
+        right = Theme.of(context).textTheme.headline6.color;
         left = Theme.of(context).cardColor;
       });
     }
