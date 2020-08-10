@@ -43,33 +43,37 @@ class SearchFragment extends StatefulWidget {
 }
 
 class _SearchFragmentState extends State<SearchFragment> {
-  bool focused;
-  FocusNode focusNode;
+  bool _focused;
+  FocusNode _focusNode;
+  TextEditingController _controller;
 
-  void search(String text){
-    if(text=='') unfocusSearch();
-    else{
+  void search(String text) {
+    if (text == '')
+      unfocusSearch();
+    else {
       //TODO: perform search
     }
   }
 
   void unfocusSearch() {
-    focusNode.unfocus();
+    _focusNode.unfocus();
     setState(() {
-      focused = false;
+      _focused = false;
     });
   }
 
   @override
   void initState() {
-    focused = focused ?? false;
-    focusNode = FocusNode();
+    _focused = _focused ?? false;
+    _focusNode = FocusNode();
+    _controller = TextEditingController();
     super.initState();
   }
 
   @override
   void dispose() {
-    focusNode.dispose();
+    _focusNode.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -78,11 +82,11 @@ class _SearchFragmentState extends State<SearchFragment> {
     return Container(
       child: ListView(
         physics:
-            focused ? NeverScrollableScrollPhysics() : ClampingScrollPhysics(),
+            _focused ? NeverScrollableScrollPhysics() : ClampingScrollPhysics(),
         padding: EdgeInsets.all(0),
         children: <Widget>[
           AnimatedContainer(
-            height: focused ? 0 : 160,
+            height: _focused ? 0 : 160,
             duration: Duration(milliseconds: 100),
           ),
           AnimatedContainer(
@@ -90,7 +94,7 @@ class _SearchFragmentState extends State<SearchFragment> {
             duration: Duration(milliseconds: 100),
             decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: focused
+                borderRadius: _focused
                     ? BorderRadius.zero
                     : BorderRadius.only(
                         topLeft: Radius.circular(30),
@@ -99,7 +103,7 @@ class _SearchFragmentState extends State<SearchFragment> {
               children: <Widget>[
                 Container(
                   margin: EdgeInsets.only(
-                      top: focused ? 45 : 35, left: 30, right: 30, bottom: 10),
+                      top: _focused ? 45 : 35, left: 30, right: 30, bottom: 10),
                   height: 50,
                   child: Padding(
                     padding: const EdgeInsets.only(left: 20.0, right: 7),
@@ -109,8 +113,9 @@ class _SearchFragmentState extends State<SearchFragment> {
                         Container(
                           width: 270,
                           child: TextFormField(
-                            focusNode: focusNode,
-                            onTap: () => setState(() => focused = true),
+                            controller: _controller,
+                            focusNode: _focusNode,
+                            onTap: () => setState(() => _focused = true),
                             onFieldSubmitted: (text) => search(text),
                             decoration: InputDecoration.collapsed(
                                 hintText: 'Search',
@@ -118,8 +123,16 @@ class _SearchFragmentState extends State<SearchFragment> {
                                     fontFamily: 'Open Sans SemiBold')),
                           ),
                         ),
-                        focused
-                            ? Container()
+                        _focused
+                            ? IconButton(
+                                padding: EdgeInsets.all(0),
+                                icon: Icon(Icons.clear),
+                                onPressed: () {
+                                  _controller.clear();
+                                  _focusNode.unfocus();
+                                  setState(() => _focused=false);
+                                },
+                              )
                             : ScannerButton(),
                       ],
                     ),
@@ -131,7 +144,7 @@ class _SearchFragmentState extends State<SearchFragment> {
                 SizedBox(
                   height: 35,
                 ),
-                focused
+                _focused
                     /*TODO: Create a class SearchResult and switch with this container
                     * add also the BLoC with the stream for the results
                     */
@@ -375,15 +388,15 @@ class SearchField extends SearchDelegate<Beer> {
   }
 }
 
-class ScannerButton extends StatelessWidget{
+class ScannerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
       padding: EdgeInsets.all(0),
       icon: Icon(Icons.center_focus_strong),
-      onPressed: () => openScanner(context),);
+      onPressed: () => openScanner(context),
+    );
   }
-
 
   void openScanner(BuildContext context) async {
     String result = await MethodChannel("CAMERA_X").invokeMethod('SCAN');
