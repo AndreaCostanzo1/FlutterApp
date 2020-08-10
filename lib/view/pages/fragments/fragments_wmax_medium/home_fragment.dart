@@ -84,7 +84,7 @@ class _TopPage extends StatelessWidget {
                   bottomLeft: Radius.circular(30),
                   bottomRight: Radius.circular(30))),
           child: Container(
-            padding: EdgeInsets.all(15),
+            padding: EdgeInsets.only(left: 10, top: 15, right: 15, bottom: 15),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -234,7 +234,7 @@ class _BlogArticlesState extends State<_BlogArticles> {
     //NOTE: pageController can be accessed before build
     //this is the only solution found to set current page to a dynamic value
     Future.delayed(Duration.zero, () {
-      setState(() =>currentPage = pageController.page.round());
+      setState(() => currentPage = pageController.page.round());
     });
   }
 
@@ -299,42 +299,47 @@ class _Events extends StatelessWidget {
           height: cardHeight,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Stack(
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            child: Material(
+              child: InkWell(
+                onTap: () => print('tap'),
+                child: Stack(
                   children: <Widget>[
-                    Container(
-                      height: cardHeight * proportionImageTitle,
-                      width: cardWidth,
-                      child: Image(
-                        image: NetworkImage(brewery['image']),
-                        fit: BoxFit.cover,
-                      ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Container(
+                          height: cardHeight * proportionImageTitle,
+                          width: cardWidth,
+                          child: Ink.image(
+                            image: NetworkImage(brewery['image']),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Container(
+                          height: cardHeight * (1 - proportionImageTitle),
+                          width: cardWidth,
+                          color: Colors.transparent,
+                        ),
+                      ],
                     ),
-                    Container(
-                      height: cardHeight * (1 - proportionImageTitle),
-                      width: cardWidth,
-                      color: Colors.white,
+                    _DateBox(
+                      dateContainerSize,
+                      cardWidth,
+                      cardHeight,
+                      day: '11',
+                      monthAbbreviation: 'JEN',
                     ),
+                    _EventBody(
+                      dateContainerSize,
+                      cardWidth,
+                      cardHeight,
+                      title: 'Compleanno birrificio',
+                      subTitle: 'Questa piccola descrizione breve',
+                      place: 'Birrificio di Lambrate',
+                    )
                   ],
                 ),
-                _DateBox(
-                  dateContainerSize,
-                  cardWidth,
-                  cardHeight,
-                  day: '11',
-                  monthAbbreviation: 'JEN',
-                ),
-                _EventBody(
-                  dateContainerSize,
-                  cardWidth,
-                  cardHeight,
-                  title: 'Compleanno birrificio',
-                  subTitle: 'Questa piccola descrizione breve',
-                  place: 'Birrificio di Lambrate',
-                )
-              ],
+              ),
             ),
           ),
           //clipRRect
@@ -367,50 +372,52 @@ class _DateBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: dateContainerSize,
-      height: dateContainerSize,
       margin: EdgeInsets.fromLTRB(cardWidth * 0.061, cardHeight * 0.43, 0, 0),
-      child: Stack(
-        children: <Widget>[
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              color: Colors.white,
+      child: Ink(
+        width: dateContainerSize,
+        height: dateContainerSize,
+        child: Stack(
+          children: <Widget>[
+            Ink(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
-          ),
-          Container(
-            height: dateContainerSize * 0.95,
-            width: dateContainerSize,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text(
-                  day,
-                  style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 24,
-                      fontFamily: 'Open Sans SemiBold'),
-                ),
-                Text(
-                  monthAbbreviation,
-                  style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 10.5,
-                      fontFamily: 'Open Sans Bold'),
-                ),
-              ],
+            Container(
+              height: dateContainerSize * 0.95,
+              width: dateContainerSize,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    day,
+                    style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 24,
+                        fontFamily: 'Open Sans SemiBold'),
+                  ),
+                  Text(
+                    monthAbbreviation,
+                    style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 10.5,
+                        fontFamily: 'Open Sans Bold'),
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black45,
+              blurRadius: 7,
             ),
-          )
-        ],
-      ),
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black45,
-            blurRadius: 7,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
