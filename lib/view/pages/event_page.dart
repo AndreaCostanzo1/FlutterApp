@@ -6,12 +6,13 @@ class EventPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          _EventDetailsBackground(),
-          _EventDetailsContent(),
-        ],
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            _EventDetailsBackground(),
+            _EventDetailsContent(),
+          ],
+        ),
       ),
     );
   }
@@ -28,7 +29,7 @@ class _EventDetailsBackground extends StatelessWidget {
       child: ClipPath(
         clipper: ImageClipper(),
         child: Image.network(
-          data[0]['image'],
+          data[0]['image'], //fixme
           fit: BoxFit.cover,
           width: screenWidth,
           color: Color(0x99000000),
@@ -69,147 +70,139 @@ class _EventDetailsContent extends StatelessWidget {
     final _screenWidth = MediaQuery.of(context).size.width;
     final _screenHeight = MediaQuery.of(context).size.height;
 
-    return SingleChildScrollView(
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: _screenWidth * 0.005),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-              height: _screenHeight * 0.370,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    height: _screenHeight * 0.185,
-                    margin: EdgeInsets.only(
-                        left: _screenWidth * 0.285, right: _screenWidth * 0.05),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        AutoSizeText(
-                          event.title,
-                          style: eventWhiteTitleTextStyle,
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: _screenWidth * 0.005),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            height: _screenHeight * 0.370,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  height: _screenHeight * 0.185,
+                  margin: EdgeInsets.only(
+                      left: _screenWidth * 0.285, right: _screenWidth * 0.05),
+                  child: AutoSizeText(
+                    event.title,
+                    style: eventWhiteTitleTextStyle,
+                  ),
+                ),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: _screenWidth * 0.14),
+                  margin: EdgeInsets.only(left: _screenWidth * 0.151),
+                  child: FittedBox(
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.trending_flat,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        Icon(
+                          Icons.location_on,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Text(
+                          event.location,
+                          style: eventLocationTextStyle,
                         ),
                       ],
                     ),
                   ),
-                  Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: _screenWidth * 0.14),
-                    margin: EdgeInsets.only(left: _screenWidth * 0.151),
-                    child: FittedBox(
-                      child: Row(
-                        children: <Widget>[
-                          Icon(
-                            Icons.trending_flat,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                          Icon(
-                            Icons.location_on,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          Text(
-                            event.location,
-                            style: eventLocationTextStyle.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700),
-                          ),
-                        ],
+                ),
+                SizedBox(
+                  height: _screenHeight * 0.055,
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 10.0),
+            child: Text(
+              "AWARDS",
+              style: guestTextStyle,
+            ),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: <Widget>[
+                for (final guest in guests)
+                  Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: ClipOval(
+                      child: Image.network(
+                        guest.imagePath,
+                        width: 90,
+                        height: 90,
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
-                  SizedBox(height: _screenHeight*0.055,),
-                ],
-              ),
+              ],
             ),
-            Padding(
-              padding: const EdgeInsets.only(left: 10.0),
-              child: Text(
-                "AWARDS",
-                style: guestTextStyle,
-              ),
-            ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: <Widget>[
-                  for (final guest in guests)
-                    Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: ClipOval(
-                        child: Image.network(
-                          guest.imagePath,
-                          width: 90,
-                          height: 90,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Padding(
+          ),
+          Padding(
               padding: const EdgeInsets.all(16),
-              child: RichText(
-                text: TextSpan(children: [
+              child: AutoSizeText.rich(
+                TextSpan(children: [
                   TextSpan(
                     text: event.punchLine1,
                     style: punchLine1TextStyle,
                   ),
-                  TextSpan(text: ' ',style: punchLine1TextStyle),
+                  TextSpan(text: ' ', style: punchLine1TextStyle),
                   TextSpan(
                     text: event.punchLine2,
                     style: punchLine2TextStyle,
                   ),
                 ]),
+              )),
+          if (event.description != null)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                event.description,
+                style: eventDescriptionTextStyle,
               ),
             ),
-            if (event.description.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  event.description,
-                  style: eventLocationTextStyle,
-                ),
+          if (event.galleryImages.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 16, bottom: 16),
+              child: Text(
+                "GALLERY",
+                style: guestTextStyle,
               ),
-            if (event.galleryImages.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(left: 16.0, top: 16, bottom: 16),
-                child: Text(
-                  "GALLERY",
-                  style: guestTextStyle,
-                ),
-              ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: <Widget>[
-                  for (final galleryImagePath in event.galleryImages)
-                    Container(
-                      margin: const EdgeInsets.only(
-                          left: 16, right: 16, bottom: 32),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                        child: Image.network(
-                          //FIXME use async
-                          galleryImagePath,
-                          width: 180,
-                          height: 180,
-                          fit: BoxFit.cover,
-                        ),
+            ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: <Widget>[
+                for (final galleryImagePath in event.galleryImages)
+                  Container(
+                    margin:
+                        const EdgeInsets.only(left: 16, right: 16, bottom: 32),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      child: Image.network(
+                        //FIXME use async
+                        galleryImagePath,
+                        width: 180,
+                        height: 180,
+                        fit: BoxFit.cover,
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -241,7 +234,8 @@ class Event {
 final fiveKmRunEvent = Event(
     imagePath: "assets/event_images/5_km_downtown_run.jpeg",
     title: "Compleanno Birrificio di Lambrate",
-    description: "",
+    description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vestibulum nisi sit amet nunc porttitor, et rhoncus metus sagittis. Mauris vel ultrices nisl. Phasellus ac justo ut tellus aliquet tincidunt quis eget nisl. Quisque justo tellus, pretium id elit ut, feugiat porttitor justo. Aenean eu mauris vitae nisi faucibus ullamcorper sed nec lorem. Curabitur hendrerit in quam sed iaculis. ",
     location: "Birrificio di Lambrate",
     duration: "3h",
     punchLine1: "Oggi",
@@ -362,6 +356,13 @@ const TextStyle eventWhiteTitleTextStyle = TextStyle(
 const TextStyle eventLocationTextStyle = TextStyle(
   fontSize: 24.0,
   fontFamily: "Campton Bold",
+  color: Color(0xFFFFFFFF),
+);
+
+const TextStyle eventDescriptionTextStyle = TextStyle(
+  fontSize: 16.0,
+  fontFamily: "Montserrat Regular",
+  fontWeight: FontWeight.w700,
   color: Color(0xFF000000),
 );
 
