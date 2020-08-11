@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_beertastic/blocs/articles_bloc.dart';
+import 'package:flutter_beertastic/model/article.dart';
 import 'package:flutter_beertastic/view/pages/event_page.dart';
 
 import '../../article_page.dart';
@@ -86,9 +90,45 @@ class _BlogArticles extends StatefulWidget {
 }
 
 class _BlogArticlesState extends State<_BlogArticles> {
-  final PageController pageController = PageController(viewportFraction: 0.86);
+  ArticlesBloc _articlesBloc;
 
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Article>>(
+        stream: _articlesBloc.articlesController,
+        builder: (context, snapshot) {
+          List<Article> _articles = snapshot.data;
+          return _articles == null ? Container() : _ArticlesRow(_articles);
+        });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _articlesBloc = ArticlesBloc();
+    _articlesBloc.retrieveArticles();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _articlesBloc.dispose();
+  }
+}
+
+class _ArticlesRow extends StatefulWidget {
+  final List<Article> _articles;
+
+  _ArticlesRow(this._articles);
+
+  @override
+  __ArticlesRowState createState() => __ArticlesRowState();
+}
+
+class __ArticlesRowState extends State<_ArticlesRow> {
   final double containerHeight = 200;
+
+  final PageController pageController = PageController(viewportFraction: 0.86);
 
   int currentPage;
 
@@ -101,8 +141,8 @@ class _BlogArticlesState extends State<_BlogArticles> {
         key: PageStorageKey('paf'),
         controller: pageController,
         scrollDirection: Axis.horizontal,
-        children: data.map((article) {
-          bool activePage = data.indexOf(article) == currentPage;
+        children: widget._articles.map((article) {
+          bool activePage = widget._articles.indexOf(article) == currentPage;
           return AnimatedContainer(
             child: Stack(
               children: <Widget>[
@@ -112,9 +152,9 @@ class _BlogArticlesState extends State<_BlogArticles> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Hero(
-                      tag: article['name'], //TODO animate transition
+                      tag: article.id, //TODO animate transition
                       child: Image(
-                        image: NetworkImage(article['image']),
+                        image: NetworkImage(article.coverImage),
                         colorBlendMode: BlendMode.darken,
                         color: Colors.black38,
                         fit: BoxFit.cover,
@@ -129,7 +169,8 @@ class _BlogArticlesState extends State<_BlogArticles> {
                     onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ArticlePage(data[currentPage]),
+                        builder: (context) => ArticlePage(
+                            widget._articles.elementAt(currentPage)),
                       ),
                     ),
                     child: SingleChildScrollView(
@@ -148,7 +189,7 @@ class _BlogArticlesState extends State<_BlogArticles> {
                             Container(
                               padding: EdgeInsets.only(),
                               child: Text(
-                                'My title is big and long',
+                                article.title,
                                 style: TextStyle(
                                     color: Color(0xF2F2F2F2),
                                     fontSize: 28,
@@ -158,7 +199,7 @@ class _BlogArticlesState extends State<_BlogArticles> {
                             activePage
                                 ? Container(
                                     child: Text(
-                                      'Lorem ipsum dolor sic amet',
+                                      article.punchline,
                                       style: TextStyle(
                                           color: Color(0xF2F2F2F2),
                                           fontSize: 16,
@@ -190,7 +231,7 @@ class _BlogArticlesState extends State<_BlogArticles> {
             duration: Duration(milliseconds: 500),
             curve: Curves.easeOutQuint,
           );
-        }).toList(),
+        }).toList(), //fixme add empty boxes for when the articles are not loaded
       ),
     );
   }
@@ -260,7 +301,7 @@ class _Events extends StatelessWidget {
     double proportionImageTitle = 0.57;
     double dateContainerSize = 53;
     return Column(
-      children: data.map((brewery) {
+      children: eventList.map((brewery) {
         return Container(
           width: cardWidth,
           margin: EdgeInsets.symmetric(vertical: 10),
@@ -470,3 +511,37 @@ class _EventBody extends StatelessWidget {
     );
   }
 }
+
+//FIXME CANCEL ME
+List eventList = [
+  {
+    'name': 'Antelope Canyon',
+    'image':
+        'https://images.unsplash.com/photo-1527498913931-c302284a62af?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=934&q=80',
+    'description':
+        'Over the years, Lover Antelope Canyon has become a favorite gathering pace for photographers tourists, and visitors from the world.',
+    'date': 'Mar 20, 2019',
+    'rating': '4.7',
+    'cost': '\$40.00'
+  },
+  {
+    'name': 'Genteng Lembang',
+    'image':
+        'https://images.unsplash.com/photo-1548560781-a7a07d9d33db?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=581&q=80',
+    'description':
+        'Over the years, Lover Antelope Canyon has become a favorite gathering pace for photographers tourists, and visitors from the world.',
+    'date': 'Mar 24, 2019',
+    'rating': '4,83',
+    'cost': '\$50.00'
+  },
+  {
+    'name': 'Kamchatka Peninsula',
+    'image':
+        'https://images.unsplash.com/photo-1542869781-a272dedbc93e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=983&q=80',
+    'description':
+        'Over the years, Lover Antelope Canyon has become a favorite gathering pace for photographers tourists, and visitors from the world.',
+    'date': 'Apr 18, 2019',
+    'rating': '4,7',
+    'cost': '\$30.00'
+  },
+];

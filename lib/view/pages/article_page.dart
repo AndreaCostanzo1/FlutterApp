@@ -1,11 +1,12 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_beertastic/model/article.dart';
 
 class ArticlePage extends StatefulWidget {
-  ArticlePage(this.data, {Key key, this.title}) : super(key: key);
-
-  final Map data;
-  final String title;
+  ArticlePage(this.article, {Key key})
+      : super(key: key);
+  final Article article;
 
   @override
   _ArticlePageState createState() => _ArticlePageState();
@@ -24,9 +25,9 @@ class _ArticlePageState extends State<ArticlePage> {
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
             child: Hero(
-              tag: widget.data['name'],
+              tag: widget.article.id,
               child: Image(
-                image: NetworkImage(widget.data['image']),
+                image: NetworkImage(widget.article.coverImage),
                 fit: BoxFit.cover,
                 colorBlendMode: BlendMode.darken,
                 color: Colors.transparent,
@@ -61,28 +62,9 @@ class _ArticlePageState extends State<ArticlePage> {
                     margin: EdgeInsets.only(left: 15),
                     height: 26,
                     width: 90,
-                    child: Container(
-                      child: Center(
-                        child: Text(
-                          'CURIOSITY',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontFamily: 'Open Sans Bold'),
-                        ),
-                      ),
-                      decoration: BoxDecoration(
-                          gradient: new LinearGradient(
-                              colors: [
-                                Color(0xffc4001d),
-                                Theme.of(context).primaryColorDark
-                              ],
-                              begin: const FractionalOffset(1.0, 1.0),
-                              end: const FractionalOffset(0.2, 0.2),
-                              stops: [0.0, 1.0],
-                              tileMode: TileMode.clamp),
-                          borderRadius: BorderRadius.circular(5)),
-                    ),
+                    //get category box
+                    child: _ArticleCategoryRender()
+                        .getRenderedCategory(widget.article.category),
                   ),
                 ],
               ),
@@ -92,7 +74,7 @@ class _ArticlePageState extends State<ArticlePage> {
               Container(
                 padding: EdgeInsets.only(left: 15),
                 child: Text(
-                  'Life advice looking',
+                  widget.article.title,
                   style: TextStyle(
                       fontSize: 32,
                       fontFamily: 'Canvas Bold',
@@ -105,7 +87,7 @@ class _ArticlePageState extends State<ArticlePage> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed dolor id nisl porttitor tempus sed ac justo. Proin a tortor ligula. Mauris lacus ipsum, luctus ut eros a, suscipit facilisis nulla. Vestibulum mi mi, interdum sed enim et, pellentesque elementum enim. Vivamus porttitor tempor ante, eu condimentum ex pulvinar bibendum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sed dolor id nisl porttitor tempus sed ac justo. Proin a tortor ligula. Mauris lacus ipsum, luctus ut eros a, suscipit facilisis nulla. Vestibulum mi mi, interdum sed enim et, pellentesque elementum enim. Vivamus porttitor tempor ante, eu condimentum ex pulvinar bibendum.',
+                  widget.article.text,
                   style: TextStyle(
                     fontSize: 17,
                     fontFamily: 'Montserrat Regular',
@@ -140,11 +122,40 @@ class _ArticlePageState extends State<ArticlePage> {
 
   void _uponScroll() {
     if (_controller.offset <= 30) {
-      setState(() => backgroundOpacity = 0.5+(_controller.offset)/300);
+      setState(() => backgroundOpacity = 0.5 + (_controller.offset) / 300);
     } else if (_controller.offset > 30 && _controller.offset <= 100) {
       setState(() => backgroundOpacity = 0.6);
     } else {
       setState(() => backgroundOpacity = 0.7);
     }
   }
+}
+
+class _ArticleCategoryRender {
+  final Map<String, Widget> categoryRender = Map();
+
+  Widget getRenderedCategory(String category) {
+    return categoryRender[category] ?? Container();
+  }
+
+  final Widget _curiosity = Container(
+    child: Center(
+      child: Text(
+        'CURIOSITY',
+        style: TextStyle(
+            color: Colors.white, fontSize: 14, fontFamily: 'Open Sans Bold'),
+      ),
+    ),
+    decoration: BoxDecoration(
+        gradient: new LinearGradient(
+            colors: [
+              Color(0xffc4001d),
+              Color(0xFFFF6F00),
+            ],
+            begin: const FractionalOffset(1.0, 1.0),
+            end: const FractionalOffset(0.2, 0.2),
+            stops: [0.0, 1.0],
+            tileMode: TileMode.clamp),
+        borderRadius: BorderRadius.circular(5)),
+  );
 }
