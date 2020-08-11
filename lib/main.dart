@@ -5,10 +5,13 @@ import 'package:flutter/rendering.dart';
 
 import 'package:flutter_beertastic/view/pages/authentication_page.dart';
 import 'package:flutter_beertastic/view/pages/home_page.dart';
+import 'package:flutter_google_maps/flutter_google_maps.dart';
 
 import 'package:provider/provider.dart';
 
 void main() {
+  GoogleMap.init("AIzaSyDKmlc3BZaeylhz-yA1gpnt7KDeYL_Waxc");
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 

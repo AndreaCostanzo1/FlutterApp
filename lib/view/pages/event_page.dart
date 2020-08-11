@@ -1,6 +1,9 @@
+import 'dart:collection';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class EventPage extends StatelessWidget {
   @override
@@ -172,14 +175,10 @@ class _EventDetailsContent extends StatelessWidget {
                 style: eventDescriptionTextStyle,
               ),
             ),
-          if (event.galleryImages.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(left: 16.0, top: 16, bottom: 16),
-              child: Text(
-                "GALLERY",
-                style: guestTextStyle,
-              ),
-            ),
+          SizedBox(
+            height: 20,
+          ),
+          _MapBox(45.274068, 9.093420), //fixme
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -206,6 +205,57 @@ class _EventDetailsContent extends StatelessWidget {
       ),
     );
   }
+}
+
+class _MapBox extends StatefulWidget {
+  final double _latitude;
+  final double _longitude;
+
+  _MapBox(this._latitude, this._longitude);
+
+  @override
+  __MapBoxState createState() => __MapBoxState();
+}
+
+class __MapBoxState extends State<_MapBox> {
+  GoogleMapController _mapController;
+  Set<Marker> _markers=HashSet();
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      child: Container(
+        height: MediaQuery.of(context).size.height * 0.400,
+        child: GoogleMap(
+          initialCameraPosition: CameraPosition(
+            target: LatLng(widget._latitude, widget._longitude),
+            zoom: 16,
+          ),
+          markers: _markers,
+          onMapCreated: _onMapCreated,
+        ),
+      ),
+    );
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    setState(() {
+      _mapController = controller;
+      _markers.add(Marker(
+        markerId: MarkerId('name'),
+        position: LatLng(widget._latitude, widget._longitude),
+        onTap: _launchMaps(widget._latitude, widget._longitude),
+      ));
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  _launchMaps(double latitude, double longitude) {}
 }
 
 //FIXME delete me
