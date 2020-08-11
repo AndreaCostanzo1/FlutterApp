@@ -1,7 +1,8 @@
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/model/article.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ArticlePage extends StatefulWidget {
   ArticlePage(this.article, {Key key}) : super(key: key);
@@ -88,10 +89,56 @@ class _ArticlePageState extends State<ArticlePage> {
                 SizedBox(
                   height: 20,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                ...widget.article.subsections
+                    .map((subsection) => Column(
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width,
+                              child: Text(
+                                subsection.title,
+                                style: TextStyle(
+                                    fontSize: 26,
+                                    fontFamily: 'Canvas Bold',
+                                    color: Colors.white),
+                                textAlign: TextAlign.justify,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Container(
+                              child: Text(
+                                subsection.text,
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontFamily: 'Montserrat Regular',
+                                  color: Colors.white,
+                                ),
+                                textAlign: TextAlign.justify,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            subsection.image == null
+                                ? Container()
+                                : Column(
+                                  children: [
+                                    ClipRRect(
+                                        borderRadius: BorderRadius.circular(20),
+                                        child: Image.network(subsection.image)),
+                                    SizedBox(
+                                      height: 40,
+                                    ),
+                                  ],
+                                ),
+                          ],
+                        ))
+                    .toList(),
+                Column(
                   children: [
                     Container(
+                      width: MediaQuery.of(context).size.width,
                       child: Text(
                         widget.article.author,
                         style: TextStyle(
@@ -99,9 +146,37 @@ class _ArticlePageState extends State<ArticlePage> {
                           fontFamily: 'Montserrat Regular',
                           color: Colors.white,
                         ),
-                        textAlign: TextAlign.justify,
+                        textAlign: TextAlign.end,
                       ),
                     ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    if (widget.article.source != null)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(10),
+                              onTap: () => launch(widget.article.source),
+                              child: Container(
+                                height: 21.5,
+                                child: AutoSizeText(
+                                  'Source here',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontFamily: 'Montserrat Regular',
+                                      color: Colors.white,
+                                      decoration: TextDecoration.underline),
+                                  textAlign: TextAlign.end,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
                 SizedBox(
@@ -163,7 +238,9 @@ class CuriosityTag extends StatelessWidget {
             child: Text(
               'CURIOSITY',
               style: TextStyle(
-                  color: Colors.white, fontSize: 14, fontFamily: 'Open Sans Bold'),
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontFamily: 'Open Sans Bold'),
             ),
           ),
           decoration: BoxDecoration(
@@ -195,7 +272,9 @@ class HomeBrewingTag extends StatelessWidget {
             child: Text(
               'HOME BREWING',
               style: TextStyle(
-                  color: Colors.white, fontSize: 14, fontFamily: 'Open Sans Bold'),
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontFamily: 'Open Sans Bold'),
             ),
           ),
           decoration: BoxDecoration(
