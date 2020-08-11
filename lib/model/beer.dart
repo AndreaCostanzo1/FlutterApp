@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Beer {
-  final String _documentID;
+  final String _id;
   final String _name;
   final String _producer;
   final double _rating;
@@ -9,8 +9,8 @@ class Beer {
   final double _temperature;
   final String _beerImageUrl;
 
-  Beer.fromSnapshot(DocumentSnapshot snapshot)
-      : _documentID = snapshot?.documentID,
+  Beer.fromSnapshot(Map<String, dynamic> snapshot)
+      : _id = snapshot['id'],
         _name = snapshot['name'],
         _producer = snapshot['producer'],
         _rating = snapshot['rating'].toDouble(),
@@ -18,7 +18,7 @@ class Beer {
         _temperature = snapshot['temperature'].toDouble(),
         _beerImageUrl = snapshot['imageUrl'];
 
-  String get id => _documentID;
+  String get id => _id;
 
   String get name => _name;
 
