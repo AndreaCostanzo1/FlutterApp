@@ -35,6 +35,7 @@ class ArticlesBloc {
 
   _updateArticlesSink(List<DocumentSnapshot> okrSnapshots) {
     //get the list of articles still not retrieved
+    _articles.clear();
     _articles.addAll(okrSnapshots
         .map((snapshots) => Article.fromSnapshot(snapshots.data))
         .toList());

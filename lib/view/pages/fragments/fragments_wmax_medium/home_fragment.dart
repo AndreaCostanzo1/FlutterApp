@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -126,7 +127,7 @@ class _ArticlesRow extends StatefulWidget {
 }
 
 class __ArticlesRowState extends State<_ArticlesRow> {
-  final double containerHeight = 200;
+  final double _containerHeight = 200;
 
   final PageController pageController = PageController(viewportFraction: 0.86);
 
@@ -134,8 +135,9 @@ class __ArticlesRowState extends State<_ArticlesRow> {
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
-      height: containerHeight,
+      height: _containerHeight,
       margin: EdgeInsets.only(top: 8),
       child: PageView(
         key: PageStorageKey('paf'),
@@ -179,34 +181,48 @@ class __ArticlesRowState extends State<_ArticlesRow> {
                       physics: NeverScrollableScrollPhysics(),
                       //This disallow scroll with touch screen
                       child: Container(
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width,
+                        height: activePage? _containerHeight*0.9:_containerHeight*0.9-20,
                         padding: EdgeInsets.only(
-                            top: containerHeight * 0.615, right: 15),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: <Widget>[
-                            Container(
-                              padding: EdgeInsets.only(),
-                              child: Text(
-                                article.title,
-                                style: TextStyle(
-                                    color: Color(0xF2F2F2F2),
-                                    fontSize: 28,
-                                    fontFamily: 'PlayfairDisplay Bold'),
-                              ),
+                            top: _containerHeight * 0.115,left: MediaQuery.of(context).size.width*0.04),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: <Widget>[
+                                Container(
+                                  height: _containerHeight*0.6,
+                                  width: MediaQuery.of(context).size.width*0.72,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Container(
+                                        child: AutoSizeText(
+                                          article.title,
+                                          style: TextStyle(
+                                              color: Color(0xF2F2F2F2),
+                                              fontSize: 28,
+                                              fontFamily: 'PlayfairDisplay Bold'),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                activePage
+                                    ? Container(
+                                        height: 20,
+                                        width: MediaQuery.of(context).size.width*0.72,
+                                        child: AutoSizeText(
+                                          article.punchline,
+                                          style: TextStyle(
+                                              color: Color(0xF2F2F2F2),
+                                              fontSize: 16,
+                                              fontFamily: 'Montserrat Regular'),
+                                        ),
+                                      )
+                                    : Container(),
+                              ],
                             ),
-                            activePage
-                                ? Container(
-                                    child: Text(
-                                      article.punchline,
-                                      style: TextStyle(
-                                          color: Color(0xF2F2F2F2),
-                                          fontSize: 16,
-                                          fontFamily: 'Montserrat Regular'),
-                                    ),
-                                  )
-                                : Container(),
                           ],
                         ),
                       ),
@@ -217,7 +233,7 @@ class __ArticlesRowState extends State<_ArticlesRow> {
             ),
             margin: EdgeInsets.only(
                 top: activePage ? 0 : 20,
-                right: 30,
+                right: MediaQuery.of(context).size.width*0.0729,
                 bottom: activePage ? 10 : 15),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),

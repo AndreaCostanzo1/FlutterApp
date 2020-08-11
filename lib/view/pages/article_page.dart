@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/model/article.dart';
 
 class ArticlePage extends StatefulWidget {
-  ArticlePage(this.article, {Key key})
-      : super(key: key);
+  ArticlePage(this.article, {Key key}) : super(key: key);
   final Article article;
 
   @override
@@ -50,56 +49,66 @@ class _ArticlePageState extends State<ArticlePage> {
             duration: Duration(milliseconds: 700),
             curve: Curves.decelerate,
           ),
-          ListView(
-            controller: _controller,
-            children: <Widget>[
-              Container(
-                height: MediaQuery.of(context).size.height * 0.5,
-              ),
-              Row(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.only(left: 15),
-                    height: 26,
-                    width: 90,
-                    //get category box
-                    child: _ArticleCategoryRender()
-                        .getRenderedCategory(widget.article.category),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Container(
-                padding: EdgeInsets.only(left: 15),
-                child: Text(
-                  widget.article.title,
-                  style: TextStyle(
-                      fontSize: 32,
-                      fontFamily: 'Canvas Bold',
-                      color: Colors.white),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 13),
+            child: ListView(
+              controller: _controller,
+              children: <Widget>[
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.5,
                 ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  widget.article.text,
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontFamily: 'Montserrat Regular',
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.justify,
+                _ArticleCategoryRender()
+                    .getRenderedCategory(widget.article.category),
+                SizedBox(
+                  height: 10,
                 ),
-              ),
-              SizedBox(
-                height: 20,
-              )
-            ],
+                Container(
+                  child: Text(
+                    widget.article.title,
+                    style: TextStyle(
+                        fontSize: 32,
+                        fontFamily: 'Canvas Bold',
+                        color: Colors.white),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Container(
+                  child: Text(
+                    widget.article.text,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontFamily: 'Montserrat Regular',
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.justify,
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      child: Text(
+                        widget.article.author,
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontFamily: 'Montserrat Regular',
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.justify,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -132,30 +141,76 @@ class _ArticlePageState extends State<ArticlePage> {
 }
 
 class _ArticleCategoryRender {
-  final Map<String, Widget> categoryRender = Map();
+  final Map<String, Widget> categoryRender = Map.from({
+    'curiosity': CuriosityTag(),
+    'home brewing': HomeBrewingTag(),
+  });
 
   Widget getRenderedCategory(String category) {
     return categoryRender[category] ?? Container();
   }
+}
 
-  final Widget _curiosity = Container(
-    child: Center(
-      child: Text(
-        'CURIOSITY',
-        style: TextStyle(
-            color: Colors.white, fontSize: 14, fontFamily: 'Open Sans Bold'),
-      ),
-    ),
-    decoration: BoxDecoration(
-        gradient: new LinearGradient(
-            colors: [
-              Color(0xffc4001d),
-              Color(0xFFFF6F00),
-            ],
-            begin: const FractionalOffset(1.0, 1.0),
-            end: const FractionalOffset(0.2, 0.2),
-            stops: [0.0, 1.0],
-            tileMode: TileMode.clamp),
-        borderRadius: BorderRadius.circular(5)),
-  );
+class CuriosityTag extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          height: 26,
+          width: 90,
+          child: Center(
+            child: Text(
+              'CURIOSITY',
+              style: TextStyle(
+                  color: Colors.white, fontSize: 14, fontFamily: 'Open Sans Bold'),
+            ),
+          ),
+          decoration: BoxDecoration(
+              gradient: new LinearGradient(
+                  colors: [
+                    Color(0xffc4001d),
+                    Color(0xFFFF6F00),
+                  ],
+                  begin: const FractionalOffset(1.0, 1.0),
+                  end: const FractionalOffset(0.2, 0.2),
+                  stops: [0.0, 1.0],
+                  tileMode: TileMode.clamp),
+              borderRadius: BorderRadius.circular(5)),
+        ),
+      ],
+    );
+  }
+}
+
+class HomeBrewingTag extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          height: 26,
+          width: 130,
+          child: Center(
+            child: Text(
+              'HOME BREWING',
+              style: TextStyle(
+                  color: Colors.white, fontSize: 14, fontFamily: 'Open Sans Bold'),
+            ),
+          ),
+          decoration: BoxDecoration(
+              gradient: new LinearGradient(
+                  colors: [
+                    Color(0xFF38ef7d),
+                    Color(0xFF11998e),
+                  ],
+                  begin: const FractionalOffset(1.0, 1.0),
+                  end: const FractionalOffset(0.2, 0.2),
+                  stops: [0.0, 1.0],
+                  tileMode: TileMode.clamp),
+              borderRadius: BorderRadius.circular(5)),
+        ),
+      ],
+    );
+  }
 }
