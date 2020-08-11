@@ -154,7 +154,7 @@ class __ArticlesRowState extends State<_ArticlesRow> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Hero(
-                      tag: article.id, //TODO animate transition
+                      tag: article.id,
                       child: Image(
                         image: NetworkImage(article.coverImage),
                         colorBlendMode: BlendMode.darken,
@@ -175,55 +175,58 @@ class __ArticlesRowState extends State<_ArticlesRow> {
                             widget._articles.elementAt(currentPage)),
                       ),
                     ),
-                    child: SingleChildScrollView(
-                      //single child scroll view needed to render subtitle,
-                      //but shouldn't be scrollable
-                      physics: NeverScrollableScrollPhysics(),
-                      //This disallow scroll with touch screen
-                      child: Container(
-                        height: activePage? _containerHeight*0.9:_containerHeight*0.9-20,
-                        padding: EdgeInsets.only(
-                            top: _containerHeight * 0.115,left: MediaQuery.of(context).size.width*0.04),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: <Widget>[
-                                Container(
-                                  height: _containerHeight*0.6,
-                                  width: MediaQuery.of(context).size.width*0.72,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Container(
-                                        child: AutoSizeText(
-                                          article.title,
-                                          style: TextStyle(
-                                              color: Color(0xF2F2F2F2),
-                                              fontSize: 28,
-                                              fontFamily: 'PlayfairDisplay Bold'),
+                    child: Container(
+                      height: _containerHeight,
+                      child: SingleChildScrollView(
+                        //single child scroll view needed to render subtitle,
+                        //but shouldn't be scrollable
+                        physics: NeverScrollableScrollPhysics(),
+                        //This disallow scroll with touch screen
+                        child: Container(
+                          height: activePage? _containerHeight*0.9:_containerHeight*0.9-20,
+                          padding: EdgeInsets.only(
+                              top: _containerHeight * 0.115,left: MediaQuery.of(context).size.width*0.04),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: <Widget>[
+                                  Container(
+                                    height: _containerHeight*0.6,
+                                    width: MediaQuery.of(context).size.width*0.72,
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Container(
+                                          child: AutoSizeText(
+                                            article.title,
+                                            style: TextStyle(
+                                                color: Color(0xF2F2F2F2),
+                                                fontSize: 28,
+                                                fontFamily: 'PlayfairDisplay Bold'),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                activePage
-                                    ? Container(
-                                        height: 20,
-                                        width: MediaQuery.of(context).size.width*0.72,
-                                        child: AutoSizeText(
-                                          article.punchline,
-                                          style: TextStyle(
-                                              color: Color(0xF2F2F2F2),
-                                              fontSize: 16,
-                                              fontFamily: 'Montserrat Regular'),
-                                        ),
-                                      )
-                                    : Container(),
-                              ],
-                            ),
-                          ],
+                                  activePage
+                                      ? Container(
+                                          height: 20,
+                                          width: MediaQuery.of(context).size.width*0.72,
+                                          child: AutoSizeText(
+                                            article.punchline,
+                                            style: TextStyle(
+                                                color: Color(0xF2F2F2F2),
+                                                fontSize: 16,
+                                                fontFamily: 'Montserrat Regular'),
+                                          ),
+                                        )
+                                      : Container(),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
