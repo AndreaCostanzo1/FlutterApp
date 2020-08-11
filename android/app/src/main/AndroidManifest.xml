@@ -14,6 +14,7 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="flutter_beertastic"
         android:icon="@mipmap/ic_launcher">
+
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -28,13 +29,14 @@
             <meta-data
                 android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
                 android:value="true" />
-            <meta-data android:name="com.google.android.geo.API_KEY"
-                android:value="AIzaSyDKmlc3BZaeylhz-yA1gpnt7KDeYL_Waxc"/>
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".view.ScannerActivity" android:theme="@style/beertastic_theme"/>
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDKmlc3BZaeylhz-yA1gpnt7KDeYL_Waxc"/>
     </application>
 </manifest>
