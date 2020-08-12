@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_beertastic/model/beer.dart';
 
 class BeerBloc {
@@ -11,15 +13,14 @@ class BeerBloc {
 
   //.broadcast used when there are multiple listeners
   final StreamController<List<Beer>> _beersController =
-  StreamController<List<Beer>>.broadcast();
+      StreamController<List<Beer>>.broadcast();
 
   final StreamController<Beer> _singleBeerController =
-  StreamController<Beer>.broadcast();
+      StreamController<Beer>.broadcast();
 
   Stream<List<Beer>> get beersController => _beersController.stream;
 
-  Stream<Beer> get singleBeerController =>
-      _singleBeerController.stream;
+  Stream<Beer> get singleBeerController => _singleBeerController.stream;
 
   void dispose() async {
     _subscriptions.forEach((subscription) => subscription.cancel());
@@ -28,11 +29,15 @@ class BeerBloc {
   }
 
   void retrieveSuggestedBeers() {
-    _subscriptions.add(Firestore.instance
-        .collection('beers')
-        .where('suggestTo', arrayContains: FirebaseAuth.instance.currentUser())
-        .snapshots()
-        .listen((query) => _updateBeersSink(query.documents)));
+    FirebaseAuth.instance.currentUser().then((user) {
+      Firestore.instance
+          .collection('beers')
+          .where('suggestTo',
+              arrayContains:
+                  Firestore.instance.collection("users").document(user.uid))
+          .getDocuments()
+          .then((query) => _updateBeersSink(query.documents));
+    });
   }
 
   _updateBeersSink(List<DocumentSnapshot> beersSnapshots) {
@@ -42,5 +47,14 @@ class BeerBloc {
         .map((snapshots) => Beer.fromSnapshot(snapshots.data))
         .toList());
     _beersController.sink.add(_beers);
+  }
+
+  static Stream<Uint8List> getBeerImage(String imageUrl) {
+    return FirebaseStorage.instance
+        .ref()
+        .child(imageUrl ?? 'random')
+        .getData(10000000)
+        .asStream()
+        .asBroadcastStream(); //fixme-> addReference to an ImageNotFound in firebase instead of 'random
   }
 }
