@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _bottomNavBarIndex = 0;
     _map[0] = HomeFragment();
-    _map[1] = SearchFragment();
+    _map[1] = SearchFragment(key: UniqueKey(),);
     _map[2] = ProfileFragment();
   }
 }

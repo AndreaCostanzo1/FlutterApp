@@ -31,6 +31,7 @@ class BeerBloc {
   }
 
   void retrieveSuggestedBeers() {
+    if(_beersController.isClosed) return;
     FirebaseAuth.instance.currentUser().then((user) {
       Firestore.instance
           .collection('beers')
@@ -44,11 +45,13 @@ class BeerBloc {
 
   _updateBeersSink(List<DocumentSnapshot> beersSnapshots) {
     //get the list of articles still not retrieved
-    _beers.clear();
-    _beers.addAll(beersSnapshots
-        .map((snapshots) => Beer.fromSnapshot(snapshots.data))
-        .toList());
-    _beersController.sink.add(_beers);
+    if(!_beersController.isClosed){
+      _beers.clear();
+      _beers.addAll(beersSnapshots
+          .map((snapshots) => Beer.fromSnapshot(snapshots.data))
+          .toList());
+      _beersController.sink.add(_beers);
+    }
   }
 
   static Stream<Uint8List> getBeerImage(String imageUrl) {

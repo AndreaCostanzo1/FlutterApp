@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ import 'package:flutter_beertastic/model/beer.dart';
 import '../../beer_page.dart';
 
 class SearchFragment extends StatefulWidget {
+  SearchFragment({Key key}) : super(key: key);
+
   @override
   _SearchFragmentState createState() => _SearchFragmentState();
 }
@@ -16,6 +19,7 @@ class _SearchFragmentState extends State<SearchFragment> {
   bool _focused;
   FocusNode _focusNode;
   TextEditingController _controller;
+  BeerBloc _beerBloc;
 
   void search(String text) {
     if (text == '')
@@ -37,6 +41,8 @@ class _SearchFragmentState extends State<SearchFragment> {
     _focused = _focused ?? false;
     _focusNode = FocusNode();
     _controller = TextEditingController();
+    _beerBloc = BeerBloc();
+    if (_beerBloc.beers.length == 0) _beerBloc.retrieveSuggestedBeers();
     super.initState();
   }
 
@@ -44,22 +50,22 @@ class _SearchFragmentState extends State<SearchFragment> {
   void dispose() {
     _focusNode.dispose();
     _controller.dispose();
+    _beerBloc.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: ListView(
-        physics:
-            _focused ? NeverScrollableScrollPhysics() : ClampingScrollPhysics(),
-        padding: EdgeInsets.all(0),
-        children: <Widget>[
-          AnimatedContainer(
-            height: _focused ? 0 : 160,
-            duration: Duration(milliseconds: 100),
-          ),
-          AnimatedContainer(
+      child: RefreshIndicator(
+        onRefresh:_handleRefresh,
+        child: SingleChildScrollView(
+          physics: _focused
+              ? NeverScrollableScrollPhysics()
+              : BouncingScrollPhysics(),
+          padding: EdgeInsets.all(0),
+          child: AnimatedContainer(
+            margin: EdgeInsets.only(top: _focused ? 0 : 160),
             width: MediaQuery.of(context).size.width,
             duration: Duration(milliseconds: 100),
             decoration: BoxDecoration(
@@ -69,63 +75,68 @@ class _SearchFragmentState extends State<SearchFragment> {
                     : BorderRadius.only(
                         topLeft: Radius.circular(30),
                         topRight: Radius.circular(30))),
-            child: Column(
-              children: <Widget>[
-                Container(
-                  margin: EdgeInsets.only(
-                      top: _focused ? 45 : 35, left: 30, right: 30, bottom: 10),
-                  height: 50,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 20.0, right: 7),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.65,
-                          child: TextFormField(
-                            controller: _controller,
-                            focusNode: _focusNode,
-                            onTap: () => setState(() => _focused = true),
-                            onFieldSubmitted: (text) => search(text),
-                            decoration: InputDecoration.collapsed(
-                                hintText: 'Search',
-                                hintStyle: TextStyle(
-                                    fontFamily: 'Open Sans SemiBold')),
-                          ),
+            child: StreamBuilder<List<Beer>>(
+              stream: _beerBloc.beersController,
+              builder: (context, snapshot) {
+                return Column(
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.only(
+                          top: _focused ? 45 : 35, left: 30, right: 30, bottom: 10),
+                      height: 50,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 20.0, right: 7),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.65,
+                              child: TextFormField(
+                                controller: _controller,
+                                focusNode: _focusNode,
+                                onTap: () => setState(() => _focused = true),
+                                onFieldSubmitted: (text) => search(text),
+                                decoration: InputDecoration.collapsed(
+                                    hintText: 'Search',
+                                    hintStyle: TextStyle(
+                                        fontFamily: 'Open Sans SemiBold')),
+                              ),
+                            ),
+                            _focused
+                                ? IconButton(
+                                    padding: EdgeInsets.all(0),
+                                    icon: Icon(Icons.clear),
+                                    onPressed: () {
+                                      _controller.clear();
+                                      _focusNode.unfocus();
+                                      setState(() => _focused = false);
+                                    },
+                                  )
+                                : ScannerButton(),
+                          ],
                         ),
-                        _focused
-                            ? IconButton(
-                                padding: EdgeInsets.all(0),
-                                icon: Icon(Icons.clear),
-                                onPressed: () {
-                                  _controller.clear();
-                                  _focusNode.unfocus();
-                                  setState(() => _focused = false);
-                                },
-                              )
-                            : ScannerButton(),
-                      ],
+                      ),
+                      decoration: BoxDecoration(
+                          color: Color(0xFFf4f2e4),
+                          borderRadius: BorderRadius.circular(30)),
                     ),
-                  ),
-                  decoration: BoxDecoration(
-                      color: Color(0xFFf4f2e4),
-                      borderRadius: BorderRadius.circular(30)),
-                ),
-                SizedBox(
-                  height: 35,
-                ),
-                _focused
-                    /*TODO: Create a class SearchResult and switch with this container
-                    * add also the BLoC with the stream for the results
-                    */
-                    ? Container(
-                        height: MediaQuery.of(context).size.height,
-                      )
-                    : PostGallery(key: UniqueKey(),),
-              ],
+                    SizedBox(
+                      height: 35,
+                    ),
+                    _focused
+                        /*TODO: Create a class SearchResult and switch with this container
+                          * add also the BLoC with the stream for the results
+                          */
+                        ? Container(
+                            height: MediaQuery.of(context).size.height,
+                          )
+                        : PostGallery(snapshot),
+                  ],
+                );
+              }
             ),
-          )
-        ],
+          ),
+        ),
       ),
       decoration: BoxDecoration(
         gradient: new LinearGradient(
@@ -140,63 +151,44 @@ class _SearchFragmentState extends State<SearchFragment> {
       ),
     );
   }
+
+  Future<Null> _handleRefresh() async {
+   _beerBloc.retrieveSuggestedBeers();
+   await _beerBloc.beersController.first;
+   return null;
+  }
 }
 
-class PostGallery extends StatefulWidget {
+class PostGallery extends StatelessWidget {
+  final AsyncSnapshot<List<Beer>> snapshot;
 
-  PostGallery({Key key});
-
-  @override
-  _PostGalleryState createState() => _PostGalleryState();
-}
-
-class _PostGalleryState extends State<PostGallery> {
-  BeerBloc _beerBloc;
+  PostGallery(this.snapshot);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: StreamBuilder<List<Beer>>(
-          stream: _beerBloc.beersController,
-          builder: (context, snapshot) {
-            List<List<Beer>> groupsOfBeers = List();
-            if (snapshot.data != null) {
-              //TODO: move this method in a separate class and test it;
-              for (int i = 0; i < (snapshot.data.length / 9).truncate(); i++) {
-                groupsOfBeers.add(snapshot.data.getRange(i, i + 9).toList());
-              }
-              //Return a block of beers for each group, otherwise a white container to fill the space below
-              return groupsOfBeers.length > 0
-                  ? Column(
-                      children: [
-                        ...groupsOfBeers
-                            .map((beersList) => __BeerBlocks(beersList))
-                            .toList(),
-                      ],
-                    )
-                  : Container(
-                      height: MediaQuery.of(context).size.height * 0.6,
-                    );
-            } else {
-              return Container(
-                height: MediaQuery.of(context).size.height * 0.6,
-              );
-            }
-          }),
-    );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _beerBloc = BeerBloc();
-    if(_beerBloc.beers.length==0) _beerBloc.retrieveSuggestedBeers();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _beerBloc.dispose();
+    List<List<Beer>> groupsOfBeers = List();
+    if (snapshot.data != null) {
+      //TODO: move this method in a separate class and test it;
+      for (int i = 0; i < (snapshot.data.length / 9).truncate(); i++) {
+        groupsOfBeers.add(snapshot.data.getRange(i, i + 9).toList());
+      }
+      //Return a block of beers for each group, otherwise a white container to fill the space below
+      return groupsOfBeers.length > 0
+          ? Column(
+              children: [
+                ...groupsOfBeers
+                    .map((beersList) => __BeerBlocks(beersList))
+                    .toList(),
+              ],
+            )
+          : Container(
+              height: MediaQuery.of(context).size.height * 0.6,
+            );
+    } else {
+      return Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+      );
+    }
   }
 }
 
@@ -288,16 +280,14 @@ class ___BeerImage extends StatefulWidget {
 }
 
 class ____BeerImageState extends State<___BeerImage> {
-
   ImageProvider _beerImage;
 
   @override
   Widget build(BuildContext context) {
-    print(widget._beer.name);
     return StreamBuilder<Uint8List>(
         stream: BeerBloc.getBeerImage(widget._beer.beerImageUrl),
         builder: (context, snapshot) {
-          if(snapshot.data!=null )_beerImage= MemoryImage(snapshot.data);
+          if (snapshot.data != null) _beerImage = MemoryImage(snapshot.data);
           return snapshot.data != null
               ? Container(
                   decoration: BoxDecoration(
