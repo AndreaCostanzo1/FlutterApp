@@ -22,6 +22,8 @@ class BeerBloc {
 
   Stream<Beer> get singleBeerController => _singleBeerController.stream;
 
+  List<Beer> get beers => _beers;
+
   void dispose() async {
     _subscriptions.forEach((subscription) => subscription.cancel());
     _beersController?.close();

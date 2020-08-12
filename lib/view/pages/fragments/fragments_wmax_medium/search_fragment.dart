@@ -121,7 +121,7 @@ class _SearchFragmentState extends State<SearchFragment> {
                     ? Container(
                         height: MediaQuery.of(context).size.height,
                       )
-                    : PostGallery(),
+                    : PostGallery(key: UniqueKey(),),
               ],
             ),
           )
@@ -143,6 +143,9 @@ class _SearchFragmentState extends State<SearchFragment> {
 }
 
 class PostGallery extends StatefulWidget {
+
+  PostGallery({Key key});
+
   @override
   _PostGalleryState createState() => _PostGalleryState();
 }
@@ -152,40 +155,42 @@ class _PostGalleryState extends State<PostGallery> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<Beer>>(
-        stream: _beerBloc.beersController,
-        builder: (context, snapshot) {
-          List<List<Beer>> groupsOfBeers = List();
-          if (snapshot.data != null) {
-            //TODO: move this method in a separate class and test it;
-            for (int i = 0; i < (snapshot.data.length / 9).truncate(); i++) {
-              groupsOfBeers.add(snapshot.data.getRange(i, i + 9).toList());
+    return Container(
+      child: StreamBuilder<List<Beer>>(
+          stream: _beerBloc.beersController,
+          builder: (context, snapshot) {
+            List<List<Beer>> groupsOfBeers = List();
+            if (snapshot.data != null) {
+              //TODO: move this method in a separate class and test it;
+              for (int i = 0; i < (snapshot.data.length / 9).truncate(); i++) {
+                groupsOfBeers.add(snapshot.data.getRange(i, i + 9).toList());
+              }
+              //Return a block of beers for each group, otherwise a white container to fill the space below
+              return groupsOfBeers.length > 0
+                  ? Column(
+                      children: [
+                        ...groupsOfBeers
+                            .map((beersList) => __BeerBlocks(beersList))
+                            .toList(),
+                      ],
+                    )
+                  : Container(
+                      height: MediaQuery.of(context).size.height * 0.6,
+                    );
+            } else {
+              return Container(
+                height: MediaQuery.of(context).size.height * 0.6,
+              );
             }
-            //Return a block of beers for each group, otherwise a white container to fill the space below
-            return groupsOfBeers.length > 0
-                ? Column(
-                    children: [
-                      ...groupsOfBeers
-                          .map((beersList) => __BeerBlocks(beersList))
-                          .toList(),
-                    ],
-                  )
-                : Container(
-                    height: MediaQuery.of(context).size.height * 0.6,
-                  );
-          } else {
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.6,
-            );
-          }
-        });
+          }),
+    );
   }
 
   @override
   void initState() {
     super.initState();
     _beerBloc = BeerBloc();
-    _beerBloc.retrieveSuggestedBeers();
+    if(_beerBloc.beers.length==0) _beerBloc.retrieveSuggestedBeers();
   }
 
   @override
@@ -240,21 +245,25 @@ class PostSubGallery1 extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
+            key: UniqueKey(),
             height: bigSize,
             width: bigSize,
             child: ___BeerImage(_beers[0], bigSize),
           ),
           Container(
+            key: UniqueKey(),
             height: bigSize,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
+                  key: UniqueKey(),
                   height: smallSize,
                   width: smallSize,
                   child: ___BeerImage(_beers[1], smallSize),
                 ),
                 Container(
+                  key: UniqueKey(),
                   height: smallSize,
                   width: smallSize,
                   child: ___BeerImage(_beers[2], smallSize),
@@ -268,18 +277,27 @@ class PostSubGallery1 extends StatelessWidget {
   }
 }
 
-class ___BeerImage extends StatelessWidget {
+class ___BeerImage extends StatefulWidget {
   final Beer _beer;
   final double size;
 
   ___BeerImage(this._beer, this.size);
 
   @override
+  ____BeerImageState createState() => ____BeerImageState();
+}
+
+class ____BeerImageState extends State<___BeerImage> {
+
+  ImageProvider _beerImage;
+
+  @override
   Widget build(BuildContext context) {
-    print(_beer.name);
+    print(widget._beer.name);
     return StreamBuilder<Uint8List>(
-        stream: BeerBloc.getBeerImage(_beer.beerImageUrl),
+        stream: BeerBloc.getBeerImage(widget._beer.beerImageUrl),
         builder: (context, snapshot) {
+          if(snapshot.data!=null )_beerImage= MemoryImage(snapshot.data);
           return snapshot.data != null
               ? Container(
                   decoration: BoxDecoration(
@@ -299,8 +317,8 @@ class ___BeerImage extends StatelessWidget {
                       onTap: () => print('tap'), //fixme
                       borderRadius: BorderRadius.circular(10),
                       child: Padding(
-                          padding: EdgeInsets.all(size * 0.03),
-                          child: Ink.image(image: MemoryImage(snapshot.data))),
+                          padding: EdgeInsets.all(widget.size * 0.03),
+                          child: Ink.image(image: _beerImage)),
                     ),
                   ),
                 )
@@ -328,16 +346,19 @@ class PostSubGallery2 extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
+            key: UniqueKey(),
             height: smallSize,
             width: smallSize,
             child: ___BeerImage(_beers[0], smallSize),
           ),
           Container(
+            key: UniqueKey(),
             height: smallSize,
             width: smallSize,
             child: ___BeerImage(_beers[1], smallSize),
           ),
           Container(
+            key: UniqueKey(),
             height: smallSize,
             width: smallSize,
             child: ___BeerImage(_beers[2], smallSize),
@@ -368,11 +389,13 @@ class PostSubGallery3 extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
+                  key: UniqueKey(),
                   height: smallSize,
                   width: smallSize,
                   child: ___BeerImage(_beers[0], smallSize),
                 ),
                 Container(
+                  key: UniqueKey(),
                   height: smallSize,
                   width: smallSize,
                   child: ___BeerImage(_beers[1], smallSize),
@@ -381,6 +404,7 @@ class PostSubGallery3 extends StatelessWidget {
             ),
           ),
           Container(
+            key: UniqueKey(),
             height: bigSize,
             width: bigSize,
             child: ___BeerImage(_beers[2], bigSize),
