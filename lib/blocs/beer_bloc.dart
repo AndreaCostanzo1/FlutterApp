@@ -7,31 +7,47 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_beertastic/model/beer.dart';
 
 class BeerBloc {
-  final List<Beer> _beers = List();
+  final Map<StreamController, List<Beer>> _cachedBeers = Map();
 
   final List<StreamSubscription> _subscriptions = List();
 
   //.broadcast used when there are multiple listeners
-  final StreamController<List<Beer>> _beersController =
-      StreamController<List<Beer>>.broadcast();
+  final StreamController<List<Beer>> _suggestedBeersController =
+      StreamController.broadcast();
+
+  final StreamController<List<Beer>> _queriedBeersController =
+      StreamController.broadcast();
 
   final StreamController<Beer> _singleBeerController =
-      StreamController<Beer>.broadcast();
+      StreamController.broadcast();
 
-  Stream<List<Beer>> get beersController => _beersController.stream;
+  BeerBloc() {
+    _cachedBeers.addAll({
+      _suggestedBeersController: List(),
+      _queriedBeersController: List(),
+    });
+  }
 
-  Stream<Beer> get singleBeerController => _singleBeerController.stream;
+  Stream<List<Beer>> get suggestedBeersStream =>
+      _suggestedBeersController.stream;
 
-  List<Beer> get beers => _beers;
+  Stream<Beer> get singleBeerStream => _singleBeerController.stream;
+
+  Stream<List<Beer>> get queriedBeersStream => _queriedBeersController.stream;
+
+  List<Beer> get suggestedBeers => _cachedBeers[_suggestedBeersController];
+
+  List<Beer> get queriedBeers => _cachedBeers[_queriedBeersController];
 
   void dispose() async {
     _subscriptions.forEach((subscription) => subscription.cancel());
-    _beersController?.close();
+    _suggestedBeersController?.close();
     _singleBeerController?.close();
+    _queriedBeersController?.close();
   }
 
   void retrieveSuggestedBeers() {
-    if(_beersController.isClosed) return;
+    if (_suggestedBeersController.isClosed) return;
     FirebaseAuth.instance.currentUser().then((user) {
       Firestore.instance
           .collection('beers')
@@ -39,18 +55,38 @@ class BeerBloc {
               arrayContains:
                   Firestore.instance.collection("users").document(user.uid))
           .getDocuments()
-          .then((query) => _updateBeersSink(query.documents));
+          .then((query) =>
+              _updateBeersSink(_suggestedBeersController, query.documents));
     });
   }
 
-  _updateBeersSink(List<DocumentSnapshot> beersSnapshots) {
+  //value is used to perform a "like" behaviour of SQL databases
+  void retrieveBeersWhenParameterIsLike(String parameter, String value) {
+    if (_queriedBeersController.isClosed) return;
+    String lowerLimit=(value.length>0?value[0].toUpperCase():'');
+    if(value.length>1) lowerLimit=lowerLimit+value.substring(1).toLowerCase();
+    String upperLimit=lowerLimit+'zzzz';
+    Firestore.instance
+        .collection('beers')
+        .where(parameter,
+           isGreaterThanOrEqualTo: lowerLimit)
+        .where(parameter,isLessThanOrEqualTo: upperLimit)
+        .getDocuments()
+        .then((query) =>
+            _updateBeersSink(_queriedBeersController, query.documents));
+  }
+
+  _updateBeersSink(StreamController<List<Beer>> beersStream,
+      List<DocumentSnapshot> beersSnapshots) {
     //get the list of articles still not retrieved
-    if(!_beersController.isClosed){
-      _beers.clear();
-      _beers.addAll(beersSnapshots
+    if (!beersStream.isClosed) {
+      List<Beer> beerList = _cachedBeers[beersStream];
+      beerList.clear();
+      beerList.addAll(beersSnapshots
           .map((snapshots) => Beer.fromSnapshot(snapshots.data))
           .toList());
-      _beersController.sink.add(_beers);
+      beerList.forEach((element) {print(element.name);}); //fixme remove me
+      beersStream.sink.add(beerList);
     }
   }
 
@@ -62,4 +98,12 @@ class BeerBloc {
         .asStream()
         .asBroadcastStream(); //fixme-> addReference to an ImageNotFound in firebase instead of 'random
   }
+
+  void clearQueriedBeersStream() {
+    List<Beer> beerList = _cachedBeers[_queriedBeersController];
+    beerList.clear();
+    _queriedBeersController.sink.add(beerList);
+  }
 }
+
+

@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,7 +45,8 @@ class _SearchFragmentState extends State<SearchFragment> {
     _focusNode = FocusNode();
     _controller = TextEditingController();
     _beerBloc = BeerBloc();
-    if (_beerBloc.beers.length == 0) _beerBloc.retrieveSuggestedBeers();
+    if (_beerBloc.suggestedBeers.length == 0)
+      _beerBloc.retrieveSuggestedBeers();
     super.initState();
   }
 
@@ -77,7 +80,7 @@ class _SearchFragmentState extends State<SearchFragment> {
                         topLeft: Radius.circular(30),
                         topRight: Radius.circular(30))),
             child: StreamBuilder<List<Beer>>(
-                stream: _beerBloc.beersController,
+                stream: _beerBloc.suggestedBeersStream,
                 builder: (context, snapshot) {
                   return Column(
                     children: <Widget>[
@@ -100,6 +103,8 @@ class _SearchFragmentState extends State<SearchFragment> {
                                   focusNode: _focusNode,
                                   onTap: () => setState(() => _focused = true),
                                   onFieldSubmitted: (text) => search(text),
+                                  onChanged: (value) =>
+                                      _handleSearchFieldChange(value),
                                   decoration: InputDecoration.collapsed(
                                       hintText: 'Search',
                                       hintStyle: TextStyle(
@@ -131,9 +136,16 @@ class _SearchFragmentState extends State<SearchFragment> {
                           /*TODO: Create a class SearchResult and switch with this container
                           * add also the BLoC with the stream for the results
                           */
-                          ? Container(
-                              height: MediaQuery.of(context).size.height,
-                            )
+                          ? StreamBuilder<List<Beer>>(
+                              stream: _beerBloc.queriedBeersStream,
+                              builder: (context, snapshot) {
+                                return Container(
+                                  height: MediaQuery.of(context).size.height,
+                                  child: snapshot.data != null
+                                      ? _SearchedBeerList(snapshot.data)
+                                      : Container(),
+                                );
+                              })
                           : PostGallery(snapshot),
                     ],
                   );
@@ -157,8 +169,152 @@ class _SearchFragmentState extends State<SearchFragment> {
 
   Future<Null> _handleRefresh() async {
     _beerBloc.retrieveSuggestedBeers();
-    await _beerBloc.beersController.first;
+    await _beerBloc.suggestedBeersStream.first;
     return null;
+  }
+
+  _handleSearchFieldChange(String value) {
+    if (value.length > 2)
+      _beerBloc.retrieveBeersWhenParameterIsLike('name', value);
+    else {
+      _beerBloc.clearQueriedBeersStream();
+    }
+  }
+}
+
+class _SearchedBeerList extends StatelessWidget {
+  final List<Beer> _beerList;
+
+  _SearchedBeerList(this._beerList);
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: _beerList.length == 0
+          ? Column(
+              children: [
+                Container(),
+              ],
+            )
+          : Column(
+              children: [
+                ..._beerList
+                    .map((beer) => Column(
+                          children: [
+                            __BeerEntry(beer),
+                            SizedBox(
+                              height: 10,
+                            )
+                          ],
+                        ))
+                    .toList()
+              ],
+            ),
+    );
+  }
+}
+
+class __BeerEntry extends StatelessWidget {
+  final Beer _beer;
+
+  __BeerEntry(this._beer);
+
+  @override
+  Widget build(BuildContext context) {
+    double containerHeight = MediaQuery.of(context).size.height * 0.15;
+    double containerWidth = MediaQuery.of(context).size.width;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => BeerPage(_beer.id)));
+        },
+        child: Container(
+          padding: EdgeInsets.only(left: containerWidth * 0.05),
+          height: containerHeight,
+          width: containerWidth,
+          child: Row(
+            children: [
+              StreamBuilder<Uint8List>(
+                  stream: BeerBloc.getBeerImage(_beer.beerImageUrl),
+                  builder: (context, snapshot) {
+                    return Container(
+                      width: containerHeight * 0.8,
+                      height: containerHeight * 0.8,
+                      child: snapshot.data != null
+                          ? Ink(
+                              decoration: BoxDecoration(
+                                  color: Colors.grey.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(20)),
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.all(containerHeight * 0.8 * 0.1),
+                                child: Image.memory(
+                                  snapshot.data,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            )
+                          : Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.grey.withOpacity(0.3),
+                              ),
+                            ),
+                    );
+                  }),
+              Container(
+                height: containerHeight * 0.8,
+                margin: EdgeInsets.only(left: 15),
+                child: Column(
+                  children: [
+                    Container(
+                      width: containerWidth * 0.7,
+                      height: containerHeight * 0.45,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              AutoSizeText(
+                                _beer.name,
+                                style: TextStyle(fontFamily: "Campton Bold"),
+                                maxFontSize: 30,
+                                minFontSize: 25,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: containerWidth * 0.7,
+                      height: containerHeight * 0.3,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Text(
+                                _beer.producer,
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
