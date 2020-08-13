@@ -13,9 +13,9 @@ class Beer {
       : _id = snapshot['id'],
         _name = snapshot['name'],
         _producer = snapshot['producer'],
-        _rating = snapshot['rating']??0.toDouble(),
-        _alcohol = snapshot['alcohol']??0.toDouble(),
-        _temperature = snapshot['temperature']??0.toDouble(),
+        _rating = (snapshot['rating']??0).toDouble(),
+        _alcohol = (snapshot['alcohol']??0).toDouble(),
+        _temperature = (snapshot['temperature']??0).toDouble(),
         _beerImageUrl = snapshot['imageUrl'];
 
   String get id => _id;
