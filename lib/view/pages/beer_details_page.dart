@@ -1,13 +1,19 @@
 import 'package:flare_flutter/flare_actor.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_beertastic/model/beer.dart';
 
 import 'package:flutter_beertastic/view/components/icons/custom_icons.dart';
 
 Color bottomBarColor = Colors.amber[300];
 Color bottomBarSquareColor = Colors.amber[500];
 
-class DetailsScreen extends StatelessWidget {
+class DetailsPage extends StatelessWidget {
+
+  final Beer _beer;
+
+  DetailsPage(this._beer);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,11 +47,11 @@ class DetailsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       SizedBox(height: 16.0),
-                      itemRow(CustomIcons.beer, 'Style', 'Lager'),
+                      itemRow(CustomIcons.beer, 'Style', _beer.style),
                       SizedBox(height: 16.0),
-                      colorRow(),
+                      colorRow(_beer.color),
                       SizedBox(height: 16.0),
-                      itemRow(Icons.bubble_chart, 'Carbonation', 'up to 82%'),
+                      itemRow(Icons.bubble_chart, 'Carbonation', _beer.carbonation.toString()),
                       SizedBox(height: 16.0),
                     ],
                   ),
@@ -161,7 +167,7 @@ class DetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget colorRow() {
+  Widget colorRow(String color) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
@@ -184,7 +190,7 @@ class DetailsScreen extends StatelessWidget {
           height: 40,
           child: FlareActor(
             "assets/animations/simple_color_bar.flr",
-            animation: '3',
+            animation: color,
           ),
         ),
       ],

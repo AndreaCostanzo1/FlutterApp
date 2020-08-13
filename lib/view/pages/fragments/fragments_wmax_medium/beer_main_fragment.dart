@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -32,7 +33,7 @@ class BeerMainFragmentMedium extends StatelessWidget {
                 Provider.of<Beer>(context).producer,
                 style: Theme.of(context).textTheme.subtitle2,
               ),
-              SizedBox(height: 12.0),
+              SizedBox(height: 10.0),
               _Rating(Provider.of<Beer>(context).rating.toString()),
               Spacer(),
               _ButtonAndImageRow(),
@@ -54,10 +55,16 @@ class _Title extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
-      width: 300.0,
-      child: Text(
-        beerName,
-        style: Theme.of(context).textTheme.headline6,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width*0.9,
+          maxHeight: MediaQuery.of(context).size.height*0.13,
+          minHeight: MediaQuery.of(context).size.height*0.08,
+        ),
+        child: AutoSizeText(
+          beerName,
+          style: Theme.of(context).textTheme.headline6,
+        ),
       ), //Text
     );
   }
@@ -103,6 +110,7 @@ class _ButtonAndImageRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Beer beer = Beer.fromBeer(Provider.of<Beer>(context));
     // TODO: implement build
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -112,7 +120,7 @@ class _ButtonAndImageRow extends StatelessWidget {
           onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => DetailsScreen(),
+                  builder: (context) => DetailsPage(beer),
                 ),
               ),
           backgroundColor: Theme.of(context).canvasColor,
@@ -121,9 +129,12 @@ class _ButtonAndImageRow extends StatelessWidget {
             color: Theme.of(context).backgroundColor,
           ),
         ),
-        Container(
-          width: 200.0,
-          height: 330.0,
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight:330.0,
+            minHeight: 280.0,
+            maxWidth: 220.0,
+          ),
           child: StreamBuilder(
             stream: FirebaseStorage.instance
                 .ref()

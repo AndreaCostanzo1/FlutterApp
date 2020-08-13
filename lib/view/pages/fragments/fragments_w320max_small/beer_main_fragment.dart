@@ -110,12 +110,14 @@ class _ButtonAndImageRow extends StatelessWidget {
           width: 42.0,
           height: 42.0,
           child: FloatingActionButton(
-            onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DetailsScreen(),
-                  ),
-                ),
+            onPressed: ()=>print('fix me'),
+            //FIXME
+//            onPressed: () => Navigator.push(
+//                  context,
+//                  MaterialPageRoute(
+//                    builder: (context) => DetailsPage(),
+//                  ),
+//                ),
             backgroundColor: Theme.of(context).canvasColor,
             child: Icon(
               CustomIcons.beer,
