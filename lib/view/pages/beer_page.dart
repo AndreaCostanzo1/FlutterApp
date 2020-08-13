@@ -115,6 +115,7 @@ class _MediumPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Theme(
       child: Scaffold(
+        resizeToAvoidBottomPadding: false,
         backgroundColor: BeerPageThemeMedium().canvasColor,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
