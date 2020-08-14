@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Beer {
   final String _id;
@@ -16,7 +15,7 @@ class Beer {
       : _id = snapshot['id'],
         _name = snapshot['name'],
         _producer = snapshot['producer'],
-        _rating = (snapshot['rating'] ?? 0).toDouble(),
+        _rating = ((snapshot['rating'] ?? 0).toDouble()*10).round() / 10,
         _alcohol = (snapshot['alcohol'] ?? 0.0).toDouble(),
         _temperature = (snapshot['temperature'] ?? 0).toDouble(),
         _beerImageUrl = snapshot['imageUrl'],
@@ -56,7 +55,4 @@ class Beer {
 
   double get carbonation => _carbonation;
 
-  double _upToFirstDecimalValue(double double) {
-    return (double * 10).round() / 10;
-  }
 }

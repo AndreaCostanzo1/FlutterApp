@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_beertastic/view/components/icons/custom_icons.dart';
-import 'package:flutter_beertastic/view/pages/beer_details_page.dart';
 import 'package:flutter_beertastic/view/pages/beer_reviews_page.dart';
 
 class BeerMainFragmentSmall extends StatelessWidget {

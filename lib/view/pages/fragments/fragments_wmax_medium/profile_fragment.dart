@@ -1,15 +1,11 @@
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_beertastic/blocs/authenticator.dart';
-import 'package:flutter_beertastic/blocs/beer_bloc.dart';
 import 'package:flutter_beertastic/blocs/profile_image_bloc.dart';
 import 'package:flutter_beertastic/view/components/buttons/custom_profile_list_item.dart';
 import 'package:flutter_beertastic/view/pages/styles/wmax_medium/profile_fragment_style.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class ProfileFragment extends StatefulWidget {
   @override

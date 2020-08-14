@@ -218,7 +218,6 @@ class _MapBox extends StatefulWidget {
 }
 
 class __MapBoxState extends State<_MapBox> {
-  GoogleMapController _mapController;
   Set<Marker> _markers=HashSet();
 
   @override
@@ -241,7 +240,6 @@ class __MapBoxState extends State<_MapBox> {
 
   void _onMapCreated(GoogleMapController controller) {
     setState(() {
-      _mapController = controller;
       _markers.add(Marker(
         markerId: MarkerId('name'),
         position: LatLng(widget._latitude, widget._longitude),
