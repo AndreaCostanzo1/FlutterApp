@@ -1,11 +1,15 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_beertastic/blocs/authenticator.dart';
 import 'package:flutter_beertastic/blocs/beer_bloc.dart';
 import 'package:flutter_beertastic/blocs/profile_image_bloc.dart';
 import 'package:flutter_beertastic/view/components/buttons/custom_profile_list_item.dart';
 import 'package:flutter_beertastic/view/pages/styles/wmax_medium/profile_fragment_style.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ProfileFragment extends StatefulWidget {
   @override
@@ -82,7 +86,7 @@ class __ProfileSectionState extends State<_ProfileSection> {
                             height: SpacingUnit.w * 2.5,
                             width: SpacingUnit.w * 2.5,
                             child: InkWell(
-                              onTap: ()=> print('tap'),
+                              onTap: ()=> _changeImage(),
                               child: Center(
                                 heightFactor: SpacingUnit.w * 1.5,
                                 widthFactor: SpacingUnit.w * 1.5,
@@ -143,6 +147,17 @@ class __ProfileSectionState extends State<_ProfileSection> {
   void dispose() {
     super.dispose();
     _profileBloc.dispose();
+  }
+
+  _changeImage() async {
+    String string = await _profileBloc.getProfileImagePath();
+    try {
+      bool uploaded = await MethodChannel('PICKER_CHANNEL').invokeMethod(
+          'STORAGE', Map.from({'path': string}));
+      if(uploaded) _profileBloc.getProfileImage();
+    } catch(error){
+      //TODO: show upload failed
+    }
   }
 }
 

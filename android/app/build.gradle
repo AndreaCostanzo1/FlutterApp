@@ -25,7 +25,7 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     lintOptions {
         disable 'InvalidPackage'
@@ -35,7 +35,7 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "beertastic.sanag.com.flutter_beertastic"
         minSdkVersion 24
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -71,6 +71,8 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel:2.2.0"
     //Firebase ML kit
     implementation 'com.google.firebase:firebase-ml-vision:24.0.3'
+    //Firebase Storage
+    implementation 'com.google.firebase:firebase-storage:19.1.1'
     //CameraX
     implementation "androidx.camera:camera-core:1.0.0-alpha06"
     implementation "androidx.camera:camera-camera2:1.0.0-alpha06"
