@@ -1,34 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/blocs/authenticator.dart';
+import 'package:flutter_beertastic/blocs/beer_bloc.dart';
+import 'package:flutter_beertastic/blocs/profile_image_bloc.dart';
 import 'package:flutter_beertastic/view/components/buttons/custom_profile_list_item.dart';
 import 'package:flutter_beertastic/view/pages/styles/wmax_medium/profile_fragment_style.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
-
 class ProfileFragment extends StatefulWidget {
-
   @override
   _ProfileFragmentState createState() => _ProfileFragmentState();
 }
 
 class _ProfileFragmentState extends State<ProfileFragment> {
-
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, height: 896, width: 414, allowFontScaling: true);
     return Container(
       decoration: BoxDecoration(
-          gradient: new LinearGradient(
-              colors: [
-                Theme.of(context).primaryColorLight,
-                Theme.of(context).primaryColorDark
-              ],
-              begin: const FractionalOffset(1.0, 1.0),
-              end: const FractionalOffset(0.2, 0.2),
-              stops: [0.0, 1.0],
-              tileMode: TileMode.clamp),
-          ),
+        gradient: new LinearGradient(
+            colors: [
+              Theme.of(context).primaryColorLight,
+              Theme.of(context).primaryColorDark
+            ],
+            begin: const FractionalOffset(1.0, 1.0),
+            end: const FractionalOffset(0.2, 0.2),
+            stops: [0.0, 1.0],
+            tileMode: TileMode.clamp),
+      ),
       child: Column(
         children: <Widget>[
           SizedBox(height: SpacingUnit.w * 3),
@@ -40,10 +39,16 @@ class _ProfileFragmentState extends State<ProfileFragment> {
   }
 }
 
-class _ProfileSection extends StatelessWidget {
+class _ProfileSection extends StatefulWidget {
+  @override
+  __ProfileSectionState createState() => __ProfileSectionState();
+}
+
+class __ProfileSectionState extends State<_ProfileSection> {
+  ProfileImageBloc _profileBloc;
+
   @override
   Widget build(BuildContext context) {
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,9 +62,17 @@ class _ProfileSection extends StatelessWidget {
                 margin: EdgeInsets.only(top: SpacingUnit.w * 3),
                 child: Stack(
                   children: <Widget>[
-                    CircleAvatar(
-                      radius: SpacingUnit.w * 5,
-                    ),
+                    StreamBuilder<ImageProvider>(
+                        stream: _profileBloc.profileImageStream,
+                        builder: (context, snapshot) {
+                          return CircleAvatar(
+                            radius: SpacingUnit.w * 5,
+                            foregroundColor: Colors.grey,
+                            backgroundImage: snapshot.data != null
+                                ? snapshot.data
+                                : AssetImage('assets/images/user.png'),
+                          );
+                        }),
                     Align(
                       alignment: Alignment.bottomRight,
                       child: Container(
@@ -114,16 +127,29 @@ class _ProfileSection extends StatelessWidget {
       ],
     );
   }
+
+  @override
+  void initState() {
+    super.initState();
+    _profileBloc = ProfileImageBloc();
+    _profileBloc.getProfileImage();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _profileBloc.dispose();
+  }
 }
 
-class _ProfileItems extends StatelessWidget{
-
+class _ProfileItems extends StatelessWidget {
   final AuthenticatorInterface _authBLoC = Authenticator();
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: _authBLoC.remoteError,
-      builder: (context, snapshot){
+      builder: (context, snapshot) {
         //TODO: Manage errors (see login_form line 31)
         return Expanded(
           child: ScrollConfiguration(
@@ -150,7 +176,6 @@ class _ProfileItems extends StatelessWidget{
       },
     );
   }
-
 }
 
 class _HideGlowBehaviour extends ScrollBehavior {
@@ -160,4 +185,3 @@ class _HideGlowBehaviour extends ScrollBehavior {
     return child;
   }
 }
-

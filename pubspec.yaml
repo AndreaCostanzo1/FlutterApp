@@ -66,6 +66,7 @@ flutter:
   # assets
   assets:
     - assets/images/logo.png
+    - assets/images/user.png
     - assets/animations/simple_color_bar.flr
 
   fonts:
