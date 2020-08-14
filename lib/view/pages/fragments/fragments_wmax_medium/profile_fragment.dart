@@ -75,20 +75,24 @@ class __ProfileSectionState extends State<_ProfileSection> {
                         }),
                     Align(
                       alignment: Alignment.bottomRight,
-                      child: Container(
-                        height: SpacingUnit.w * 2.5,
-                        width: SpacingUnit.w * 2.5,
-                        decoration: BoxDecoration(
+                      child: ClipOval(
+                        child: Material(
                           color: Theme.of(context).accentColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          heightFactor: SpacingUnit.w * 1.5,
-                          widthFactor: SpacingUnit.w * 1.5,
-                          child: Icon(
-                            LineAwesomeIcons.pen,
-                            color: DarkPrimaryColor,
-                            size: ScreenUtil().setSp(SpacingUnit.w * 1.5),
+                          child: Container(
+                            height: SpacingUnit.w * 2.5,
+                            width: SpacingUnit.w * 2.5,
+                            child: InkWell(
+                              onTap: ()=> print('tap'),
+                              child: Center(
+                                heightFactor: SpacingUnit.w * 1.5,
+                                widthFactor: SpacingUnit.w * 1.5,
+                                child: Icon(
+                                  LineAwesomeIcons.pen,
+                                  color: DarkPrimaryColor,
+                                  size: ScreenUtil().setSp(SpacingUnit.w * 1.5),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
