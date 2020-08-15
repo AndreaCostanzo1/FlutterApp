@@ -31,6 +31,7 @@ class _SearchFragmentState extends State<SearchFragment> {
   }
 
   void unfocusSearch() {
+    _controller.clear();
     _focusNode.unfocus();
     setState(() {
       _focused = false;
@@ -113,11 +114,7 @@ class _SearchFragmentState extends State<SearchFragment> {
                                   ? IconButton(
                                       padding: EdgeInsets.all(0),
                                       icon: Icon(Icons.clear),
-                                      onPressed: () {
-                                        _controller.clear();
-                                        _focusNode.unfocus();
-                                        setState(() => _focused = false);
-                                      },
+                                      onPressed: () => unfocusSearch(),
                                     )
                                   : ScannerButton(),
                             ],
