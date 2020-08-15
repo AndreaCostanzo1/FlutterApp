@@ -4,6 +4,7 @@ import 'package:flutter_beertastic/blocs/authenticator.dart';
 import 'package:flutter_beertastic/blocs/profile_image_bloc.dart';
 import 'package:flutter_beertastic/view/components/buttons/custom_profile_list_item.dart';
 import 'package:flutter_beertastic/view/pages/styles/wmax_medium/profile_fragment_style.dart';
+import 'package:flutter_beertastic/view/pages/settings_page.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
@@ -101,14 +102,18 @@ class __ProfileSectionState extends State<_ProfileSection> {
                 ),
               ),
               SizedBox(height: SpacingUnit.w * 2),
-              Text(
-                'Mario Rossi',
-                style: titleTextStyle,
-              ),
-              SizedBox(height: SpacingUnit.w * 0.5),
-              Text(
-                'mymail.address@gmail.com',
-                style: captionTextStyle,
+              Column(
+                children: <Widget>[
+                  Text(
+                    'Mario Rossi',
+                    style: titleTextStyle,
+                  ),
+                  SizedBox(height: SpacingUnit.w * 0.5),
+                  Text(
+                    'mymail.address@gmail.com',
+                    style: captionTextStyle,
+                  ),
+                ],
               ),
               SizedBox(height: SpacingUnit.w * 2),
               Container(
@@ -175,7 +180,10 @@ class _ProfileItems extends StatelessWidget {
                   icon: LineAwesomeIcons.cog,
                   text: 'Settings',
                   color: Theme.of(context).backgroundColor,
-                  onTap: () => print('tap'),
+                  onTap: () => Navigator.push(context,  MaterialPageRoute(
+                    builder: (context) => SettingsPage(),
+                  )),
+
                 ),
                 ProfileListItem(
                   icon: LineAwesomeIcons.alternate_sign_out,
@@ -192,6 +200,7 @@ class _ProfileItems extends StatelessWidget {
     );
   }
 }
+
 
 class _HideGlowBehaviour extends ScrollBehavior {
   @override

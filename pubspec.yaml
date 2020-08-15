@@ -69,6 +69,8 @@ flutter:
   assets:
     - assets/images/logo.png
     - assets/images/user.png
+    - assets/images/3042.jpg
+    - assets/images/milan.jpg
     - assets/animations/simple_color_bar.flr
 
   fonts:
