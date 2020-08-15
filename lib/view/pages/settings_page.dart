@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 class SettingsPage extends StatelessWidget {
   SettingsPage({Key key}) : super(key: key);
@@ -8,21 +9,24 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[_TopPage()],
-        ),
+        child: _TopPage(),
       ),
     );
   }
 }
 
-class _TopPage extends StatelessWidget {
+class _TopPage extends StatefulWidget {
+  @override
+  __TopPageState createState() => __TopPageState();
+}
+
+class __TopPageState extends State<_TopPage> {
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
         Container(
-          constraints: BoxConstraints.expand(height: 295),
+          constraints: BoxConstraints.expand(height: MediaQuery.of(context).size.height*0.4),
           decoration: BoxDecoration(
               image: DecorationImage(
                   image: AssetImage('assets/images/milan.jpg'),
@@ -77,58 +81,75 @@ class _TopPage extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 50,
+          height: MediaQuery.of(context).size.height*0.067,
         ),
-        _SettingsWidget(),
-      ],
-    );
-  }
-}
-
-class _SettingsWidget extends StatefulWidget {
-  @override
-  __SettingsWidgetState createState() => __SettingsWidgetState();
-}
-
-class __SettingsWidgetState extends State<_SettingsWidget> {
-  TextEditingController _controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        children: <Widget>[
-          Row(
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
             children: <Widget>[
+              Row(
+                children: <Widget>[
+                  Container(
+                    child: Text(
+                      'Nickname',
+                      style:
+                          TextStyle(fontFamily: "Campton Bold", fontSize: 26),
+                    ),
+                  ),
+                ],
+              ),
+              TextFormField(
+                style:
+                    TextStyle(fontSize: 22, fontFamily: "Montserrat Regular"),
+              ),
               Container(
-                child: Text(
-                  'Nickname',
-                  style: TextStyle(fontFamily: "Campton Bold", fontSize: 26),
+                height: MediaQuery.of(context).size.height * 0.4,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        ClipRRect(
+                            borderRadius: BorderRadius.circular(30),
+                            child: ButtonTheme(
+                              minWidth: MediaQuery.of(context).size.width*0.4,
+                              child: FlatButton(
+                                onPressed: () => print('tap'),
+                                child: Text('Cancel'),
+                              ),
+                            )),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
+                          child: ButtonTheme(
+                            minWidth: MediaQuery.of(context).size.width*0.4,
+                            child: RaisedButton(
+                              onPressed: () => print('tap'),
+                              child: Text('Confirm'),
+                            ),
+                          ),
+                        )
+                      ],
+                    )
+                  ],
                 ),
               ),
             ],
           ),
-          TextFormField(
-            style: TextStyle(fontSize: 22, fontFamily: "Montserrat Regular"),
-          ),
-          SizedBox(
-            height: 40,
-          ),
-        ],
-      ),
+        )
+      ],
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: '');
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+  void _temp() {
+    Geolocator().getCurrentPosition().then((value) {
+      Geolocator()
+          .placemarkFromCoordinates(value.latitude, value.longitude)
+          .then((value) {
+        print('Locality: ' + value[0].locality);
+        print('Adm area: ' + value[0].administrativeArea);
+      });
+    });
   }
 }
 
