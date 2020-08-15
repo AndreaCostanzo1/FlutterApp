@@ -1,12 +1,14 @@
 import 'dart:async';
+import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 abstract class AuthenticatorInterface {
   void logWithEmailAndPassword(String email, String password);
 
-  void signUpWithEmailAndPassword(
-      String email, String password, String confirm);
+  void signUpWithEmailAndPassword(String email, String password,
+      String confirm);
 
   void logOut();
 
@@ -35,7 +37,7 @@ class Authenticator implements AuthenticatorInterface {
   @override
   void logWithEmailAndPassword(String email, String password) async {
     RemoteError _staticError =
-        StaticFieldChecker().checkEmailAndPassword(email, password);
+    StaticFieldChecker().checkEmailAndPassword(email, password);
     if (_staticError != null) {
       _remoteErrorController.sink.add(_staticError);
     } else {
@@ -46,15 +48,16 @@ class Authenticator implements AuthenticatorInterface {
   }
 
   @override
-  void signUpWithEmailAndPassword(
-      String email, String password, String confirm) async {
+  void signUpWithEmailAndPassword(String email, String password,
+      String confirm) async {
     RemoteError _staticError =
-        StaticFieldChecker().checkFields(email, password, confirm);
+    StaticFieldChecker().checkFields(email, password, confirm);
     if (_staticError != null) {
       _remoteErrorController.sink.add(_staticError);
     } else {
       FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password)
+          .then((response) => _createNewUserEntry(response))
           .catchError((error) => _handleError(error));
     }
   }
@@ -86,6 +89,17 @@ class Authenticator implements AuthenticatorInterface {
 
   void dispose() async {
     _remoteErrorController?.close();
+  }
+
+  void _createNewUserEntry(AuthResult response) {
+    FirebaseUser user = response.user;
+    Map<String,dynamic> userData=Map.from({
+      'id':user.uid,
+      'nickname': 'user'+user.uid.substring(7)+Random().nextInt(300).toString(),
+      'email': user.email,
+      'profile_image_path':'profile_images/'+user.uid
+    });
+    Firestore.instance.collection('users').document(user.uid).setData(userData);
   }
 }
 
