@@ -141,7 +141,13 @@ class __TopPageState extends State<_TopPage> {
     );
   }
 
-  void _temp() {
+  @override
+  void initState() {
+    super.initState();
+    _temp();
+  }
+
+  void _temp() async {
     Geolocator().getCurrentPosition().then((value) {
       Geolocator()
           .placemarkFromCoordinates(value.latitude, value.longitude)
