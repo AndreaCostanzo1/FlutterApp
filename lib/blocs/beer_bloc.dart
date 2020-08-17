@@ -132,14 +132,14 @@ class BeerBloc {
         isGreaterThan: DateTime.now().subtract(Duration(minutes: 2)))
         .getDocuments();
     if(query.documents!=null&&!(query.documents.length>0)){
-      Firestore.instance.runTransaction((transaction) {
+      Firestore.instance.runTransaction((transaction)  {
         return transaction.get(reference).then((snapshot) async {
           Beer beer = Beer.fromSnapshot(snapshot.data);
           reference.collection('searches').add({
             'user': userRef,
             'date': DateTime.now(),
           });
-          transaction.update(reference, {'searches': beer.searches + 1});
+          await transaction.update(reference, {'searches': beer.searches + 1});
         });
       });
     }
