@@ -63,14 +63,14 @@ class BeerBloc {
   //value is used to perform a "like" behaviour of SQL databases
   void retrieveBeersWhenParameterIsLike(String parameter, String value) {
     if (_queriedBeersController.isClosed) return;
-    String lowerLimit=(value.length>0?value[0].toUpperCase():'');
-    if(value.length>1) lowerLimit=lowerLimit+value.substring(1).toLowerCase();
-    String upperLimit=lowerLimit+'zzzz';
+    String lowerLimit = (value.length > 0 ? value[0].toUpperCase() : '');
+    if (value.length > 1)
+      lowerLimit = lowerLimit + value.substring(1).toLowerCase();
+    String upperLimit = lowerLimit + 'zzzz';
     Firestore.instance
         .collection('beers')
-        .where(parameter,
-           isGreaterThanOrEqualTo: lowerLimit)
-        .where(parameter,isLessThanOrEqualTo: upperLimit)
+        .where(parameter, isGreaterThanOrEqualTo: lowerLimit)
+        .where(parameter, isLessThanOrEqualTo: upperLimit)
         .getDocuments()
         .then((query) =>
             _updateBeersSink(_queriedBeersController, query.documents));
@@ -103,6 +103,20 @@ class BeerBloc {
     beerList.clear();
     _queriedBeersController.sink.add(beerList);
   }
+
+  void retrieveSingleBeer(String beerID) {
+    Firestore.instance
+        .collection('beers')
+        .document(beerID)
+        .get()
+        .then((snapshot) {
+      print(snapshot.data != null);
+      if (snapshot.data != null) {
+        _singleBeerController.sink.add(Beer.fromSnapshot(snapshot.data));
+      } else {
+        _singleBeerController.sink.addError('Beer-not-found');
+        _singleBeerController.sink.add(Beer.nullBeer());
+      }
+    });
+  }
 }
-
-

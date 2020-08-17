@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_beertastic/blocs/beer_bloc.dart';
 
 import 'package:flutter_beertastic/model/beer.dart';
 import 'package:flutter_beertastic/view/pages/fragments/fragments_w320max_small/beer_bottom_bar.dart';
@@ -37,19 +38,20 @@ class BeerPage extends StatefulWidget {
 }
 
 class _BeerState extends State<BeerPage> {
+
+  BeerBloc _beerBloc;
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<DocumentSnapshot>(
-      stream: Firestore.instance
-          .collection('beers')
-          .document(widget.beerID)
-          .snapshots(),
+    return StreamBuilder<Beer>(
+      stream: _beerBloc.singleBeerStream,
       builder: (context, snapshot) {
+        if(snapshot.data!=null&&snapshot.hasData) /*TODO implement update searches*/;
         return snapshot.data == null
             ? _RefreshIndicatorPage()
-            : snapshot.data.exists
+            : snapshot.data.id!=''
                 ? Provider<Beer>.value(
-                    value: Beer.fromSnapshot(snapshot.data.data),
+                    value: Beer.fromBeer(snapshot.data),
                     //extract the page depending on dimension
                     child: widget.widgetsByDimensions[SizeComputer.computeSize(
                         MediaQuery.of(context).size.width)],
@@ -57,6 +59,19 @@ class _BeerState extends State<BeerPage> {
                 : NoBeerPage();
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _beerBloc= BeerBloc();
+    _beerBloc.retrieveSingleBeer(widget.beerID);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _beerBloc.dispose();
   }
 }
 

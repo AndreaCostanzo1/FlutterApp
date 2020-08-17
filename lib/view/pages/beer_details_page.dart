@@ -8,11 +8,21 @@ import 'package:flutter_beertastic/view/components/icons/custom_icons.dart';
 Color bottomBarColor = Colors.amber[300];
 Color bottomBarSquareColor = Colors.amber[500];
 
-class DetailsPage extends StatelessWidget {
+class DetailsPage extends StatefulWidget {
 
   final Beer _beer;
 
-  DetailsPage(this._beer);
+  DetailsPage(this._beer, {Key key}):super(key:key);
+
+  @override
+  _DetailsPageState createState() => _DetailsPageState(_beer);
+}
+
+class _DetailsPageState extends State<DetailsPage> {
+
+  Beer _beer;
+
+  _DetailsPageState(this._beer);
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +57,11 @@ class DetailsPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       SizedBox(height: 16.0),
-                      itemRow(CustomIcons.beer, 'Style', _beer.style),
+                      itemRow(CustomIcons.beer, 'Style', widget._beer.style),
                       SizedBox(height: 16.0),
-                      colorRow(_beer.color),
+                      colorRow(widget._beer.color),
                       SizedBox(height: 16.0),
-                      itemRow(Icons.bubble_chart, 'Carbonation', _beer.carbonation.toString()),
+                      itemRow(Icons.bubble_chart, 'Carbonation', widget._beer.carbonation.toString()),
                       SizedBox(height: 16.0),
                     ],
                   ),
@@ -72,10 +82,10 @@ class DetailsPage extends StatelessWidget {
               child: Row(
                 children: <Widget>[
                   SizedBox(width: 20.0),
-                  Icon(Icons.add, color: Colors.white, size: 24.0),
+                  Icon(Icons.search, color: Colors.white, size: 24.0),
                   SizedBox(width: 40.0),
                   Text(
-                    'Delivery Information',
+                    _beer.searches.toString(),
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 22.0,
@@ -98,10 +108,10 @@ class DetailsPage extends StatelessWidget {
               child: Row(
                 children: <Widget>[
                   SizedBox(width: 20.0),
-                  Icon(Icons.add, color: Colors.white, size: 24.0),
+                  Icon(Icons.favorite_border, color: Colors.white, size: 24.0),
                   SizedBox(width: 40.0),
                   Text(
-                    'Return Policy',
+                    _beer.likes.toString(),
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 22.0,
