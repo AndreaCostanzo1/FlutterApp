@@ -8,6 +8,8 @@ import 'package:flutter_beertastic/view/pages/settings_page.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
+import '../../favourites_page.dart';
+
 class ProfileFragment extends StatefulWidget {
   @override
   _ProfileFragmentState createState() => _ProfileFragmentState();
@@ -116,17 +118,23 @@ class __ProfileSectionState extends State<_ProfileSection> {
                 ],
               ),
               SizedBox(height: SpacingUnit.w * 2),
-              Container(
-                height: SpacingUnit.w * 4,
-                width: SpacingUnit.w * 20,
-                decoration: BoxDecoration(
+              Material(
+                color: Color(0xffFF4B2B),
+                borderRadius: BorderRadius.circular(SpacingUnit.w * 3),
+                child: InkWell(
+                  onTap: ()=>Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => FavouritesPage(),
+                  )),
                   borderRadius: BorderRadius.circular(SpacingUnit.w * 3),
-                  color: Theme.of(context).accentColor,
-                ),
-                child: Center(
-                  child: Text(
-                    'Main Button',
-                    style: buttonTextStyle,
+                  child: Container(
+                    height: SpacingUnit.w * 4,
+                    width: SpacingUnit.w * 20,
+                    child: Center(
+                      child: Text(
+                        'My Favourites',
+                        style: buttonTextStyle,
+                      ),
+                    ),
                   ),
                 ),
               ),
