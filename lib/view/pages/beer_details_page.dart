@@ -1,6 +1,7 @@
 import 'package:flare_flutter/flare_actor.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_beertastic/blocs/beer_bloc.dart';
 import 'package:flutter_beertastic/model/beer.dart';
 
 import 'package:flutter_beertastic/view/components/icons/custom_icons.dart';
@@ -9,20 +10,19 @@ Color bottomBarColor = Colors.amber[300];
 Color bottomBarSquareColor = Colors.amber[500];
 
 class DetailsPage extends StatefulWidget {
-
   final Beer _beer;
 
-  DetailsPage(this._beer, {Key key}):super(key:key);
+  DetailsPage(this._beer, {Key key}) : super(key: key);
 
   @override
-  _DetailsPageState createState() => _DetailsPageState(_beer);
+  _DetailsPageState createState() => _DetailsPageState();
 }
 
 class _DetailsPageState extends State<DetailsPage> {
-
-  Beer _beer;
-
-  _DetailsPageState(this._beer);
+  int _searches;
+  int _likes;
+  BeerBloc beerBloc;
+  bool _liked;
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +61,8 @@ class _DetailsPageState extends State<DetailsPage> {
                       SizedBox(height: 16.0),
                       colorRow(widget._beer.color),
                       SizedBox(height: 16.0),
-                      itemRow(Icons.bubble_chart, 'Carbonation', widget._beer.carbonation.toString()),
+                      itemRow(Icons.bubble_chart, 'Carbonation',
+                          widget._beer.carbonation.toString()),
                       SizedBox(height: 16.0),
                     ],
                   ),
@@ -85,7 +86,7 @@ class _DetailsPageState extends State<DetailsPage> {
                   Icon(Icons.search, color: Colors.white, size: 24.0),
                   SizedBox(width: 40.0),
                   Text(
-                    _beer.searches.toString(),
+                    _searches.toString(),
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 22.0,
@@ -111,7 +112,7 @@ class _DetailsPageState extends State<DetailsPage> {
                   Icon(Icons.favorite_border, color: Colors.white, size: 24.0),
                   SizedBox(width: 40.0),
                   Text(
-                    _beer.likes.toString(),
+                    _likes.toString(),
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 22.0,
@@ -136,8 +137,86 @@ class _DetailsPageState extends State<DetailsPage> {
                     ),
                   ),
                 ),
-                CustomBackgroundedIconButton(
-                  topLeftRadius: Radius.circular(48.0),
+                _liked
+                    ? AnimatedContainer(
+                  height: 80,
+                  duration: Duration(milliseconds: 300),
+                  width: MediaQuery.of(context).size.width / 2,
+                  curve: Curves.ease,
+                  decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(48),
+                          topRight: Radius.zero,
+                          bottomLeft: Radius.zero,
+                          bottomRight: Radius.zero)),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(48),
+                          topRight: Radius.zero,
+                          bottomLeft: Radius.zero,
+                          bottomRight: Radius.zero),
+                      onTap: () => _temp(),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(
+                            Icons.favorite,
+                            color: Colors.white,
+                          ),
+                          SizedBox(
+                            width: 6.0,
+                          ),
+                          Text(
+                            'add to favorites',
+                            style: TextStyle(color: Colors.white),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+                    : AnimatedContainer(
+                  height: 80,
+                  duration: Duration(milliseconds: 300),
+                  width: MediaQuery.of(context).size.width / 2,
+                  curve: Curves.ease,
+                  decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(48),
+                          topRight: Radius.zero,
+                          bottomLeft: Radius.zero,
+                          bottomRight: Radius.zero)),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(48),
+                          topRight: Radius.zero,
+                          bottomLeft: Radius.zero,
+                          bottomRight: Radius.zero),
+                      onTap: () => _temp(),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(
+                            Icons.favorite,
+                            color: Colors.white,
+                          ),
+                          SizedBox(
+                            width: 6.0,
+                          ),
+                          Text(
+                            'add to favorites',
+                            style: TextStyle(color: Colors.white),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -145,6 +224,25 @@ class _DetailsPageState extends State<DetailsPage> {
         ],
       ),
     );
+  }
+
+  _temp() {
+    print('tap');
+    setState(() {
+      if (_liked)
+        _liked = false;
+      else
+        _liked = true;
+      print(_liked);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _searches = widget._beer.searches;
+    _likes = widget._beer.likes;
+    _liked = false;
   }
 
   Widget itemRow(icon, name, title) {
@@ -216,15 +314,17 @@ class CustomBackgroundedIconButton extends StatelessWidget {
   final Color backgroundColor;
   final Color outlineColor;
   final double buttonHeight;
+  final Function onTap;
 
   CustomBackgroundedIconButton(
       {this.backgroundColor = const Color(0xff2c2731),
-        this.outlineColor = Colors.white,
-        this.topLeftRadius = Radius.zero,
-        this.topRightRadius = Radius.zero,
-        this.bottomLeftRadius = Radius.zero,
-        this.bottomRightRadius = Radius.zero,
-        this.buttonHeight = 80.0});
+      this.outlineColor = Colors.white,
+      this.topLeftRadius = Radius.zero,
+      this.topRightRadius = Radius.zero,
+      this.bottomLeftRadius = Radius.zero,
+      this.bottomRightRadius = Radius.zero,
+      this.buttonHeight = 80.0,
+      @required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -242,14 +342,13 @@ class CustomBackgroundedIconButton extends StatelessWidget {
               bottomRight: bottomRightRadius)),
       child: Material(
         color: Colors.transparent,
-
         child: InkWell(
           borderRadius: BorderRadius.only(
               topLeft: topLeftRadius,
               topRight: topRightRadius,
               bottomLeft: bottomLeftRadius,
               bottomRight: bottomRightRadius),
-          onTap: () => print('tap'),
+          onTap: () => onTap,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[

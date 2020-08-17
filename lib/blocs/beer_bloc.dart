@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_beertastic/model/beer.dart';
@@ -132,16 +133,13 @@ class BeerBloc {
         isGreaterThan: DateTime.now().subtract(Duration(minutes: 2)))
         .getDocuments();
     if(query.documents!=null&&!(query.documents.length>0)){
-      Firestore.instance.runTransaction((transaction)  {
-        return transaction.get(reference).then((snapshot) async {
-          Beer beer = Beer.fromSnapshot(snapshot.data);
-          reference.collection('searches').add({
-            'user': userRef,
-            'date': DateTime.now(),
-          });
-          await transaction.update(reference, {'searches': beer.searches + 1});
-        });
+      reference.collection('searches').add({
+        'user': userRef,
+        'date': DateTime.now(),
       });
+      CloudFunctions.instance.getHttpsCallable(
+        functionName: 'updateSearches',
+      ).call({'beerId':id});
     }
   }
 }
