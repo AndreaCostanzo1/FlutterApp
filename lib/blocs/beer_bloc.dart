@@ -85,7 +85,6 @@ class BeerBloc {
       beerList.addAll(beersSnapshots
           .map((snapshots) => Beer.fromSnapshot(snapshots.data))
           .toList());
-      beerList.forEach((element) {print(element.name);}); //fixme remove me
       beersStream.sink.add(beerList);
     }
   }

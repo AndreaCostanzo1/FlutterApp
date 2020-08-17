@@ -1,4 +1,3 @@
-
 class Beer {
   final String _id;
   final String _name;
@@ -15,7 +14,7 @@ class Beer {
       : _id = snapshot['id'],
         _name = snapshot['name'],
         _producer = snapshot['producer'],
-        _rating = ((snapshot['rating'] ?? 0).toDouble()*10).round() / 10,
+        _rating = ((snapshot['rating'] ?? 0).toDouble() * 10).round() / 10,
         _alcohol = (snapshot['alcohol'] ?? 0.0).toDouble(),
         _temperature = (snapshot['temperature'] ?? 0).toDouble(),
         _beerImageUrl = snapshot['imageUrl'],
@@ -55,4 +54,19 @@ class Beer {
 
   double get carbonation => _carbonation;
 
+  @override
+  String toString() {
+    return Map.from({
+      'id': _id,
+      'name': _name,
+      'producer': _producer,
+      'rating': _rating.toString(),
+      'alcohol': _alcohol.toString(),
+      'temperature': _temperature.toString(),
+      'beerImageUrl': _beerImageUrl,
+      'style': _style,
+      'color': _color,
+      'carbonation': _carbonation,
+    }).toString();
+  }
 }
