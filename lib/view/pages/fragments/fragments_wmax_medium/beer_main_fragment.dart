@@ -144,7 +144,7 @@ class _ButtonAndImageRow extends StatelessWidget {
             builder: (context, urlSnapshot) {
               return urlSnapshot.data != null
                   ? Image.network(urlSnapshot.data)
-                  : Container();
+                  : Container(height: 10,);
             },
           ),
         )
