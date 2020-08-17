@@ -130,16 +130,54 @@ class BeerBloc {
         .collection('searches')
         .where('user', isEqualTo: userRef)
         .where('date',
-        isGreaterThan: DateTime.now().subtract(Duration(minutes: 2)))
+            isGreaterThan: DateTime.now().subtract(Duration(minutes: 2)))
         .getDocuments();
-    if(query.documents!=null&&!(query.documents.length>0)){
+    if (query.documents != null && !(query.documents.length > 0)) {
       reference.collection('searches').add({
         'user': userRef,
         'date': DateTime.now(),
       });
-      CloudFunctions.instance.getHttpsCallable(
+      CloudFunctions.instance
+          .getHttpsCallable(
         functionName: 'updateSearches',
-      ).call({'beerId':id});
+      )
+          .call({'beerId': id});
     }
+  }
+
+  void addToFavourites(Beer beer) async {
+    DocumentReference reference =
+        Firestore.instance.collection('beers').document(beer.id);
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    DocumentReference userRef =
+        Firestore.instance.collection('users').document(user.uid);
+    try {
+      reference.collection('favourites').document(user.uid).setData({
+        'user': userRef,
+        'date': DateTime.now(),
+      });
+    } catch (e) {
+      print(e);
+    }
+
+    Firestore.instance.runTransaction((transaction) {
+      return transaction.get(reference).then((snapshot) =>
+          transaction.update(reference, {'likes': snapshot.data['likes'] + 1}));
+    });
+  }
+
+  void removeFromFavourites(Beer beer) async {
+    DocumentReference reference =
+    Firestore.instance.collection('beers').document(beer.id);
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    try {
+      reference.collection('favourites').document(user.uid).delete();
+    } catch (e) {
+      print(e);
+    }
+    Firestore.instance.runTransaction((transaction) {
+      return transaction.get(reference).then((snapshot) =>
+          transaction.update(reference, {'likes': snapshot.data['likes'] - 1}));
+    });
   }
 }
