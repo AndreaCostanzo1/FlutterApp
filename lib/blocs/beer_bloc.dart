@@ -110,7 +110,6 @@ class BeerBloc {
         .document(beerID)
         .get()
         .then((snapshot) {
-      print(snapshot.data != null);
       if (snapshot.data != null) {
         _singleBeerController.sink.add(Beer.fromSnapshot(snapshot.data));
       } else {
@@ -118,5 +117,31 @@ class BeerBloc {
         _singleBeerController.sink.add(Beer.nullBeer());
       }
     });
+  }
+
+  void updateSearches(String id) async {
+    DocumentReference reference =
+        Firestore.instance.collection('beers').document(id);
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    DocumentReference userRef =
+        Firestore.instance.collection('users').document(user.uid);
+    QuerySnapshot query = await reference
+        .collection('searches')
+        .where('user', isEqualTo: userRef)
+        .where('date',
+        isGreaterThan: DateTime.now().subtract(Duration(minutes: 2)))
+        .getDocuments();
+    if(query.documents!=null&&!(query.documents.length>0)){
+      Firestore.instance.runTransaction((transaction) {
+        return transaction.get(reference).then((snapshot) async {
+          Beer beer = Beer.fromSnapshot(snapshot.data);
+          reference.collection('searches').add({
+            'user': userRef,
+            'date': DateTime.now(),
+          });
+          transaction.update(reference, {'searches': beer.searches + 1});
+        });
+      });
+    }
   }
 }

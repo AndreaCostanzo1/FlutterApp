@@ -46,7 +46,7 @@ class _BeerState extends State<BeerPage> {
     return StreamBuilder<Beer>(
       stream: _beerBloc.singleBeerStream,
       builder: (context, snapshot) {
-        if(snapshot.data!=null&&snapshot.hasData) /*TODO implement update searches*/;
+        if(snapshot.data!=null&&snapshot.data.id!='') _beerBloc.updateSearches(snapshot.data.id);
         return snapshot.data == null
             ? _RefreshIndicatorPage()
             : snapshot.data.id!=''
