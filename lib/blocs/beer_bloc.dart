@@ -180,4 +180,19 @@ class BeerBloc {
           transaction.update(reference, {'likes': snapshot.data['likes'] - 1}));
     });
   }
+
+  void observeSingleBeer(String beerID) {
+    _subscriptions.add(Firestore.instance
+        .collection('beers')
+        .document(beerID)
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.data != null) {
+        _singleBeerController.sink.add(Beer.fromSnapshot(snapshot.data));
+      } else {
+        _singleBeerController.sink.addError('Beer-not-found');
+        _singleBeerController.sink.add(Beer.nullBeer());
+      }
+    }));
+  }
 }

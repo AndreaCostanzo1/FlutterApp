@@ -6,7 +6,6 @@ import 'package:flutter_beertastic/blocs/likes_bloc.dart';
 import 'package:flutter_beertastic/model/beer.dart';
 
 import 'package:flutter_beertastic/view/components/icons/custom_icons.dart';
-import 'package:provider/provider.dart';
 
 Color bottomBarColor = Colors.amber[300];
 Color bottomBarSquareColor = Colors.amber[500];
@@ -21,11 +20,8 @@ class DetailsPage extends StatefulWidget {
 }
 
 class _DetailsPageState extends State<DetailsPage> {
-  int _searches;
-  int _likes;
   BeerBloc _beerBloc;
   LikesBloc _likesBloc;
-  bool _updating;
 
   @override
   Widget build(BuildContext context) {
@@ -74,57 +70,70 @@ class _DetailsPageState extends State<DetailsPage> {
             ),
           ),
           SizedBox(height: 18.0),
-          Padding(
-            padding: const EdgeInsets.only(left: 48.0),
-            child: Container(
-              height: 60.0,
-              decoration: BoxDecoration(
-                  color: bottomBarSquareColor,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(32.0),
-                      bottomLeft: Radius.circular(32.0))),
-              child: Row(
-                children: <Widget>[
-                  SizedBox(width: 20.0),
-                  Icon(Icons.search, color: Colors.white, size: 24.0),
-                  SizedBox(width: 40.0),
-                  Text(
-                    _searches.toString(),
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22.0,
-                        fontWeight: FontWeight.w500),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: 32.0),
-          Padding(
-            padding: const EdgeInsets.only(left: 48.0),
-            child: Container(
-              height: 60.0,
-              decoration: BoxDecoration(
-                  color: bottomBarSquareColor,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(32.0),
-                      bottomLeft: Radius.circular(32.0))),
-              child: Row(
-                children: <Widget>[
-                  SizedBox(width: 20.0),
-                  Icon(Icons.favorite_border, color: Colors.white, size: 24.0),
-                  SizedBox(width: 40.0),
-                  Text(
-                    _likes.toString(),
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22.0,
-                        fontWeight: FontWeight.w500),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          StreamBuilder<Beer>(
+              stream: _beerBloc.singleBeerStream,
+              builder: (context, snapshot) {
+                return Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 48.0),
+                      child: Container(
+                        height: 60.0,
+                        decoration: BoxDecoration(
+                            color: bottomBarSquareColor,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(32.0),
+                                bottomLeft: Radius.circular(32.0))),
+                        child: Row(
+                          children: <Widget>[
+                            SizedBox(width: 20.0),
+                            Icon(Icons.search, color: Colors.white, size: 24.0),
+                            SizedBox(width: 40.0),
+                            Text(
+                              snapshot.data == null
+                                  ? widget._beer.searches.toString()
+                                  : snapshot.data.searches.toString(),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22.0,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 32.0),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 48.0),
+                      child: Container(
+                        height: 60.0,
+                        decoration: BoxDecoration(
+                            color: bottomBarSquareColor,
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(32.0),
+                                bottomLeft: Radius.circular(32.0))),
+                        child: Row(
+                          children: <Widget>[
+                            SizedBox(width: 20.0),
+                            Icon(Icons.favorite_border,
+                                color: Colors.white, size: 24.0),
+                            SizedBox(width: 40.0),
+                            Text(
+                              snapshot.data == null
+                                  ? widget._beer.likes.toString()
+                                  : snapshot.data.likes.toString(),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22.0,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }),
           Spacer(),
           StreamBuilder<bool>(
               stream: _likesBloc.beerLikeStream,
@@ -261,8 +270,7 @@ class _DetailsPageState extends State<DetailsPage> {
     _beerBloc = BeerBloc();
     _likesBloc = LikesBloc();
     _likesBloc.verifyIfLiked(widget._beer.id);
-    _searches = widget._beer.searches;
-    _likes = widget._beer.likes;
+    _beerBloc.observeSingleBeer(widget._beer.id);
   }
 
   @override
