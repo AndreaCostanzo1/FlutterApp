@@ -1,12 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_beertastic/blocs/likes_bloc.dart';
 import 'package:flutter_beertastic/view/components/others/list_view_items.dart';
 import 'package:flutter_beertastic/model/beer.dart';
 
+final Beer beer = Beer.fromSnapshot(Map.from({
+  'id': '8006890768305',
+  'name': 'Ichnsua',
+  'producer': 'Ichnusa',
+  'rating': 3.0,
+  'alcohol': 4.7,
+  'temperature': 5.0,
+  'imageUrl': 'beer_images/ichnusa.png',
+  'style': 'Lager',
+  'color': '3',
+  'carbonation': 2.5
+}));
 
-final Beer beer = Beer.fromSnapshot(Map.from({'id': '8006890768305', 'name': 'Ichnsua', 'producer': 'Ichnusa', 'rating': 3.0, 'alcohol': 4.7, 'temperature': 5.0, 'imageUrl': 'beer_images/ichnusa.png', 'style': 'Lager', 'color': '3', 'carbonation': 2.5}));
-
-class FavouritesPage extends StatelessWidget {
+class FavouritesPage extends StatefulWidget {
   FavouritesPage({Key key}) : super(key: key);
+
+  @override
+  _FavouritesPageState createState() => _FavouritesPageState();
+}
+
+class _FavouritesPageState extends State<FavouritesPage> {
+  LikesBloc _likesBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -15,13 +33,39 @@ class FavouritesPage extends StatelessWidget {
         padding: EdgeInsets.all(0),
         children: <Widget>[
           _TopPage(),
-          SizedBox(height: 10,),
-          BeerEntry(beer)
+          SizedBox(
+            height: 10,
+          ),
+          StreamBuilder<List<Beer>>(
+              stream: _likesBloc.likedBeerListStream,
+              builder: (context, snapshot) {
+                return snapshot.data == null
+                    ? Container(
+                        height: 10,
+                      )
+                    : Column(
+                        children: <Widget>[
+                          ...snapshot.data.map((beer) => BeerEntry(beer)).toList(),
+                        ],
+                      );
+              })
         ],
       ),
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _likesBloc = LikesBloc();
+    _likesBloc.retrieveLikedBeers();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _likesBloc.dispose();
+  }
 }
 
 class _TopPage extends StatelessWidget {
@@ -48,7 +92,8 @@ class _TopPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              margin: EdgeInsets.only(top: MediaQuery.of(context).size.height*0.04),
+              margin: EdgeInsets.only(
+                  top: MediaQuery.of(context).size.height * 0.04),
               child: __TitleBar(
                   'Favourites',
                   TextStyle(

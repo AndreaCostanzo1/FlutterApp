@@ -5,15 +5,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_beertastic/model/beer.dart';
 
 class LikesBloc {
-  final StreamController<bool> _beerLikeController =
+  final StreamController<bool> _likedBeerController =
+      StreamController.broadcast();
+
+  final StreamController<List<Beer>> _likedBeerListController =
       StreamController.broadcast();
 
   final List<StreamSubscription> _subscriptions = List();
 
-  Stream<bool> get beerLikeStream => _beerLikeController.stream;
+  final List<Beer> _likedBeers = List();
 
-  void clearStream() {
-    _beerLikeController.sink.add(null);
+  Stream<bool> get likedBeerStream => _likedBeerController.stream;
+
+  Stream<List<Beer>> get likedBeerListStream => _likedBeerListController.stream;
+
+  void clearLikedBeerStream() {
+    _likedBeerController.sink.add(null);
   }
 
   void verifyIfLiked(String id) async {
@@ -25,9 +32,9 @@ class LikesBloc {
         .document(id);
     _subscriptions.add(beerLikeRef.snapshots().listen((snapshot) {
       if (snapshot.data == null)
-        _beerLikeController.sink.add(false);
+        _likedBeerController.sink.add(false);
       else
-        _beerLikeController.sink.add(true);
+        _likedBeerController.sink.add(true);
     }));
   }
 
@@ -60,6 +67,31 @@ class LikesBloc {
 
   void dispose() {
     _subscriptions.forEach((subscription) => subscription.cancel());
-    _beerLikeController.close();
+    _likedBeerController.close();
+    _likedBeerListController.close();
+  }
+
+  void retrieveLikedBeers() async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    DocumentReference userRef =
+        Firestore.instance.collection('users').document(user.uid);
+
+    Stream<QuerySnapshot> queryStream =
+        userRef.collection('favourites').snapshots();
+    
+    _subscriptions.add(queryStream.listen((query) {
+      int i = 0;
+      _likedBeers.clear();
+      query.documents.forEach((docSnapshot) =>
+          (docSnapshot.data['beer'] as DocumentReference)
+              .get()
+              .then((beerSnap) {
+            i++;
+            _likedBeers.add(Beer.fromSnapshot(beerSnap.data));
+            if (i == query.documents.length) {
+              _likedBeerListController.sink.add(_likedBeers);
+            }
+          }));
+    }));
   }
 }

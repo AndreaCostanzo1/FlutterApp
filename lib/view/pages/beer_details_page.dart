@@ -136,7 +136,7 @@ class _DetailsPageState extends State<DetailsPage> {
               }),
           Spacer(),
           StreamBuilder<bool>(
-              stream: _likesBloc.beerLikeStream,
+              stream: _likesBloc.likedBeerStream,
               builder: (context, snapshot) {
                 return Container(
                   height: 80.0,
@@ -254,7 +254,7 @@ class _DetailsPageState extends State<DetailsPage> {
   }
 
   _updateLikeStatus(bool liked) {
-    _likesBloc.clearStream();
+    _likesBloc.clearLikedBeerStream();
     if (liked) {
       _likesBloc.removeFromFavourites(widget._beer);
       _beerBloc.removeFromFavourites(widget._beer);
