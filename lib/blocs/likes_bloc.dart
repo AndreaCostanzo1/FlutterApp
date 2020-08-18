@@ -88,7 +88,7 @@ class LikesBloc {
               .then((beerSnap) {
             i++;
             _likedBeers.add(Beer.fromSnapshot(beerSnap.data));
-            if (i == query.documents.length) {
+            if (i >= query.documents.length&& !_likedBeerListController.isClosed) {
               _likedBeerListController.sink.add(_likedBeers);
             }
           }));

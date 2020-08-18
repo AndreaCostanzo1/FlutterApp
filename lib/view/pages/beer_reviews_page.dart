@@ -117,7 +117,7 @@ class __RatingsState extends State<_Ratings> {
                                         bottom: constraints.maxWidth * 0.02),
                                     child: Column(
                                       children: <Widget>[
-                                        _UserRow(), //fixme pass userdata and rate
+                                        _UserRow(review.rate), //fixme pass userdata and rate
                                         SizedBox(
                                           height: 10,
                                         ),
@@ -180,6 +180,7 @@ class __RatingsState extends State<_Ratings> {
 
   _selectRate(int vote) {
     if (selectedRateMap[vote] != null) {
+      _reviewBloc.clearStream();
       if (selectedRateMap[vote]) {
         //case vote is selected, unselect and query all
         setState(() => selectedRateMap[vote] = false);
@@ -320,6 +321,10 @@ class __ProgressBar extends StatelessWidget {
 }
 
 class _UserRow extends StatelessWidget {
+  final int _rate;
+
+  _UserRow(this._rate);
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -356,7 +361,7 @@ class _UserRow extends StatelessWidget {
             Container(
               margin: EdgeInsets.only(top: 1.5),
               child: Text(
-                '5',
+                _rate.toString(),
                 style: TextStyle(
                     fontSize: 22,
                     fontFamily: "Nunito Bold",
