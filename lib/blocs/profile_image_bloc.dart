@@ -8,13 +8,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/model/user.dart';
 
 class ProfileImageBloc {
-  Uint8List _profileImage;
   final StreamController<ImageProvider> _profileImageController =
   StreamController();
 
-  get profileImage => _profileImage;
+  final StreamController<ImageProvider> _userImageController =
+  StreamController.broadcast();
 
   get profileImageStream => _profileImageController.stream;
+
+  get userImageStream => _userImageController.stream;
+
+  void getUserImage(String path){
+    if(path!=null) {
+      FirebaseStorage.instance.ref().child(path).getData(100000000)
+          .then(
+              (uIntImage) =>
+              _userImageController.sink.add(MemoryImage(uIntImage)))
+          .catchError((error) {
+        print('image don\'t exist');
+        _userImageController.sink.add(AssetImage('assets/images/user_review.png'));
+      });
+    }
+  }
 
   void getProfileImage() {
     FirebaseAuth.instance.currentUser().then((user) {
@@ -42,6 +57,7 @@ class ProfileImageBloc {
 
   void dispose() {
     _profileImageController.close();
+    _userImageController.close();
   }
 
   Future<String> getProfileImagePath() async {

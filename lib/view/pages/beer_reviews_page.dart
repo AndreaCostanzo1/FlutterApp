@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/blocs/beer_bloc.dart';
+import 'package:flutter_beertastic/blocs/profile_image_bloc.dart';
 import 'package:flutter_beertastic/blocs/rating_bloc.dart';
 import 'package:flutter_beertastic/model/beer.dart';
 import 'package:flutter_beertastic/model/review.dart';
+import 'package:flutter_beertastic/model/user.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class BeerReviewsPage extends StatelessWidget {
@@ -155,8 +159,7 @@ class __RatingsState extends State<_Ratings> {
                                                                     0.02),
                                                         child: Column(
                                                           children: <Widget>[
-                                                            _UserRow(review.rate),
-                                                            //fixme pass userdata and rate
+                                                            _UserRow(review.user,review.rate),
                                                             SizedBox(
                                                               height: 10,
                                                             ),
@@ -427,10 +430,20 @@ class __ProgressBar extends StatelessWidget {
   }
 }
 
-class _UserRow extends StatelessWidget {
+class _UserRow extends StatefulWidget {
   final int _rate;
 
-  _UserRow(this._rate);
+  final User _user;
+
+  _UserRow(this._user, this._rate);
+
+  @override
+  __UserRowState createState() => __UserRowState();
+}
+
+class __UserRowState extends State<_UserRow> {
+
+  ProfileImageBloc _imageBloc= ProfileImageBloc();
 
   @override
   Widget build(BuildContext context) {
@@ -440,12 +453,21 @@ class _UserRow extends StatelessWidget {
       children: <Widget>[
         Row(
           children: <Widget>[
-            ClipOval(
-              child: Container(
-                color: Colors.grey,
-                width: width * 0.13,
-                height: width * 0.13,
-              ),
+            StreamBuilder<ImageProvider>(
+              stream: _imageBloc.userImageStream,
+              builder: (context, snapshot) {
+                return ClipOval(
+                  child: snapshot.data==null? Container(
+                    color: Colors.grey,
+                    width: width * 0.13,
+                    height: width * 0.13,
+                  ):Container(
+                    child: Image(image: snapshot.data),
+                    width: width * 0.13,
+                    height: width * 0.13,
+                  ),
+                );
+              }
             ),
             SizedBox(
               width: width * 0.02,
@@ -454,7 +476,7 @@ class _UserRow extends StatelessWidget {
               children: <Widget>[
                 Container(
                   child: Text(
-                    'Nickname',
+                    widget._user.nickname,
                     style: TextStyle(fontSize: 22, fontFamily: "Nunito Bold"),
                   ),
                 )
@@ -468,7 +490,7 @@ class _UserRow extends StatelessWidget {
             Container(
               margin: EdgeInsets.only(top: 1.5),
               child: Text(
-                _rate.toString(),
+                widget._rate.toString(),
                 style: TextStyle(
                     fontSize: 22,
                     fontFamily: "Nunito Bold",
@@ -483,6 +505,19 @@ class _UserRow extends StatelessWidget {
         )
       ],
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _imageBloc=ProfileImageBloc();
+    _imageBloc.getUserImage(widget._user.profileImagePath);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _imageBloc.dispose();
   }
 }
 

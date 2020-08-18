@@ -8,10 +8,11 @@ class Review {
   Review.fromSnapshot(Map<String, dynamic> snapshot)
       : _comment = snapshot['comment'],
         _rate = snapshot['rate'],
-        _user= snapshot['userData'];
+        _user= snapshot['user'];
 
   String get comment => _comment;
 
-
   int get rate => _rate;
+
+  User get user => _user;
 }
