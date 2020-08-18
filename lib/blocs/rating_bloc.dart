@@ -17,7 +17,7 @@ class ReviewsBloc {
   final Lock _lock = Lock();
 
   final StreamController<List<Review>> _reviewStreamController =
-      StreamController();
+      StreamController.broadcast();
 
   Stream<List<Review>> get reviewsStream => _reviewStreamController.stream;
 

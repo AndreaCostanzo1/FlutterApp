@@ -64,141 +64,158 @@ class __RatingsState extends State<_Ratings> {
       ),
       child: LayoutBuilder(builder: (context, constraints) {
         return NotificationListener<ScrollNotification>(
-          onNotification: (scrollInfo) => _handleScrollNotification(scrollInfo),
-          child: ListView(
-            children: <Widget>[
-              Container(
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20)),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return StreamBuilder<Beer>(
-                          stream: _beerBloc.singleBeerStream,
+          onNotification: (scrollInfo) => _handleScrollNotification(scrollInfo,MediaQuery.of(context).size.height),
+          child: RefreshIndicator(
+            onRefresh: () => _handleRefresh(),
+            child: SingleChildScrollView(
+              physics: BouncingScrollPhysics(),
+              child: Stack(
+                children: <Widget>[
+                  Column(
+                    children: <Widget>[
+                      SizedBox(height: 10,),
+                      Container(
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20)),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              return StreamBuilder<Beer>(
+                                  stream: _beerBloc.singleBeerStream,
+                                  builder: (context, snapshot) {
+                                    Map<int, int> ratiosMap =
+                                        _generateRatiosMap(snapshot);
+                                    return Wrap(
+                                      children: <Widget>[
+                                        Container(
+                                          margin: EdgeInsets.only(
+                                              left:
+                                                  MediaQuery.of(context).size.width *
+                                                      0.03,
+                                              top:
+                                                  MediaQuery.of(context).size.height *
+                                                      0.013),
+                                          child: Text(
+                                            'Ratings',
+                                            style: TextStyle(
+                                              fontSize: 24,
+                                              fontFamily: "Nunito Bold",
+                                            ),
+                                          ),
+                                        ),
+                                        ..._selectedRateMap.keys.map((rate) =>
+                                            _RatingSummary(
+                                                rate,
+                                                constraints,
+                                                _selectedRateMap[rate],
+                                                _selectRate,
+                                                ratiosMap[rate])),
+                                        SizedBox(
+                                          height: MediaQuery.of(context).size.height *
+                                              0.06,
+                                        )
+                                      ],
+                                    );
+                                  });
+                            },
+                          )),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      StreamBuilder<List<Review>>(
+                          stream: _reviewBloc.reviewsStream,
                           builder: (context, snapshot) {
-                            Map<int, int> ratiosMap =
-                                _generateRatiosMap(snapshot);
-                            return Wrap(
-                              children: <Widget>[
-                                Container(
-                                  margin: EdgeInsets.only(
-                                      left: MediaQuery.of(context).size.width *
-                                          0.03,
-                                      top: MediaQuery.of(context).size.height *
-                                          0.013),
-                                  child: Text(
-                                    'Ratings',
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontFamily: "Nunito Bold",
-                                    ),
-                                  ),
-                                ),
-                                ..._selectedRateMap.keys.map((rate) =>
-                                    _RatingSummary(
-                                        rate,
-                                        constraints,
-                                        _selectedRateMap[rate],
-                                        _selectRate,
-                                        ratiosMap[rate])),
-                                SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.06,
-                                )
-                              ],
-                            );
-                          });
-                    },
-                  )),
-              SizedBox(
-                height: 20,
-              ),
-              StreamBuilder<List<Review>>(
-                  stream: _reviewBloc.reviewsStream,
-                  builder: (context, snapshot) {
-                    return snapshot.data != null
-                        ? Column(
-                            children: <Widget>[
-                              ...snapshot.data.map((review) => Column(
+                            return snapshot.data != null
+                                ? Column(
                                     children: <Widget>[
-                                      Container(
-                                        decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(20)),
-                                        child: LayoutBuilder(
-                                            builder: (context, constraints) {
-                                          return Wrap(
+                                      ...snapshot.data.map((review) => Column(
                                             children: <Widget>[
                                               Container(
-                                                margin: EdgeInsets.only(
-                                                    left: constraints.maxWidth *
-                                                        0.03,
-                                                    right:
-                                                        constraints.maxWidth *
-                                                            0.06,
-                                                    top: constraints.maxWidth *
-                                                        0.02,
-                                                    bottom:
-                                                        constraints.maxWidth *
-                                                            0.02),
-                                                child: Column(
-                                                  children: <Widget>[
-                                                    _UserRow(review.rate),
-                                                    //fixme pass userdata and rate
-                                                    SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                    Container(
-                                                      padding: EdgeInsets.only(
-                                                          left: constraints
-                                                                  .maxWidth *
-                                                              0.01),
-                                                      margin: EdgeInsets.only(
-                                                          bottom: constraints
-                                                                  .maxWidth *
-                                                              0.01),
-                                                      child: Row(
-                                                        children: <Widget>[
-                                                          Text(
-                                                            review.comment,
-                                                            style: TextStyle(
-                                                                fontFamily:
-                                                                    "Open Sans Regular",
-                                                                fontSize: 15),
-                                                            textAlign: TextAlign
-                                                                .justify,
-                                                          ),
-                                                        ],
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.circular(20)),
+                                                child: LayoutBuilder(
+                                                    builder: (context, constraints) {
+                                                  return Wrap(
+                                                    children: <Widget>[
+                                                      Container(
+                                                        margin: EdgeInsets.only(
+                                                            left:
+                                                                constraints.maxWidth *
+                                                                    0.03,
+                                                            right:
+                                                                constraints.maxWidth *
+                                                                    0.06,
+                                                            top:
+                                                                constraints.maxWidth *
+                                                                    0.02,
+                                                            bottom:
+                                                                constraints.maxWidth *
+                                                                    0.02),
+                                                        child: Column(
+                                                          children: <Widget>[
+                                                            _UserRow(review.rate),
+                                                            //fixme pass userdata and rate
+                                                            SizedBox(
+                                                              height: 10,
+                                                            ),
+                                                            Container(
+                                                              padding: EdgeInsets.only(
+                                                                  left: constraints
+                                                                          .maxWidth *
+                                                                      0.01),
+                                                              margin: EdgeInsets.only(
+                                                                  bottom: constraints
+                                                                          .maxWidth *
+                                                                      0.01),
+                                                              child: Row(
+                                                                children: <Widget>[
+                                                                  Text(
+                                                                    review.comment,
+                                                                    style: TextStyle(
+                                                                        fontFamily:
+                                                                            "Open Sans Regular",
+                                                                        fontSize: 15),
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .justify,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            )
+                                                          ],
+                                                        ),
                                                       ),
-                                                    )
-                                                  ],
-                                                ),
+                                                    ],
+                                                  );
+                                                }),
+                                              ),
+                                              SizedBox(
+                                                height: 20,
                                               ),
                                             ],
-                                          );
-                                        }),
-                                      ),
-                                      SizedBox(
-                                        height: 20,
-                                      ),
+                                          )),
                                     ],
-                                  )),
-                            ],
-                          )
-                        : Column(
-                            children: <Widget>[
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Container(child: CircularProgressIndicator()),
-                            ],
-                          );
-                  }),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.2,
+                                  )
+                                : Column(
+                                    children: <Widget>[
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Container(child: CircularProgressIndicator()),
+                                    ],
+                                  );
+                          }),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.2,
+                      ),
+                    ],
+                  ),
+                  Container(height: MediaQuery.of(context).size.height,),
+                ],
               ),
-            ],
+            ),
           ),
         );
       }),
@@ -245,9 +262,9 @@ class __RatingsState extends State<_Ratings> {
     }
   }
 
-  _handleScrollNotification(ScrollNotification scrollInfo) {
+  _handleScrollNotification(ScrollNotification scrollInfo, double height) {
     if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
-        scrollInfo.metrics.maxScrollExtent > 0) {
+        scrollInfo.metrics.maxScrollExtent > height*0.2) {
       //iterate to see if there's a true. If positive call retrieveWithRate
       _selectedRateMap.forEach((rate, selected) {
         if (selected)
@@ -262,21 +279,31 @@ class __RatingsState extends State<_Ratings> {
   Map<int, int> _generateRatiosMap(AsyncSnapshot<Beer> snapshot) {
     Map<int, int> map = _selectedRateMap.map((key, value) => MapEntry(key, 0));
     if (snapshot.data != null && snapshot.data.totalRatings > 0) {
-      map = _selectedRateMap.map((key, value) =>
-          MapEntry(
-              key,
-              (snapshot.data.ratingsByRate[key] / snapshot.data.totalRatings*100)
-                  .round()));
-      int totalRatio=0;
-      map.values.forEach((ratio)=> totalRatio += ratio);
-      if(totalRatio<100){
-        List<int> ratios =map.values.toList();
+      map = _selectedRateMap.map((key, value) => MapEntry(
+          key,
+          (snapshot.data.ratingsByRate[key] / snapshot.data.totalRatings * 100)
+              .round()));
+      int totalRatio = 0;
+      map.values.forEach((ratio) => totalRatio += ratio);
+      if (totalRatio < 100) {
+        List<int> ratios = map.values.toList();
         ratios.sort();
-        int keyToUpdate=map.entries.where((element) => element.value==ratios.last).toList().first.key;
-        map.update(keyToUpdate, (value) => ratios.last+(100-totalRatio));
+        int keyToUpdate = map.entries
+            .where((element) => element.value == ratios.last)
+            .toList()
+            .first
+            .key;
+        map.update(keyToUpdate, (value) => ratios.last + (100 - totalRatio));
       }
     }
     return map;
+  }
+
+  _handleRefresh() async {
+    _selectedRateMap.forEach((key, value) => _selectedRateMap[key] = false);
+    _reviewBloc.retrieveAllReviews(widget._beer.id);
+    await _reviewBloc.reviewsStream.first;
+    return null;
   }
 }
 
