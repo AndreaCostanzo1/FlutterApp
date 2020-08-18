@@ -19,15 +19,25 @@ class ReviewsBloc {
   final StreamController<List<Review>> _reviewStreamController =
       StreamController.broadcast();
 
+  final StreamController<bool> _availableDocumentsController =
+      StreamController();
+
   Stream<List<Review>> get reviewsStream => _reviewStreamController.stream;
+
+  Stream<bool> get availableDocumentsStream =>
+      _availableDocumentsController.stream;
 
   void dispose() {
     _reviewStreamController.close();
+    _availableDocumentsController.close();
   }
 
   void retrieveAllReviews(String beerId) async {
     int localPid;
-    _lock.synchronized(() => localPid = ++pid);
+    _lock.synchronized(() {
+      _availableDocumentsController.sink.add(true);
+      localPid = ++pid;
+    });
     QuerySnapshot query = await Firestore.instance
         .collection('beers')
         .document(beerId)
@@ -48,7 +58,10 @@ class ReviewsBloc {
 
   void retrieveReviewsWithVote(String beerId, int vote) async {
     int localPid;
-    _lock.synchronized(() => localPid = ++pid);
+    _lock.synchronized(() {
+      _availableDocumentsController.sink.add(true);
+      localPid = ++pid;
+    });
     QuerySnapshot query = await Firestore.instance
         .collection('beers')
         .document(beerId)
@@ -64,6 +77,7 @@ class ReviewsBloc {
         _lastDocument = null;
         _reviews.clear();
         _reviewStreamController.sink.add(_reviews);
+        _availableDocumentsController.sink.add(false);
       });
     }
   }
@@ -72,7 +86,6 @@ class ReviewsBloc {
     int i = 0;
     List<Review> localReviews = List();
     query.documents.forEach((reviewSnap) async {
-
       DocumentReference reference = reviewSnap.data['user'];
       DocumentSnapshot userSnapshot = await reference.get();
       Map<String, dynamic> reviewCompleteData = Map();
@@ -80,8 +93,8 @@ class ReviewsBloc {
       reviewCompleteData.update(
           'user', (value) => User.fromSnapshot(userSnapshot.data));
       _lock.synchronized(() {
-      localReviews.add(Review.fromSnapshot(reviewCompleteData));
-      i++;
+        localReviews.add(Review.fromSnapshot(reviewCompleteData));
+        i++;
         if (i >= query.documents.length &&
             !_reviewStreamController.isClosed &&
             pid == localPid) {
@@ -89,6 +102,7 @@ class ReviewsBloc {
           _reviews.clear();
           _reviews.addAll(localReviews);
           _reviewStreamController.sink.add(_reviews);
+          if (i < limit) _availableDocumentsController.sink.add(false);
         }
       });
     });
@@ -102,7 +116,6 @@ class ReviewsBloc {
   }
 
   void retrieveMoreReviews(String beerId) async {
-
     bool newDocumentsAvailable;
     int localPid;
     _lock.synchronized(() {
@@ -113,7 +126,12 @@ class ReviewsBloc {
       //if _lastDocument==null in the last query the length was equal to 0
       newDocumentsAvailable =
           (_lastDocument != null && _reviews.length % limit == 0);
-      if(!newDocumentsAvailable&&localPid==pid&&!_reviewStreamController.isClosed)  _reviewStreamController.sink.add(_reviews);
+      if (!newDocumentsAvailable &&
+          localPid == pid &&
+          !_reviewStreamController.isClosed) {
+        _availableDocumentsController.sink.add(false);
+        _reviewStreamController.sink.add(_reviews);
+      }
     });
     if (newDocumentsAvailable) {
       QuerySnapshot query = await Firestore.instance
@@ -128,9 +146,10 @@ class ReviewsBloc {
         _updateStreamWithoutClearing(query, localPid);
       } else {
         _lock.synchronized(() {
-          if(localPid==pid&&!_reviewStreamController.isClosed){
+          if (localPid == pid && !_reviewStreamController.isClosed) {
             _lastDocument = null;
             _reviewStreamController.sink.add(_reviews);
+            _availableDocumentsController.sink.add(false);
           }
         });
       }
@@ -143,10 +162,10 @@ class ReviewsBloc {
     query.documents.forEach((reviewSnap) async {
       DocumentReference reference = reviewSnap.data['user'];
       DocumentSnapshot userSnapshot = await reference.get();
-        Map<String, dynamic> reviewCompleteData = Map();
-        reviewCompleteData.addAll(reviewSnap.data);
-        reviewCompleteData.update(
-            'user', (value) => User.fromSnapshot(userSnapshot.data));
+      Map<String, dynamic> reviewCompleteData = Map();
+      reviewCompleteData.addAll(reviewSnap.data);
+      reviewCompleteData.update(
+          'user', (value) => User.fromSnapshot(userSnapshot.data));
       _lock.synchronized(() {
         localReviews.add(Review.fromSnapshot(reviewCompleteData));
         i++;
@@ -156,6 +175,7 @@ class ReviewsBloc {
           _lastDocument = query.documents.last;
           _reviews.addAll(localReviews);
           _reviewStreamController.sink.add(_reviews);
+          if (i < limit) _availableDocumentsController.sink.add(false);
         }
       });
     });
@@ -172,8 +192,13 @@ class ReviewsBloc {
       //the result would have been != 0.
       //if _lastDocument==null in the last query the length was equal to 0
       newDocumentsAvailable =
-      (_lastDocument != null && _reviews.length % limit == 0);
-      if(!newDocumentsAvailable&&localPid==pid&&!_reviewStreamController.isClosed)  _reviewStreamController.sink.add(_reviews);
+          (_lastDocument != null && _reviews.length % limit == 0);
+      if (!newDocumentsAvailable &&
+          localPid == pid &&
+          !_reviewStreamController.isClosed) {
+        _availableDocumentsController.sink.add(false);
+        _reviewStreamController.sink.add(_reviews);
+      }
     });
     if (newDocumentsAvailable) {
       QuerySnapshot query = await Firestore.instance
@@ -189,9 +214,10 @@ class ReviewsBloc {
         _updateStreamWithoutClearing(query, localPid);
       } else {
         _lock.synchronized(() {
-          if(localPid==pid&&!_reviewStreamController.isClosed){
+          if (localPid == pid && !_reviewStreamController.isClosed) {
             _lastDocument = null;
             _reviewStreamController.sink.add(_reviews);
+            _availableDocumentsController.sink.add(false);
           }
         });
       }
