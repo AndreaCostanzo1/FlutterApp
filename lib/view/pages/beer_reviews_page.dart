@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/blocs/beer_bloc.dart';
 import 'package:flutter_beertastic/blocs/profile_image_bloc.dart';
 import 'package:flutter_beertastic/blocs/rating_bloc.dart';
+import 'package:flutter_beertastic/blocs/user_review_bloc.dart';
 import 'package:flutter_beertastic/model/beer.dart';
 import 'package:flutter_beertastic/model/review.dart';
 import 'package:flutter_beertastic/model/user.dart';
@@ -33,7 +34,7 @@ class BeerReviewsPage extends StatelessWidget {
         child: Stack(
           children: <Widget>[
             _Ratings(_beer),
-            _RateBox(),
+            _RateBox(_beer),
           ],
         ),
       ),
@@ -316,19 +317,19 @@ class _CommentBoxes extends StatelessWidget {
                           margin: EdgeInsets.only(
                               left: constraints.maxWidth * 0.03,
                               right: constraints.maxWidth * 0.06,
-                              top: constraints.maxWidth * 0.02,
-                              bottom: constraints.maxWidth * 0.02),
+                              top: review.comment==''?constraints.maxWidth * 0.045:constraints.maxWidth * 0.02,
+                              bottom: review.comment==''?0:constraints.maxWidth * 0.02),
                           child: Column(
                             children: <Widget>[
                               _UserRow(review.user, review.rate),
-                              SizedBox(
+                              review.comment==''?Container(height: 0,):SizedBox(
                                 height: 10,
                               ),
                               Container(
                                 padding: EdgeInsets.only(
                                     left: constraints.maxWidth * 0.01),
                                 margin: EdgeInsets.only(
-                                    bottom: constraints.maxWidth * 0.01),
+                                    bottom: review.comment==''?0:constraints.maxWidth * 0.01),
                                 child: Row(
                                   children: <Widget>[
                                     Text(
@@ -569,7 +570,23 @@ class __UserRowState extends State<_UserRow> {
   }
 }
 
-class _RateBox extends StatelessWidget {
+class _RateBox extends StatefulWidget {
+  final Beer _beer;
+
+  _RateBox(this._beer);
+
+  @override
+  __RateBoxState createState() => __RateBoxState();
+
+  final double _startingRate=3;
+}
+
+class __RateBoxState extends State<_RateBox> {
+
+  double _rate;
+  TextEditingController _controller;
+  UserReviewBloc _userReviewBloc;
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -605,7 +622,7 @@ class _RateBox extends StatelessWidget {
                         width: constraints.maxWidth * 0.05,
                       ),
                       RatingBar(
-                        initialRating: 3,
+                        initialRating: widget._startingRate,
                         minRating: 1,
                         direction: Axis.horizontal,
                         allowHalfRating: false,
@@ -615,7 +632,9 @@ class _RateBox extends StatelessWidget {
                           color: Colors.amber,
                         ),
                         onRatingUpdate: (rating) {
-                          print(rating);
+                          setState(() {
+                            _rate=rating;
+                          });
                         },
                       ),
                     ],
@@ -635,6 +654,7 @@ class _RateBox extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10)),
                         child: TextFormField(
                           decoration: InputDecoration(border: InputBorder.none),
+                          controller: _controller,
                           keyboardType: TextInputType.text,
                           minLines: 1,
                           //Normal textInputField will be displayed
@@ -651,7 +671,7 @@ class _RateBox extends StatelessWidget {
                           color: Colors.amber,
                           child: InkWell(
                             borderRadius: BorderRadius.circular(10),
-                            onTap: () => print('tap'),
+                            onTap: () => _createReview(),
                             child: Icon(
                               Icons.send,
                               color: Colors.white,
@@ -668,5 +688,24 @@ class _RateBox extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _rate=widget._startingRate;
+    _controller=TextEditingController();
+    _userReviewBloc=UserReviewBloc();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+    _userReviewBloc.dispose();
+  }
+
+  _createReview() {
+    _userReviewBloc.createReview(widget._beer, _controller.text, _rate);
   }
 }
