@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_beertastic/blocs/beer_bloc.dart';
 
 import 'package:flutter_beertastic/model/beer.dart';
 import 'package:flutter_beertastic/view/components/icons/custom_icons.dart';
@@ -34,7 +35,7 @@ class BeerMainFragmentMedium extends StatelessWidget {
                 style: Theme.of(context).textTheme.subtitle2,
               ),
               SizedBox(height: 10.0),
-              _Rating(Provider.of<Beer>(context).rating.toString()),
+              _Rating(Provider.of<Beer>(context)),
               Spacer(),
               _ButtonAndImageRow(),
               SizedBox(height: 16.0)
@@ -70,10 +71,19 @@ class _Title extends StatelessWidget {
   }
 }
 
-class _Rating extends StatelessWidget {
-  final String rating;
+class _Rating extends StatefulWidget {
+  final Beer _beer;
 
-  _Rating(this.rating);
+  _Rating(this._beer);
+
+  @override
+  __RatingState createState() => __RatingState();
+
+}
+
+class __RatingState extends State<_Rating> {
+
+  BeerBloc _beerBloc = BeerBloc();
 
   @override
   Widget build(BuildContext context) {
@@ -89,9 +99,14 @@ class _Rating extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
           SizedBox(width: 4.0),
-          Text(
-            rating,
-            style: Theme.of(context).textTheme.headline4,
+          StreamBuilder<Beer>(
+            stream: _beerBloc.singleBeerStream,
+            builder: (context, snapshot) {
+              return Text(
+                snapshot.data.rating.toString()??'0',
+                style: Theme.of(context).textTheme.headline4,
+              );
+            }
           ),
           Padding(
             padding: const EdgeInsets.only(bottom: 5.0),
@@ -103,6 +118,19 @@ class _Rating extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _beerBloc=BeerBloc();
+    _beerBloc.observeSingleBeer(widget._beer.id);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _beerBloc.dispose();
   }
 }
 
