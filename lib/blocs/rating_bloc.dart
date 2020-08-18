@@ -10,6 +10,8 @@ class ReviewsBloc {
 
   DocumentSnapshot _lastDocument;
 
+  final int limit = 5;
+
   int pid = 0;
 
   final Lock _lock = Lock();
@@ -31,7 +33,7 @@ class ReviewsBloc {
         .document(beerId)
         .collection('reviews')
         .orderBy('date', descending: true)
-        .limit(20)
+        .limit(limit)
         .getDocuments();
     if (query.documents.length > 0) {
       _updateStream(query, localPid);
@@ -53,7 +55,7 @@ class ReviewsBloc {
         .collection('reviews')
         .orderBy('date', descending: true)
         .where('rate', isEqualTo: vote)
-        .limit(20)
+        .limit(limit)
         .getDocuments();
     if (query.documents.length > 0) {
       _updateStream(query, localPid);
@@ -92,6 +94,98 @@ class ReviewsBloc {
   }
 
   void clearStream() async {
-    _lock.synchronized(() { if(!_reviewStreamController.isClosed)_reviewStreamController.sink.add(null);});
+    _lock.synchronized(() {
+      if (!_reviewStreamController.isClosed)
+        _reviewStreamController.sink.add(null);
+    });
+  }
+
+  void retrieveMoreReviews(String beerId) async {
+    bool newDocumentsAvailable;
+    int localPid;
+    _lock.synchronized(() {
+      localPid = ++pid;
+
+      //if _reviews.length%limit=0 means that in the last query call i retrieved
+      //a number of documents equal to the limit. If I would retrieved less documents
+      //the result would have been != 0.
+      //if _lastDocument==null in the last query the length was equal to 0
+      newDocumentsAvailable =
+          (_lastDocument != null && _reviews.length % limit == 0);
+    });
+    if (newDocumentsAvailable) {
+      QuerySnapshot query = await Firestore.instance
+          .collection('beers')
+          .document(beerId)
+          .collection('reviews')
+          .orderBy('date', descending: true)
+          .limit(limit)
+          .startAfterDocument(_lastDocument)
+          .getDocuments();
+      if (query.documents.length > 0) {
+        _updateStreamWithoutClearing(query, localPid);
+      } else {
+        _lock.synchronized(() {
+          _lastDocument = null;
+        });
+      }
+    }
+  }
+
+  void _updateStreamWithoutClearing(QuerySnapshot query, int localPid) {
+    int i = 0;
+    List<Review> localReviews = List();
+    query.documents.forEach((reviewSnap) async {
+      i++;
+      DocumentReference reference = reviewSnap.data['user'];
+      DocumentSnapshot userSnapshot = await reference.get();
+      Map<String, dynamic> reviewCompleteData = Map();
+      reviewCompleteData.addAll(reviewSnap.data);
+      reviewCompleteData.update(
+          'user', (value) => User.fromSnapshot(userSnapshot.data));
+      localReviews.add(Review.fromSnapshot(reviewCompleteData));
+      _lock.synchronized(() {
+        if (i >= query.documents.length &&
+            !_reviewStreamController.isClosed &&
+            pid == localPid) {
+          _lastDocument = query.documents.last;
+          _reviews.addAll(localReviews);
+          _reviewStreamController.sink.add(_reviews);
+        }
+      });
+    });
+  }
+
+  void retrieveMoreReviewsWithRate(int rate, String beerId) async {
+    bool newDocumentsAvailable;
+    int localPid;
+    _lock.synchronized(() {
+      localPid = ++pid;
+
+      //if _reviews.length%limit=0 means that in the last query call i retrieved
+      //a number of documents equal to the limit. If I would retrieved less documents
+      //the result would have been != 0.
+      //if _lastDocument==null in the last query the length was equal to 0
+      newDocumentsAvailable =
+      (_lastDocument != null && _reviews.length % limit == 0);
+    });
+    if (newDocumentsAvailable) {
+      QuerySnapshot query = await Firestore.instance
+          .collection('beers')
+          .document(beerId)
+          .collection('reviews')
+          .where('rate', isEqualTo: rate)
+          .orderBy('date', descending: true)
+          .limit(limit)
+          .startAfterDocument(_lastDocument)
+          .getDocuments();
+      if (query.documents.length > 0) {
+        _updateStreamWithoutClearing(query, localPid);
+      } else {
+        _lock.synchronized(() {
+          _lastDocument = null;
+        });
+      }
+    }
   }
 }
