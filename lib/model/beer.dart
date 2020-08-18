@@ -11,6 +11,8 @@ class Beer {
   final double _carbonation;
   final int _likes;
   final int _searches;
+  final Map<String, dynamic> _ratingsByRate;
+  final int _totalRatings;
 
   Beer.nullBeer()
       : _id = '',
@@ -24,7 +26,9 @@ class Beer {
         _color = '',
         _carbonation = 0,
         _likes = 0,
-        _searches = 0;
+        _searches = 0,
+        _ratingsByRate = Map(),
+        _totalRatings = 0;
 
   Beer.fromSnapshot(Map<String, dynamic> snapshot)
       : _id = snapshot['id'],
@@ -38,7 +42,9 @@ class Beer {
         _color = snapshot['color'],
         _carbonation = (snapshot['carbonation'] ?? 0.0).toDouble(),
         _likes = snapshot['likes'],
-        _searches = snapshot['searches'];
+        _searches = snapshot['searches'],
+        _ratingsByRate = snapshot['ratings_by_rate'],
+        _totalRatings = snapshot['total_ratings'];
 
   Beer.fromBeer(Beer beer)
       : _id = beer.id,
@@ -52,7 +58,9 @@ class Beer {
         _color = beer.color,
         _carbonation = beer.carbonation,
         _searches = beer.searches,
-        _likes = beer.likes;
+        _likes = beer.likes,
+        _ratingsByRate = beer.ratingsByRate.map((key, value) => MapEntry(key.toString(),value)),
+        _totalRatings = beer.totalRatings;
 
   String get id => _id;
 
@@ -77,6 +85,10 @@ class Beer {
   int get searches => _searches;
 
   int get likes => _likes;
+
+  Map<int, int> get ratingsByRate => _ratingsByRate.map((key, value) => MapEntry(int.parse(key),value));
+
+  int get totalRatings => _totalRatings;
 
   @override
   String toString() {
