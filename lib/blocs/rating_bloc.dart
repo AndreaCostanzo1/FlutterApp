@@ -72,15 +72,16 @@ class ReviewsBloc {
     int i = 0;
     List<Review> localReviews = List();
     query.documents.forEach((reviewSnap) async {
-      i++;
+
       DocumentReference reference = reviewSnap.data['user'];
       DocumentSnapshot userSnapshot = await reference.get();
       Map<String, dynamic> reviewCompleteData = Map();
       reviewCompleteData.addAll(reviewSnap.data);
       reviewCompleteData.update(
           'user', (value) => User.fromSnapshot(userSnapshot.data));
-      localReviews.add(Review.fromSnapshot(reviewCompleteData));
       _lock.synchronized(() {
+      localReviews.add(Review.fromSnapshot(reviewCompleteData));
+      i++;
         if (i >= query.documents.length &&
             !_reviewStreamController.isClosed &&
             pid == localPid) {
@@ -101,17 +102,18 @@ class ReviewsBloc {
   }
 
   void retrieveMoreReviews(String beerId) async {
+
     bool newDocumentsAvailable;
     int localPid;
     _lock.synchronized(() {
       localPid = ++pid;
-
       //if _reviews.length%limit=0 means that in the last query call i retrieved
       //a number of documents equal to the limit. If I would retrieved less documents
       //the result would have been != 0.
       //if _lastDocument==null in the last query the length was equal to 0
       newDocumentsAvailable =
           (_lastDocument != null && _reviews.length % limit == 0);
+      if(!newDocumentsAvailable&&localPid==pid&&!_reviewStreamController.isClosed)  _reviewStreamController.sink.add(_reviews);
     });
     if (newDocumentsAvailable) {
       QuerySnapshot query = await Firestore.instance
@@ -126,7 +128,10 @@ class ReviewsBloc {
         _updateStreamWithoutClearing(query, localPid);
       } else {
         _lock.synchronized(() {
-          _lastDocument = null;
+          if(localPid==pid&&!_reviewStreamController.isClosed){
+            _lastDocument = null;
+            _reviewStreamController.sink.add(_reviews);
+          }
         });
       }
     }
@@ -136,15 +141,15 @@ class ReviewsBloc {
     int i = 0;
     List<Review> localReviews = List();
     query.documents.forEach((reviewSnap) async {
-      i++;
       DocumentReference reference = reviewSnap.data['user'];
       DocumentSnapshot userSnapshot = await reference.get();
-      Map<String, dynamic> reviewCompleteData = Map();
-      reviewCompleteData.addAll(reviewSnap.data);
-      reviewCompleteData.update(
-          'user', (value) => User.fromSnapshot(userSnapshot.data));
-      localReviews.add(Review.fromSnapshot(reviewCompleteData));
+        Map<String, dynamic> reviewCompleteData = Map();
+        reviewCompleteData.addAll(reviewSnap.data);
+        reviewCompleteData.update(
+            'user', (value) => User.fromSnapshot(userSnapshot.data));
       _lock.synchronized(() {
+        localReviews.add(Review.fromSnapshot(reviewCompleteData));
+        i++;
         if (i >= query.documents.length &&
             !_reviewStreamController.isClosed &&
             pid == localPid) {
@@ -168,6 +173,7 @@ class ReviewsBloc {
       //if _lastDocument==null in the last query the length was equal to 0
       newDocumentsAvailable =
       (_lastDocument != null && _reviews.length % limit == 0);
+      if(!newDocumentsAvailable&&localPid==pid&&!_reviewStreamController.isClosed)  _reviewStreamController.sink.add(_reviews);
     });
     if (newDocumentsAvailable) {
       QuerySnapshot query = await Firestore.instance
@@ -183,7 +189,10 @@ class ReviewsBloc {
         _updateStreamWithoutClearing(query, localPid);
       } else {
         _lock.synchronized(() {
-          _lastDocument = null;
+          if(localPid==pid&&!_reviewStreamController.isClosed){
+            _lastDocument = null;
+            _reviewStreamController.sink.add(_reviews);
+          }
         });
       }
     }

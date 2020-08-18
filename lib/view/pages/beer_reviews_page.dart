@@ -22,8 +22,12 @@ class BeerReviewsPage extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: new LinearGradient(
               colors: [
-                Theme.of(context).primaryColorLight,
-                Theme.of(context).primaryColorDark
+                Theme
+                    .of(context)
+                    .primaryColorLight,
+                Theme
+                    .of(context)
+                    .primaryColorDark
               ],
               begin: const FractionalOffset(1.0, 1.0),
               end: const FractionalOffset(0.1, 0.1),
@@ -55,11 +59,18 @@ class __RatingsState extends State<_Ratings> {
 
   ReviewsBloc _reviewBloc;
   BeerBloc _beerBloc;
+  bool _loadNewData;
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
+    double screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
     return Container(
       margin: EdgeInsets.only(
         left: screenWidth * 0.03,
@@ -68,7 +79,11 @@ class __RatingsState extends State<_Ratings> {
       ),
       child: LayoutBuilder(builder: (context, constraints) {
         return NotificationListener<ScrollNotification>(
-          onNotification: (scrollInfo) => _handleScrollNotification(scrollInfo,MediaQuery.of(context).size.height),
+          onNotification: (scrollInfo) =>
+              _handleScrollNotification(scrollInfo, MediaQuery
+                  .of(context)
+                  .size
+                  .height),
           child: RefreshIndicator(
             onRefresh: () => _handleRefresh(),
             child: SingleChildScrollView(
@@ -88,17 +103,23 @@ class __RatingsState extends State<_Ratings> {
                                   stream: _beerBloc.singleBeerStream,
                                   builder: (context, snapshot) {
                                     Map<int, int> ratiosMap =
-                                        _generateRatiosMap(snapshot);
+                                    _generateRatiosMap(snapshot);
                                     return Wrap(
                                       children: <Widget>[
                                         Container(
                                           margin: EdgeInsets.only(
                                               left:
-                                                  MediaQuery.of(context).size.width *
-                                                      0.03,
+                                              MediaQuery
+                                                  .of(context)
+                                                  .size
+                                                  .width *
+                                                  0.03,
                                               top:
-                                                  MediaQuery.of(context).size.height *
-                                                      0.013),
+                                              MediaQuery
+                                                  .of(context)
+                                                  .size
+                                                  .height *
+                                                  0.013),
                                           child: Text(
                                             'Ratings',
                                             style: TextStyle(
@@ -115,7 +136,10 @@ class __RatingsState extends State<_Ratings> {
                                                 _selectRate,
                                                 ratiosMap[rate])),
                                         SizedBox(
-                                          height: MediaQuery.of(context).size.height *
+                                          height: MediaQuery
+                                              .of(context)
+                                              .size
+                                              .height *
                                               0.06,
                                         )
                                       ],
@@ -131,91 +155,111 @@ class __RatingsState extends State<_Ratings> {
                           builder: (context, snapshot) {
                             return snapshot.data != null
                                 ? Column(
-                                    children: <Widget>[
-                                      ...snapshot.data.map((review) => Column(
-                                            children: <Widget>[
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(20)),
-                                                child: LayoutBuilder(
-                                                    builder: (context, constraints) {
-                                                  return Wrap(
-                                                    children: <Widget>[
-                                                      Container(
-                                                        margin: EdgeInsets.only(
-                                                            left:
-                                                                constraints.maxWidth *
-                                                                    0.03,
-                                                            right:
-                                                                constraints.maxWidth *
-                                                                    0.06,
-                                                            top:
-                                                                constraints.maxWidth *
-                                                                    0.02,
-                                                            bottom:
-                                                                constraints.maxWidth *
-                                                                    0.02),
-                                                        child: Column(
-                                                          children: <Widget>[
-                                                            _UserRow(review.user,review.rate),
-                                                            SizedBox(
-                                                              height: 10,
+                              children: <Widget>[
+                                ...snapshot.data.map((review) =>
+                                    Column(
+                                      children: <Widget>[
+                                        Container(
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                              BorderRadius.circular(20)),
+                                          child: LayoutBuilder(
+                                              builder: (context, constraints) {
+                                                return Wrap(
+                                                  children: <Widget>[
+                                                    Container(
+                                                      margin: EdgeInsets.only(
+                                                          left:
+                                                          constraints.maxWidth *
+                                                              0.03,
+                                                          right:
+                                                          constraints.maxWidth *
+                                                              0.06,
+                                                          top:
+                                                          constraints.maxWidth *
+                                                              0.02,
+                                                          bottom:
+                                                          constraints.maxWidth *
+                                                              0.02),
+                                                      child: Column(
+                                                        children: <Widget>[
+                                                          _UserRow(review.user,
+                                                              review.rate),
+                                                          SizedBox(
+                                                            height: 10,
+                                                          ),
+                                                          Container(
+                                                            padding: EdgeInsets
+                                                                .only(
+                                                                left: constraints
+                                                                    .maxWidth *
+                                                                    0.01),
+                                                            margin: EdgeInsets
+                                                                .only(
+                                                                bottom: constraints
+                                                                    .maxWidth *
+                                                                    0.01),
+                                                            child: Row(
+                                                              children: <
+                                                                  Widget>[
+                                                                Text(
+                                                                  review
+                                                                      .comment,
+                                                                  style: TextStyle(
+                                                                      fontFamily:
+                                                                      "Open Sans Regular",
+                                                                      fontSize: 15),
+                                                                  textAlign:
+                                                                  TextAlign
+                                                                      .justify,
+                                                                ),
+                                                              ],
                                                             ),
-                                                            Container(
-                                                              padding: EdgeInsets.only(
-                                                                  left: constraints
-                                                                          .maxWidth *
-                                                                      0.01),
-                                                              margin: EdgeInsets.only(
-                                                                  bottom: constraints
-                                                                          .maxWidth *
-                                                                      0.01),
-                                                              child: Row(
-                                                                children: <Widget>[
-                                                                  Text(
-                                                                    review.comment,
-                                                                    style: TextStyle(
-                                                                        fontFamily:
-                                                                            "Open Sans Regular",
-                                                                        fontSize: 15),
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .justify,
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            )
-                                                          ],
-                                                        ),
+                                                          )
+                                                        ],
                                                       ),
-                                                    ],
-                                                  );
-                                                }),
-                                              ),
-                                              SizedBox(
-                                                height: 20,
-                                              ),
-                                            ],
-                                          )),
-                                    ],
-                                  )
+                                                    ),
+                                                  ],
+                                                );
+                                              }),
+                                        ),
+                                        SizedBox(
+                                          height: 20,
+                                        ),
+                                      ],
+                                    )),
+                              ],
+                            )
                                 : Column(
-                                    children: <Widget>[
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      Container(child: CircularProgressIndicator()),
-                                    ],
-                                  );
+                              children: <Widget>[
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Container(child: CircularProgressIndicator()),
+                              ],
+                            );
                           }),
+                      _loadNewData ? Column(
+                        children: <Widget>[
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Container(child: CircularProgressIndicator()),
+                        ],
+                      ) : Container(),
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.2,
+                        height: MediaQuery
+                            .of(context)
+                            .size
+                            .height * 0.18,
                       ),
                     ],
                   ),
-                  Container(height: MediaQuery.of(context).size.height,),
+                  Container(height: MediaQuery
+                      .of(context)
+                      .size
+                      .height,),
                 ],
               ),
             ),
@@ -230,6 +274,7 @@ class __RatingsState extends State<_Ratings> {
     super.initState();
     _beerBloc = BeerBloc();
     _reviewBloc = ReviewsBloc();
+    _loadNewData = false;
     _beerBloc.observeSingleBeer(widget._beer.id);
     _reviewBloc.retrieveAllReviews(widget._beer.id);
     _selectedRateMap =
@@ -265,10 +310,15 @@ class __RatingsState extends State<_Ratings> {
     }
   }
 
-  _handleScrollNotification(ScrollNotification scrollInfo, double height) {
+  _handleScrollNotification(ScrollNotification scrollInfo,
+      double height) {
     if (scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent &&
-        scrollInfo.metrics.maxScrollExtent > height*0.2) {
+        scrollInfo.metrics.maxScrollExtent > height * 0.2) {
       //iterate to see if there's a true. If positive call retrieveWithRate
+      setState(() {
+        _loadNewData = true;
+      });
+      _awaitToCancelProgressIndicator();
       _selectedRateMap.forEach((rate, selected) {
         if (selected)
           _reviewBloc.retrieveMoreReviewsWithRate(rate, widget._beer.id);
@@ -279,13 +329,22 @@ class __RatingsState extends State<_Ratings> {
     }
   }
 
+  void _awaitToCancelProgressIndicator() async{
+    await _reviewBloc.reviewsStream.first;
+    setState(() {
+      _loadNewData = false;
+    });
+  }
+
   Map<int, int> _generateRatiosMap(AsyncSnapshot<Beer> snapshot) {
     Map<int, int> map = _selectedRateMap.map((key, value) => MapEntry(key, 0));
     if (snapshot.data != null && snapshot.data.totalRatings > 0) {
-      map = _selectedRateMap.map((key, value) => MapEntry(
-          key,
-          (snapshot.data.ratingsByRate[key] / snapshot.data.totalRatings * 100)
-              .round()));
+      map = _selectedRateMap.map((key, value) =>
+          MapEntry(
+              key,
+              (snapshot.data.ratingsByRate[key] / snapshot.data.totalRatings *
+                  100)
+                  .round()));
       int totalRatio = 0;
       map.values.forEach((ratio) => totalRatio += ratio);
       if (totalRatio < 100) {
@@ -443,31 +502,34 @@ class _UserRow extends StatefulWidget {
 
 class __UserRowState extends State<_UserRow> {
 
-  ProfileImageBloc _imageBloc= ProfileImageBloc();
+  ProfileImageBloc _imageBloc = ProfileImageBloc();
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
+    double width = MediaQuery
+        .of(context)
+        .size
+        .width;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Row(
           children: <Widget>[
             StreamBuilder<ImageProvider>(
-              stream: _imageBloc.userImageStream,
-              builder: (context, snapshot) {
-                return ClipOval(
-                  child: snapshot.data==null? Container(
-                    color: Colors.grey,
-                    width: width * 0.13,
-                    height: width * 0.13,
-                  ):Container(
-                    child: Image(image: snapshot.data),
-                    width: width * 0.13,
-                    height: width * 0.13,
-                  ),
-                );
-              }
+                stream: _imageBloc.userImageStream,
+                builder: (context, snapshot) {
+                  return ClipOval(
+                    child: snapshot.data == null ? Container(
+                      color: Colors.grey,
+                      width: width * 0.13,
+                      height: width * 0.13,
+                    ) : Container(
+                      child: Image(image: snapshot.data),
+                      width: width * 0.13,
+                      height: width * 0.13,
+                    ),
+                  );
+                }
             ),
             SizedBox(
               width: width * 0.02,
@@ -510,7 +572,7 @@ class __UserRowState extends State<_UserRow> {
   @override
   void initState() {
     super.initState();
-    _imageBloc=ProfileImageBloc();
+    _imageBloc = ProfileImageBloc();
     _imageBloc.getUserImage(widget._user.profileImagePath);
   }
 
@@ -524,8 +586,14 @@ class __UserRowState extends State<_UserRow> {
 class _RateBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
+    double screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
@@ -562,10 +630,11 @@ class _RateBox extends StatelessWidget {
                         direction: Axis.horizontal,
                         allowHalfRating: false,
                         itemCount: 5,
-                        itemBuilder: (context, _) => Icon(
-                          Icons.star,
-                          color: Colors.amber,
-                        ),
+                        itemBuilder: (context, _) =>
+                            Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                            ),
                         onRatingUpdate: (rating) {
                           print(rating);
                         },
@@ -595,7 +664,7 @@ class _RateBox extends StatelessWidget {
                       ),
                       Container(
                         padding:
-                            EdgeInsets.only(left: constraints.maxWidth * 0.026),
+                        EdgeInsets.only(left: constraints.maxWidth * 0.026),
                         width: constraints.maxWidth * 0.2,
                         height: 47,
                         child: Material(
