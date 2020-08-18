@@ -5,7 +5,6 @@ import 'package:flutter_beertastic/blocs/beer_bloc.dart';
 
 import 'package:flutter_beertastic/model/beer.dart';
 import 'package:flutter_beertastic/view/pages/fragments/fragments_w320max_small/beer_bottom_bar.dart';
-import 'package:flutter_beertastic/view/pages/fragments/fragments_w320max_small/beer_main_fragment.dart';
 import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/beer_bottom_bar.dart';
 import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/beer_main_fragment.dart';
 import 'package:flutter_beertastic/view/pages/styles/w320max_small/beer_page_style.dart';
@@ -29,7 +28,6 @@ class BeerPage extends StatefulWidget {
   final String title;
   final String beerID;
   final Map<String, Widget> widgetsByDimensions = {
-    SizeComputer.small: _SmallPage(),
     SizeComputer.medium: _MediumPage(),
   };
 
@@ -100,30 +98,6 @@ class NoBeerPage extends StatelessWidget {
   }
 }
 
-class _SmallPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Theme(
-      child: Scaffold(
-        backgroundColor: BeerPageThemeSmall().canvasColor,
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            BeerMainFragmentSmall(
-              beer,
-            ),
-            BeerBottomBarSmall(),
-          ],
-        ),
-      ),
-      //theme of the page
-      data: Theme.of(context).copyWith(
-        canvasColor: BeerPageThemeSmall().canvasColor,
-        textTheme: BeerPageThemeSmall().textTheme,
-      ),
-    );
-  }
-}
 
 class _MediumPage extends StatelessWidget {
   @override

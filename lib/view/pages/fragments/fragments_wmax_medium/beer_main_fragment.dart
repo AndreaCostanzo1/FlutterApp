@@ -77,11 +77,12 @@ class _Rating extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Beer beer = Beer.fromBeer(Provider.of<Beer>(context));
     return GestureDetector(
       onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => BeerReviewsPage(),
+              builder: (context) => BeerReviewsPage(beer),
             ),
           ),
       child: Row(

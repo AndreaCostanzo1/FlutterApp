@@ -1,8 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_beertastic/blocs/rating_bloc.dart';
+import 'package:flutter_beertastic/model/beer.dart';
+import 'package:flutter_beertastic/model/review.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class BeerReviewsPage extends StatelessWidget {
+  final Beer _beer;
+
+  BeerReviewsPage(this._beer);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +27,7 @@ class BeerReviewsPage extends StatelessWidget {
         ),
         child: Stack(
           children: <Widget>[
-            _Ratings(),
+            _Ratings(_beer),
             _RateBox(),
           ],
         ),
@@ -30,12 +37,18 @@ class BeerReviewsPage extends StatelessWidget {
 }
 
 class _Ratings extends StatefulWidget {
+  final Beer _beer;
+
+  _Ratings(this._beer);
+
   @override
   __RatingsState createState() => __RatingsState();
 }
 
 class __RatingsState extends State<_Ratings> {
-  Map<String, bool> selectedRateMap;
+  Map<int, bool> selectedRateMap;
+
+  ReviewsBloc _reviewBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -70,16 +83,8 @@ class __RatingsState extends State<_Ratings> {
                             ),
                           ),
                         ),
-                        _RatingSummary('5', constraints, selectedRateMap['5'],
-                            _selectRate),
-                        _RatingSummary('4', constraints, selectedRateMap['4'],
-                            _selectRate),
-                        _RatingSummary('3', constraints, selectedRateMap['3'],
-                            _selectRate),
-                        _RatingSummary('2', constraints, selectedRateMap['2'],
-                            _selectRate),
-                        _RatingSummary('1', constraints, selectedRateMap['1'],
-                            _selectRate),
+                        ...selectedRateMap.keys.map((rate) => _RatingSummary(rate, constraints, selectedRateMap[rate],
+                            _selectRate)),
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.06,
                         )
@@ -90,42 +95,68 @@ class __RatingsState extends State<_Ratings> {
             SizedBox(
               height: 20,
             ),
-            Container(
-              decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(20)),
-              child: LayoutBuilder(builder: (context, constraints) {
-                return Wrap(
-                  children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(
-                          left: constraints.maxWidth * 0.03,
-                          right: constraints.maxWidth * 0.06,
-                          top: constraints.maxWidth * 0.02,
-                          bottom: constraints.maxWidth * 0.02),
-                      child: Column(
+            StreamBuilder<List<Review>>(
+                stream: _reviewBloc.reviewsStream,
+                builder: (context, snapshot) {
+                  return snapshot.data!=null? Column(
+                    children: <Widget>[
+                      ...snapshot.data.map((review) => Column(
                         children: <Widget>[
-                          _UserRow(),
-                          SizedBox(
-                            height: 10,
-                          ),
                           Container(
-                            padding: EdgeInsets.only(
-                                left: constraints.maxWidth * 0.01),
-                            margin: EdgeInsets.only(
-                                bottom: constraints.maxWidth * 0.01),
-                            child: Text(
-                              'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s date color year',
-                              style: TextStyle(fontFamily: "Open Sans Regular"),
-                              textAlign: TextAlign.justify,
-                            ),
-                          )
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20)),
+                            child: LayoutBuilder(builder: (context, constraints) {
+                              return Wrap(
+                                children: <Widget>[
+                                  Container(
+                                    margin: EdgeInsets.only(
+                                        left: constraints.maxWidth * 0.03,
+                                        right: constraints.maxWidth * 0.06,
+                                        top: constraints.maxWidth * 0.02,
+                                        bottom: constraints.maxWidth * 0.02),
+                                    child: Column(
+                                      children: <Widget>[
+                                        _UserRow(), //fixme pass userdata and rate
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.only(
+                                              left: constraints.maxWidth * 0.01),
+                                          margin: EdgeInsets.only(
+                                              bottom: constraints.maxWidth * 0.01),
+                                          child: Row(
+                                            children: <Widget>[
+                                              Text(
+                                               review.comment,
+                                                style: TextStyle(
+                                                    fontFamily: "Open Sans Regular", fontSize: 15),
+                                                textAlign: TextAlign.justify,
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
                         ],
-                      ),
-                    ),
-                  ],
-                );
-              }),
-            ),
+                      )),
+                    ],
+                  ): Column(
+                    children: <Widget>[
+                      SizedBox(height: 10,),
+                      Container(child: CircularProgressIndicator()),
+                    ],
+                  );
+                }),
           ],
         );
       }),
@@ -135,16 +166,24 @@ class __RatingsState extends State<_Ratings> {
   @override
   void initState() {
     super.initState();
+    _reviewBloc = ReviewsBloc();
+    _reviewBloc.retrieveAllReviews(widget._beer.id);
     selectedRateMap =
-        Map.from({'5': false, '4': false, '3': false, '2': false, '1': false});
+        Map.from({5: false, 4: false, 3: false, 2: false, 1: false});
   }
 
-  _selectRate(String vote) {
+  @override
+  void dispose() {
+    super.dispose();
+    _reviewBloc.dispose();
+  }
+
+  _selectRate(int vote) {
     if (selectedRateMap[vote] != null) {
       if (selectedRateMap[vote]) {
         //case vote is selected, unselect and query all
         setState(() => selectedRateMap[vote] = false);
-        //TODO implement query to db
+        _reviewBloc.retrieveAllReviews(widget._beer.id);
       } else {
         //case vote is not selected: select it and unselect others, then query
         setState(() {
@@ -153,7 +192,7 @@ class __RatingsState extends State<_Ratings> {
             if (key != vote) selectedRateMap[key] = false;
           });
         });
-        //TODO implement query to db
+        _reviewBloc.retrieveReviewsWithVote(widget._beer.id, vote);
       }
     } else {
       print('Something went wrong: bad vote inserted');
@@ -163,7 +202,7 @@ class __RatingsState extends State<_Ratings> {
 
 class _RatingSummary extends StatelessWidget {
   final BoxConstraints _constraints;
-  final String vote;
+  final int vote;
   final bool _selected;
   final Function _selectRate;
 
@@ -189,7 +228,7 @@ class _RatingSummary extends StatelessWidget {
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    __StarsWidget(vote),
+                    __StarsWidget(vote.toString()),
                     SizedBox(
                       width: _constraints.maxWidth * 0.03,
                     ),
