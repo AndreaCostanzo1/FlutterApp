@@ -49,12 +49,21 @@ class BeerBloc {
 
   void retrieveSuggestedBeers() {
     if (_suggestedBeersController.isClosed) return;
-    FirebaseAuth.instance.currentUser().then((user) {
+    FirebaseAuth.instance.currentUser().then((user) async {
+      QuerySnapshot query = await Firestore.instance
+          .collection('users')
+          .document(user.uid)
+          .collection('affinities')
+          .where('affinity', isGreaterThanOrEqualTo: 0.5)
+          .orderBy('affinity',descending: true)
+          .limit(10)
+          .getDocuments();
+      List<DocumentReference> affinities = List();
+      query.documents
+          .forEach((element) => affinities.add(element['cluster_code']));
       Firestore.instance
           .collection('beers')
-          .where('suggestTo',
-              arrayContains:
-                  Firestore.instance.collection("users").document(user.uid))
+          .where('cluster_code', arrayContainsAny: affinities)
           .getDocuments()
           .then((query) =>
               _updateBeersSink(_suggestedBeersController, query.documents));
@@ -168,7 +177,7 @@ class BeerBloc {
 
   void removeFromFavourites(Beer beer) async {
     DocumentReference reference =
-    Firestore.instance.collection('beers').document(beer.id);
+        Firestore.instance.collection('beers').document(beer.id);
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     try {
       reference.collection('favourites').document(user.uid).delete();
