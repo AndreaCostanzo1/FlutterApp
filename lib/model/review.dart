@@ -23,4 +23,6 @@ class Review {
   int get rate => _rate;
 
   User get user => _user;
+
+  String get id =>_id;
 }

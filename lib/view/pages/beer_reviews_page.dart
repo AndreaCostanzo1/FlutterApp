@@ -1,10 +1,8 @@
-import 'dart:typed_data';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/blocs/beer_bloc.dart';
 import 'package:flutter_beertastic/blocs/profile_image_bloc.dart';
-import 'package:flutter_beertastic/blocs/rating_bloc.dart';
+import 'package:flutter_beertastic/blocs/reviews_bloc.dart';
 import 'package:flutter_beertastic/blocs/user_review_bloc.dart';
 import 'package:flutter_beertastic/model/beer.dart';
 import 'package:flutter_beertastic/model/review.dart';
@@ -45,11 +43,13 @@ class _BeerReviewsPageState extends State<BeerReviewsPage> {
                 stream: _userReviewBloc.reviewStream,
                 builder: (context, snapshot) {
                   return snapshot.data != null
-                      ? _RateBox(
-                          enabled: true,
-                          onSubmit: _createReview,
-                          key: UniqueKey(),
-                        )
+                      ? (snapshot.data.id == ''
+                          ? _RateBox(
+                              enabled: true,
+                              onSubmit: _createReview,
+                              key: UniqueKey(),
+                            )
+                          : _CommentBox(snapshot.data,onPressed: ()=>_deleteReview(snapshot.data),))
                       : _RateBox(
                           enabled: false,
                           key: UniqueKey(),
@@ -76,6 +76,10 @@ class _BeerReviewsPageState extends State<BeerReviewsPage> {
 
   _createReview(String text, double rate) {
     _userReviewBloc.createReview(widget._beer, text, rate);
+  }
+
+  _deleteReview(Review review) {
+    _userReviewBloc.deleteReview(widget._beer, review);
   }
 }
 
@@ -380,7 +384,7 @@ class _CommentBoxes extends StatelessWidget {
                                 child: Row(
                                   children: <Widget>[
                                     Container(
-                                      width:constraints.maxWidth*0.895,
+                                      width: constraints.maxWidth * 0.895,
                                       child: Text(
                                         review.comment,
                                         style: TextStyle(
@@ -760,5 +764,107 @@ class __RateBoxState extends State<_RateBox> {
   void dispose() {
     super.dispose();
     _controller.dispose();
+  }
+}
+
+class _CommentBox extends StatelessWidget {
+  final Review _review;
+
+  final Function onPressed;
+
+  _CommentBox(this._review,{Function onPressed}): this.onPressed=onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        Container(
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+          padding: EdgeInsets.only(
+              left: screenWidth * 0.025,
+              right: screenWidth * 0.025,
+              top: screenHeight * 0.015,
+              bottom: screenHeight * 0.015),
+          child: LayoutBuilder(builder: (context, constraints) {
+            return Column(
+              children: <Widget>[
+                Container(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        padding: EdgeInsets.only(top: 5),
+                        child: Text(
+                          "Your rate:",
+                          style: TextStyle(
+                              fontFamily: "Campton Bold", fontSize: 23),
+                        ),
+                      ),
+                      SizedBox(
+                        width: constraints.maxWidth * 0.05,
+                      ),
+                      RatingBar(
+                        ignoreGestures: true,
+                        initialRating: _review.rate.toDouble(),
+                        minRating: 1,
+                        direction: Axis.horizontal,
+                        allowHalfRating: false,
+                        itemCount: 5,
+                        itemBuilder: (context, _) => Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                        ),
+                        onRatingUpdate: (double value) {},
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 2.5),
+                  width: constraints.maxWidth,
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        width: constraints.maxWidth * 0.8,
+                        padding: EdgeInsets.symmetric(
+                          vertical: 8,
+                            horizontal: constraints.maxWidth * 0.03),
+                        decoration: BoxDecoration(
+                            color: Color(0xFFf4f2e4),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Text(_review.comment,textAlign: TextAlign.justify,style: TextStyle(fontSize: 16),),
+                      ),
+                      Container(
+                        padding:
+                            EdgeInsets.only(left: constraints.maxWidth * 0.026),
+                        width: constraints.maxWidth * 0.2,
+                        height: 47,
+                        child: Material(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.grey,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(10),
+                            onTap: onPressed??(){},
+                            child: Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            );
+          }),
+        ),
+      ],
+    );
   }
 }
