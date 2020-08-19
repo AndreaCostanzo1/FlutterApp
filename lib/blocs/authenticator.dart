@@ -91,15 +91,23 @@ class Authenticator implements AuthenticatorInterface {
     _remoteErrorController?.close();
   }
 
-  void _createNewUserEntry(AuthResult response) {
+  void _createNewUserEntry(AuthResult response) async {
     FirebaseUser user = response.user;
-    Map<String,dynamic> userData=Map.from({
-      'id':user.uid,
-      'nickname': 'user'+user.uid.substring(10),
+    Map<String, dynamic> userData = Map.from({
+      'id': user.uid,
+      'nickname': 'user' + user.uid.substring(10),
       'email': user.email,
-      'profile_image_path':'profile_images/'+user.uid
+      'profile_image_path': 'profile_images/' + user.uid
     });
-    Firestore.instance.collection('users').document(user.uid).setData(userData);
+    DocumentReference userRef=Firestore.instance.collection('users').document(user.uid);
+    userRef.setData(userData);
+    QuerySnapshot query = await Firestore.instance.collection('clusters').orderBy(
+        'popularity', descending: true).limit(1).getDocuments();
+    DocumentSnapshot clusterSnap = query.documents.first;
+    userRef.collection('affinities').document(clusterSnap.documentID).setData({
+      'cluster_code': Firestore.instance.collection('clusters').document(clusterSnap.documentID),
+      'affinity': 0.5
+    });
   }
 }
 
