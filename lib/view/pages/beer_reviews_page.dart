@@ -837,7 +837,7 @@ class _CommentBox extends StatelessWidget {
                         decoration: BoxDecoration(
                             color: Color(0xFFf4f2e4),
                             borderRadius: BorderRadius.circular(10)),
-                        child: Text(_review.comment,textAlign: TextAlign.justify,style: TextStyle(fontSize: 16),),
+                        child: Text(_review.comment.length>220?_review.comment.substring(0,220)+'...':_review.comment,textAlign: TextAlign.justify,style: TextStyle(fontSize: 16),),
                       ),
                       Container(
                         padding:
