@@ -11,10 +11,17 @@ import 'package:flutter_beertastic/model/review.dart';
 import 'package:flutter_beertastic/model/user.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
-class BeerReviewsPage extends StatelessWidget {
+class BeerReviewsPage extends StatefulWidget {
   final Beer _beer;
 
   BeerReviewsPage(this._beer);
+
+  @override
+  _BeerReviewsPageState createState() => _BeerReviewsPageState();
+}
+
+class _BeerReviewsPageState extends State<BeerReviewsPage> {
+  UserReviewBloc _userReviewBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +40,42 @@ class BeerReviewsPage extends StatelessWidget {
         ),
         child: Stack(
           children: <Widget>[
-            _Ratings(_beer),
-            _RateBox(_beer),
+            _Ratings(widget._beer),
+            StreamBuilder<Review>(
+                stream: _userReviewBloc.reviewStream,
+                builder: (context, snapshot) {
+                  return snapshot.data != null
+                      ? _RateBox(
+                          enabled: true,
+                          onSubmit: _createReview,
+                          key: UniqueKey(),
+                        )
+                      : _RateBox(
+                          enabled: false,
+                          key: UniqueKey(),
+                        );
+                }),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _userReviewBloc = UserReviewBloc();
+    _userReviewBloc.retrieveReview(widget._beer);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _userReviewBloc.dispose();
+  }
+
+  _createReview(String text, double rate) {
+    _userReviewBloc.createReview(widget._beer, text, rate);
   }
 }
 
@@ -316,28 +353,41 @@ class _CommentBoxes extends StatelessWidget {
                         Container(
                           margin: EdgeInsets.only(
                               left: constraints.maxWidth * 0.03,
-                              right: constraints.maxWidth * 0.06,
-                              top: review.comment==''?constraints.maxWidth * 0.045:constraints.maxWidth * 0.02,
-                              bottom: review.comment==''?0:constraints.maxWidth * 0.02),
+                              right: constraints.maxWidth * 0.05,
+                              top: review.comment == ''
+                                  ? constraints.maxWidth * 0.045
+                                  : constraints.maxWidth * 0.02,
+                              bottom: review.comment == ''
+                                  ? 0
+                                  : constraints.maxWidth * 0.02),
                           child: Column(
                             children: <Widget>[
                               _UserRow(review.user, review.rate),
-                              review.comment==''?Container(height: 0,):SizedBox(
-                                height: 10,
-                              ),
+                              review.comment == ''
+                                  ? Container(
+                                      height: 0,
+                                    )
+                                  : SizedBox(
+                                      height: 10,
+                                    ),
                               Container(
                                 padding: EdgeInsets.only(
                                     left: constraints.maxWidth * 0.01),
                                 margin: EdgeInsets.only(
-                                    bottom: review.comment==''?0:constraints.maxWidth * 0.01),
+                                    bottom: review.comment == ''
+                                        ? 0
+                                        : constraints.maxWidth * 0.01),
                                 child: Row(
                                   children: <Widget>[
-                                    Text(
-                                      review.comment,
-                                      style: TextStyle(
-                                          fontFamily: "Open Sans Regular",
-                                          fontSize: 15),
-                                      textAlign: TextAlign.justify,
+                                    Container(
+                                      width:constraints.maxWidth*0.895,
+                                      child: Text(
+                                        review.comment,
+                                        style: TextStyle(
+                                            fontFamily: "Open Sans Regular",
+                                            fontSize: 15),
+                                        textAlign: TextAlign.justify,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -571,21 +621,20 @@ class __UserRowState extends State<_UserRow> {
 }
 
 class _RateBox extends StatefulWidget {
-  final Beer _beer;
+  final bool enabled;
+  final Function onSubmit;
 
-  _RateBox(this._beer);
+  final double _startingRate = 3;
+
+  _RateBox({Key key, this.enabled = false, this.onSubmit}) : super(key: key);
 
   @override
   __RateBoxState createState() => __RateBoxState();
-
-  final double _startingRate=3;
 }
 
 class __RateBoxState extends State<_RateBox> {
-
   double _rate;
   TextEditingController _controller;
-  UserReviewBloc _userReviewBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -622,6 +671,7 @@ class __RateBoxState extends State<_RateBox> {
                         width: constraints.maxWidth * 0.05,
                       ),
                       RatingBar(
+                        ignoreGestures: !widget.enabled,
                         initialRating: widget._startingRate,
                         minRating: 1,
                         direction: Axis.horizontal,
@@ -633,7 +683,7 @@ class __RateBoxState extends State<_RateBox> {
                         ),
                         onRatingUpdate: (rating) {
                           setState(() {
-                            _rate=rating;
+                            _rate = rating;
                           });
                         },
                       ),
@@ -668,15 +718,24 @@ class __RateBoxState extends State<_RateBox> {
                         height: 47,
                         child: Material(
                           borderRadius: BorderRadius.circular(10),
-                          color: Colors.amber,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(10),
-                            onTap: () => _createReview(),
-                            child: Icon(
-                              Icons.send,
-                              color: Colors.white,
-                            ),
-                          ),
+                          color: widget.enabled ? Colors.amber : Colors.grey,
+                          child: widget.enabled
+                              ? InkWell(
+                                  borderRadius: BorderRadius.circular(10),
+                                  onTap: () =>
+                                      widget.onSubmit(_controller.text, _rate),
+                                  child: Icon(
+                                    Icons.send,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : InkWell(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Icon(
+                                    Icons.send,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       )
                     ],
@@ -693,19 +752,13 @@ class __RateBoxState extends State<_RateBox> {
   @override
   void initState() {
     super.initState();
-    _rate=widget._startingRate;
-    _controller=TextEditingController();
-    _userReviewBloc=UserReviewBloc();
+    _rate = widget._startingRate;
+    _controller = TextEditingController();
   }
 
   @override
   void dispose() {
     super.dispose();
     _controller.dispose();
-    _userReviewBloc.dispose();
-  }
-
-  _createReview() {
-    _userReviewBloc.createReview(widget._beer, _controller.text, _rate);
   }
 }

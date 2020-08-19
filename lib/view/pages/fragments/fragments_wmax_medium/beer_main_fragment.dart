@@ -95,27 +95,30 @@ class __RatingState extends State<_Rating> {
               builder: (context) => BeerReviewsPage(beer),
             ),
           ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
-          SizedBox(width: 4.0),
-          StreamBuilder<Beer>(
-            stream: _beerBloc.singleBeerStream,
-            builder: (context, snapshot) {
-              return Text(
-                snapshot.data.rating.toString()??'0',
-                style: Theme.of(context).textTheme.headline4,
-              );
-            }
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 5.0),
-            child: Icon(
-              Icons.star,
-              color: Theme.of(context).textTheme.headline4.color,
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[
+            SizedBox(width: 4.0),
+            StreamBuilder<Beer>(
+              stream: _beerBloc.singleBeerStream,
+              builder: (context, snapshot) {
+                return Text(
+                  snapshot.data!=null?snapshot.data.rating.toString():'0.0',
+                  style: Theme.of(context).textTheme.headline4,
+                );
+              }
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.only(bottom: 5.0),
+              child: Icon(
+                Icons.star,
+                color: Theme.of(context).textTheme.headline4.color,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

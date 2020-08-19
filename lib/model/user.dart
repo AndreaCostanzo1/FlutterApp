@@ -8,6 +8,11 @@ class User {
         _profileImagePath = snapshot['profile_image_path'],
         _nickname = snapshot['nickname'];
 
+  User.empty()
+      : _uid = '',
+        _profileImagePath = '',
+        _nickname = '';
+
   String get uid => _uid;
 
   String get profileImagePath => _profileImagePath;

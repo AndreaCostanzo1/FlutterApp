@@ -1,21 +1,68 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_beertastic/model/beer.dart';
+import 'package:flutter_beertastic/model/review.dart';
+import 'package:flutter_beertastic/model/user.dart';
 
 class UserReviewBloc {
+
+  StreamController<Review> _userReviewStreamController = StreamController();
+
+  final List<StreamSubscription> _subscriptions = List();
+
+  Stream<Review> get reviewStream => _userReviewStreamController.stream;
+
+  void dispose() {
+    _userReviewStreamController.close();
+    _subscriptions.forEach((subscription) => subscription.cancel());
+  }
+
+  void retrieveReview(Beer beer) async {
+    FirebaseUser fUser = await FirebaseAuth.instance.currentUser();
+    DocumentReference beerRef =
+    Firestore.instance.collection('beers').document(beer.id);
+    _subscriptions.add(beerRef.collection('reviews').document(fUser.uid).snapshots().listen((reviewSnap) {
+      if(reviewSnap.data!=null){
+        _retrieveUserAndNotifyReview(reviewSnap);
+      } else {
+        //notify no reviews for this beer
+        _userReviewStreamController.sink.add(Review.empty());
+      }
+    }));
+  }
+
   void createReview(Beer beer, String comment, double rate) async {
-    //TODO clear stream
+    //clear stream
+    _userReviewStreamController.sink.add(null);
+    //creation process
     FirebaseUser fUser = await FirebaseAuth.instance.currentUser();
     DocumentReference userRef =
         Firestore.instance.collection('users').document(fUser.uid);
     DocumentReference beerRef =
         Firestore.instance.collection('beers').document(beer.id);
-    beerRef.collection('reviews').add({
+    beerRef.collection('reviews').document(fUser.uid).setData({
       'user': userRef,
       'date': DateTime.now(),
       'rate': rate,
       'comment': comment ?? ''
     });
+    _updateReviewsCount(beerRef,rate);
+  }
+
+  void _retrieveUserAndNotifyReview(DocumentSnapshot reviewSnap) {
+    DocumentReference userRef= reviewSnap['user'];
+    userRef.get().then((userSnap) {
+      Map<String, dynamic> reviewCompleteData = Map();
+      reviewCompleteData.addAll(reviewSnap.data);
+      reviewCompleteData.update(
+          'user', (value) => User.fromSnapshot(userSnap.data));
+      _userReviewStreamController.sink.add(Review.fromSnapshot(reviewCompleteData));
+    });
+  }
+
+  void _updateReviewsCount(DocumentReference beerRef,double rate) {
     Firestore.instance.runTransaction((transaction) {
       return transaction.get(beerRef).then((beerSnap) {
         Beer beer = Beer.fromSnapshot(beerSnap.data);
@@ -30,6 +77,4 @@ class UserReviewBloc {
       }).catchError((e) => print(e.toString()));
     });
   }
-
-  void dispose() {}
 }
