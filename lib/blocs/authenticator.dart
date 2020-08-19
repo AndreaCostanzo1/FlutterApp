@@ -95,7 +95,7 @@ class Authenticator implements AuthenticatorInterface {
     FirebaseUser user = response.user;
     Map<String,dynamic> userData=Map.from({
       'id':user.uid,
-      'nickname': 'user'+user.uid.substring(7)+Random().nextInt(300).toString(),
+      'nickname': 'user'+user.uid.substring(10),
       'email': user.email,
       'profile_image_path':'profile_images/'+user.uid
     });

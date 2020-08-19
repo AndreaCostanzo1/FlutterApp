@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_beertastic/blocs/authenticator.dart';
-import 'package:flutter_beertastic/blocs/profile_image_bloc.dart';
+import 'package:flutter_beertastic/blocs/user_bloc.dart';
+import 'package:flutter_beertastic/model/user.dart';
 import 'package:flutter_beertastic/view/components/buttons/custom_profile_list_item.dart';
 import 'package:flutter_beertastic/view/pages/styles/wmax_medium/profile_fragment_style.dart';
 import 'package:flutter_beertastic/view/pages/settings_page.dart';
@@ -104,18 +105,23 @@ class __ProfileSectionState extends State<_ProfileSection> {
                 ),
               ),
               SizedBox(height: SpacingUnit.w * 2),
-              Column(
-                children: <Widget>[
-                  Text(
-                    'Mario Rossi',
-                    style: titleTextStyle,
-                  ),
-                  SizedBox(height: SpacingUnit.w * 0.5),
-                  Text(
-                    'mymail.address@gmail.com',
-                    style: captionTextStyle,
-                  ),
-                ],
+              StreamBuilder<User>(
+                stream: _profileBloc.authenticatedUserStream,
+                builder: (context, snapshot) {
+                  return snapshot.data!=null? Column(
+                    children: <Widget>[
+                      Text(
+                        snapshot.data.nickname,
+                        style: titleTextStyle,
+                      ),
+                      SizedBox(height: SpacingUnit.w * 0.5),
+                      Text(
+                        snapshot.data.email,
+                        style: captionTextStyle,
+                      ),
+                    ],
+                  ):Container(height: SpacingUnit.w*2,);
+                }
               ),
               SizedBox(height: SpacingUnit.w * 2),
               Material(
@@ -149,7 +155,7 @@ class __ProfileSectionState extends State<_ProfileSection> {
   void initState() {
     super.initState();
     _profileBloc = ProfileImageBloc();
-    _profileBloc.getProfileImage();
+    _profileBloc.getAuthenticatedUserData();
   }
 
   @override
@@ -163,7 +169,7 @@ class __ProfileSectionState extends State<_ProfileSection> {
     try {
       bool uploaded = await MethodChannel('PICKER_CHANNEL').invokeMethod(
           'STORAGE', Map.from({'path': string}));
-      if(uploaded) _profileBloc.getProfileImage();
+      if(uploaded) _profileBloc.getAuthenticatedUserData();
     } catch(error){
       //TODO: show upload failed
     }

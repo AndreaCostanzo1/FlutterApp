@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/blocs/beer_bloc.dart';
-import 'package:flutter_beertastic/blocs/profile_image_bloc.dart';
+import 'package:flutter_beertastic/blocs/user_bloc.dart';
 import 'package:flutter_beertastic/blocs/reviews_bloc.dart';
 import 'package:flutter_beertastic/blocs/user_review_bloc.dart';
 import 'package:flutter_beertastic/model/beer.dart';

@@ -11,12 +11,23 @@ class ProfileImageBloc {
   final StreamController<ImageProvider> _profileImageController =
   StreamController();
 
+  final StreamController<User> _authenticatedUserController =
+  StreamController();
+
   final StreamController<ImageProvider> _userImageController =
   StreamController.broadcast();
 
   get profileImageStream => _profileImageController.stream;
 
+  get authenticatedUserStream => _authenticatedUserController.stream;
+
   get userImageStream => _userImageController.stream;
+
+  void dispose() {
+    _profileImageController.close();
+    _authenticatedUserController.close();
+    _userImageController.close();
+  }
 
   void getUserImage(String path){
     if(path!=null) {
@@ -31,18 +42,19 @@ class ProfileImageBloc {
     }
   }
 
-  void getProfileImage() {
-    FirebaseAuth.instance.currentUser().then((user) {
-      Firestore.instance
+  void getAuthenticatedUserData() {
+    FirebaseAuth.instance.currentUser().then((fUser) async {
+      DocumentSnapshot userSnapshot = await Firestore.instance
           .collection('users')
-          .document(user.uid)
-          .get()
-          .then((userSnapshot) => _retrieveProfileImage(userSnapshot.data));
+          .document(fUser.uid)
+          .get();
+      User user = User.fromSnapshot(userSnapshot.data);
+      _authenticatedUserController.sink.add(user);
+      _retrieveProfileImage(user);
     });
   }
 
-  void _retrieveProfileImage(Map<String, dynamic> snapshot) {
-    User user = User.fromSnapshot(snapshot);
+  void _retrieveProfileImage(User user) {
     String path = user.profileImagePath;
     if (path == null) {
       _profileImageController.sink.add(AssetImage('assets/images/user.png'));
@@ -53,11 +65,6 @@ class ProfileImageBloc {
               _profileImageController.sink.add(MemoryImage(uIntImage)))
           .catchError((error) => print('image don\'t exist'));
     }
-  }
-
-  void dispose() {
-    _profileImageController.close();
-    _userImageController.close();
   }
 
   Future<String> getProfileImagePath() async {
