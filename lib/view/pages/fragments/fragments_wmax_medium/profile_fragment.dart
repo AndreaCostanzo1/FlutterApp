@@ -125,7 +125,7 @@ class __ProfileSectionState extends State<_ProfileSection> {
               ),
               SizedBox(height: SpacingUnit.w * 2),
               Material(
-                color: Color(0xffFF4B2B),
+                color: Colors.amber,
                 borderRadius: BorderRadius.circular(SpacingUnit.w * 3),
                 child: InkWell(
                   onTap: ()=>Navigator.push(context, MaterialPageRoute(
