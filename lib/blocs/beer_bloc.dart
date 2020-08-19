@@ -6,6 +6,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_beertastic/model/beer.dart';
+import 'package:synchronized/synchronized.dart';
 
 class BeerBloc {
   final Map<StreamController, List<Beer>> _cachedBeers = Map();
@@ -21,6 +22,8 @@ class BeerBloc {
 
   final StreamController<Beer> _singleBeerController =
       StreamController.broadcast();
+
+  final Lock _lock=Lock();
 
   BeerBloc() {
     _cachedBeers.addAll({
@@ -160,6 +163,13 @@ class BeerBloc {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     DocumentReference userRef =
         Firestore.instance.collection('users').document(user.uid);
+    _singleBeerController.sink.add(null);
+    await _lock.synchronized(() async {
+      await Firestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(reference);
+        transaction.update(reference, {'likes': snapshot.data['likes'] + 1});
+      });
+    });
     try {
       reference.collection('favourites').document(user.uid).setData({
         'user': userRef,
@@ -168,26 +178,25 @@ class BeerBloc {
     } catch (e) {
       print(e);
     }
-
-    Firestore.instance.runTransaction((transaction) {
-      return transaction.get(reference).then((snapshot) =>
-          transaction.update(reference, {'likes': snapshot.data['likes'] + 1}));
-    });
   }
 
   void removeFromFavourites(Beer beer) async {
     DocumentReference reference =
         Firestore.instance.collection('beers').document(beer.id);
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    _singleBeerController.sink.add(null);
+    await _lock.synchronized(() async {
+      await Firestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(reference);
+        transaction.update(reference, {'likes': snapshot.data['likes'] - 1});
+      });
+    });
     try {
       reference.collection('favourites').document(user.uid).delete();
     } catch (e) {
       print(e);
     }
-    Firestore.instance.runTransaction((transaction) {
-      return transaction.get(reference).then((snapshot) =>
-          transaction.update(reference, {'likes': snapshot.data['likes'] - 1}));
-    });
+
   }
 
   void observeSingleBeer(String beerID) {
