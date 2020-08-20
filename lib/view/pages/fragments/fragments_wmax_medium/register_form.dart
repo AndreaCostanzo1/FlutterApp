@@ -194,7 +194,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
   String _computeText(RemoteError error) {
     String text = _ErrorTextComputer().errorTexts[error];
-    return text == null ? '' : text;
+    return text == null ? 'Error during registration' : text;
   }
 
   bool _computeEmailError(RemoteError data) {
@@ -214,7 +214,8 @@ class _ErrorTextComputer {
   final Map<RemoteError, String> _errorTexts = {
     RemoteError.EMAIL_FORMAT: 'Insert a valid email please!',
     RemoteError.PASSWORD_FORMAT: 'Password must have at least 6 characters',
-    RemoteError.NOT_MATCHING_PASSWORDS: 'Passwords should match!'
+    RemoteError.NOT_MATCHING_PASSWORDS: 'Passwords should match!',
+    RemoteError.USER_ALREADY_EXIST: 'Email already in use',
   };
 
   Map<RemoteError, String> get errorTexts => _errorTexts;

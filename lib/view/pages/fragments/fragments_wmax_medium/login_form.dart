@@ -180,7 +180,7 @@ class _LoginFormState extends State<LoginForm> {
 
   String _computeText(RemoteError error) {
     String text = _ErrorTextComputer().errorTexts[error];
-    return text == null ? '' : text;
+    return text == null ? 'Error during login' : text;
   }
 
 

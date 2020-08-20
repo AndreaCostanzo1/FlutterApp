@@ -23,6 +23,7 @@ class Authenticator implements AuthenticatorInterface {
   final Map<String, RemoteError> errors = {
     'ERROR_USER_NOT_FOUND': RemoteError.USER_NOT_FOUND,
     'ERROR_WRONG_PASSWORD': RemoteError.WRONG_PASSWORD,
+    'ERROR_EMAIL_ALREADY_IN_USE': RemoteError.USER_ALREADY_EXIST,
   };
 
   RemoteError _remoteError;
