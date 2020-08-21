@@ -49,7 +49,7 @@ class _ProfileSection extends StatefulWidget {
 }
 
 class __ProfileSectionState extends State<_ProfileSection> {
-  ProfileImageBloc _profileBloc;
+  UserBloc _profileBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +154,7 @@ class __ProfileSectionState extends State<_ProfileSection> {
   @override
   void initState() {
     super.initState();
-    _profileBloc = ProfileImageBloc();
+    _profileBloc = UserBloc();
     _profileBloc.getAuthenticatedUserData();
   }
 

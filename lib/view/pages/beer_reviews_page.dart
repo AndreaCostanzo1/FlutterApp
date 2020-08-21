@@ -545,7 +545,7 @@ class _UserRow extends StatefulWidget {
 }
 
 class __UserRowState extends State<_UserRow> {
-  ProfileImageBloc _imageBloc = ProfileImageBloc();
+  UserBloc _imageBloc = UserBloc();
 
   @override
   Widget build(BuildContext context) {
@@ -613,7 +613,7 @@ class __UserRowState extends State<_UserRow> {
   @override
   void initState() {
     super.initState();
-    _imageBloc = ProfileImageBloc();
+    _imageBloc = UserBloc();
     _imageBloc.getUserImage(widget._user.profileImagePath);
   }
 

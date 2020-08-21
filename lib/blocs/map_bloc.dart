@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_beertastic/blocs/utilities/city_data_converter.dart';
 import 'package:flutter_beertastic/blocs/utilities/geo_data.dart';
 import 'package:flutter_beertastic/blocs/utilities/geo_hash_computer.dart';
 import 'package:flutter_beertastic/model/city.dart';
@@ -13,12 +16,22 @@ class MapBloc {
   final StreamController<List<City>> _nearestCitiesController =
       StreamController();
 
+  final StreamController<Uint8List> _cityImageController =
+  StreamController();
+
   Stream<List<City>> get nearestCityStream => _nearestCitiesController.stream;
+
+  Stream<Uint8List> get cityImageStream => _cityImageController.stream;
 
   void dispose() {
     _nearestCitiesController.close();
+    _cityImageController.close();
   }
 
+  void retrieveCityImage(City city) async {
+    Uint8List image = await FirebaseStorage.instance.ref().child(city.imageUrl).getData(600000);
+    _cityImageController.sink.add(image);
+  }
   void retrieveNearestCities() async {
     if (await Permission.location.request().isGranted) {
       GeoData data = await _computeGeoData();
@@ -34,13 +47,12 @@ class MapBloc {
       List<City> cities = List();
       if (snapshots.length > 0) {
         //case some cities found nearby
-        print('here');
         cities.addAll(_getCityOrderedByVicinity(data, snapshots));
       } else {
         //no city nearby, select randomly
         Firestore.instance.collection('cities').limit(5).getDocuments().then(
             (query) => query.documents.forEach((citySnap) => cities
-                .add(City.fromSnapshot(_convertSnapshot(citySnap.data)))));
+                .add(City.fromSnapshot(CityDataConverter.convertSnapshot(citySnap.data)))));
       }
       _nearestCitiesController.sink.add(cities);
     }
@@ -145,19 +157,8 @@ class MapBloc {
       DocumentSnapshot snapshot = _citiesByDistance.keys
           .firstWhere((key) => _citiesByDistance[key] == distance);
       _citiesByDistance.remove(snapshot);
-      cities.add(City.fromSnapshot(_convertSnapshot(snapshot.data)));
+      cities.add(City.fromSnapshot(CityDataConverter.convertSnapshot(snapshot.data)));
     });
     return cities;
-  }
-
-  Map<String, dynamic> _convertSnapshot(Map<String, dynamic> data) {
-    Map<String, dynamic> _snapshotToGenerate = Map();
-    GeoPoint geoPoint = data['geo_point'];
-    _snapshotToGenerate.addAll(data);
-    _snapshotToGenerate.addEntries([
-      MapEntry('latitude', geoPoint.latitude),
-      MapEntry('longitude', geoPoint.longitude)
-    ]);
-    return _snapshotToGenerate;
   }
 }
