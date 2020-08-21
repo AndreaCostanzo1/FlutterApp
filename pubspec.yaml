@@ -34,6 +34,8 @@ dependencies:
   permission_handler: ^5.0.1+1
   image_picker: ^0.6.7+4
   flutter_rating_bar: ^3.0.1+1
+  rxdart: ^0.24.1
+  async: ^2.4.1
 
   url_launcher: ^5.5.0
 

@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_beertastic/blocs/map_bloc.dart';
 
 abstract class AuthenticatorInterface {
   void logWithEmailAndPassword(String email, String password);
@@ -94,16 +95,33 @@ class Authenticator implements AuthenticatorInterface {
 
   void _createNewUserEntry(AuthResult response) async {
     FirebaseUser user = response.user;
+    await _createDatabaseEntry(user);
+    _setUserDefaultCity(user);
+    _setUserBeerAffinities(user);
+  }
+
+  Future<void> _createDatabaseEntry(FirebaseUser user) async {
     Map<String, dynamic> userData = Map.from({
       'id': user.uid,
-      'nickname': 'user' + user.uid.substring(10),
+      'nickname': 'user' + user.uid.substring(16),
       'email': user.email,
       'profile_image_path': 'profile_images/' + user.uid
     });
     DocumentReference userRef=Firestore.instance.collection('users').document(user.uid);
-    userRef.setData(userData);
+    return userRef.setData(userData);
+  }
+
+  void _setUserDefaultCity(FirebaseUser user) {
+    MapBloc bloc = MapBloc();
+    bloc.setDefaultCity(user);
+    bloc.dispose();
+  }
+
+  void _setUserBeerAffinities(FirebaseUser user) async {
+    DocumentReference userRef = Firestore.instance.collection('users').document(user.uid);
     QuerySnapshot query = await Firestore.instance.collection('clusters').orderBy(
         'popularity', descending: true).limit(1).getDocuments();
+    //take the cluster with higher popularity
     DocumentSnapshot clusterSnap = query.documents.first;
     userRef.collection('affinities').document(clusterSnap.documentID).setData({
       'cluster_code': Firestore.instance.collection('clusters').document(clusterSnap.documentID),
