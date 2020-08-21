@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_beertastic/blocs/map_bloc.dart';
+import 'package:flutter_beertastic/model/city.dart';
 import 'package:geolocator/geolocator.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -21,12 +23,16 @@ class _TopPage extends StatefulWidget {
 }
 
 class __TopPageState extends State<_TopPage> {
+  MapBloc _mapBloc;
+
+  List<City> _cities;
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
         Container(
-          constraints: BoxConstraints.expand(height: MediaQuery.of(context).size.height*0.4),
+          constraints: BoxConstraints.expand(
+              height: MediaQuery.of(context).size.height * 0.4),
           decoration: BoxDecoration(
               image: DecorationImage(
                   image: AssetImage('assets/images/milan.jpg'),
@@ -53,24 +59,59 @@ class __TopPageState extends State<_TopPage> {
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 0, horizontal: 10),
-                        child: PopupMenuButton(
-                          icon: Icon(
-                            Icons.more_vert,
-                            color: Colors.white,
-                            size: 36,
-                          ),
-                          itemBuilder: (BuildContext context) {
-                            return [
-                              PopupMenuItem(
-                                  child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text('Milan'),
-                                ],
-                              )),
-                            ];
-                          },
+                        child: StreamBuilder<List<City>>(
+                          stream: _mapBloc.nearestCityStream,
+                          builder: (context, snapshot) {
+                            List<City> cities = snapshot.data??List();
+                            City nearestCity = cities.length>0?cities.removeAt(0):null;
+                            return PopupMenuButton(
+                              onSelected: (city)=> _loadCity(city),
+                              icon: Icon(
+                                Icons.more_vert,
+                                color: Colors.white,
+                                size: 36,
+                              ),
+                              itemBuilder: (BuildContext context) {
+                                return [
+                                  nearestCity==null?PopupMenuItem(
+                                    key: UniqueKey(),
+                                    enabled: false,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Text('Close to refresh'),
+                                        Icon(Icons.cloud_download,color: Colors.black,)
+                                      ],
+                                    ),
+                                  ):
+                                  PopupMenuItem(
+                                    key: UniqueKey(),
+                                    value: nearestCity,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Text(nearestCity.name),
+                                        Icon(Icons.near_me,color: Colors.black,)
+                                      ],
+                                    ),
+                                  ),
+                                  ...cities.map((city) => PopupMenuItem(
+                                    key: UniqueKey(),
+                                    value: city,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Text(city.name),
+                                      ],
+                                    ),
+                                  )),
+                                ];
+                              },
+                            );
+                          }
                         ),
                       )
                     ],
@@ -81,7 +122,7 @@ class __TopPageState extends State<_TopPage> {
           ),
         ),
         SizedBox(
-          height: MediaQuery.of(context).size.height*0.067,
+          height: MediaQuery.of(context).size.height * 0.067,
         ),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 20),
@@ -113,7 +154,7 @@ class __TopPageState extends State<_TopPage> {
                         ClipRRect(
                             borderRadius: BorderRadius.circular(30),
                             child: ButtonTheme(
-                              minWidth: MediaQuery.of(context).size.width*0.4,
+                              minWidth: MediaQuery.of(context).size.width * 0.4,
                               child: FlatButton(
                                 onPressed: () => print('tap'),
                                 child: Text('Cancel'),
@@ -122,7 +163,7 @@ class __TopPageState extends State<_TopPage> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(30),
                           child: ButtonTheme(
-                            minWidth: MediaQuery.of(context).size.width*0.4,
+                            minWidth: MediaQuery.of(context).size.width * 0.4,
                             child: RaisedButton(
                               onPressed: () => print('tap'),
                               child: Text('Confirm'),
@@ -144,18 +185,19 @@ class __TopPageState extends State<_TopPage> {
   @override
   void initState() {
     super.initState();
-    _temp();
+    _mapBloc = MapBloc();
+    _cities=List();
+    _mapBloc.retrieveNearestCities();
   }
 
-  void _temp() async {
-    Geolocator().getCurrentPosition().then((value) {
-      Geolocator()
-          .placemarkFromCoordinates(value.latitude, value.longitude)
-          .then((value) {
-        print('Locality: ' + value[0].locality);
-        print('Adm area: ' + value[0].administrativeArea);
-      });
-    });
+  @override
+  void dispose() {
+    _mapBloc.dispose();
+    super.dispose();
+  }
+
+  _loadCity(city) {
+    
   }
 }
 

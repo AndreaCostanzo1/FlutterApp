@@ -1,15 +1,50 @@
+import 'dart:async';
+
 import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_beertastic/blocs/utilities/geo_data.dart';
 import 'package:flutter_beertastic/blocs/utilities/geo_hash_computer.dart';
+import 'package:flutter_beertastic/model/city.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class MapBloc {
+  final StreamController<List<City>> _nearestCitiesController =
+      StreamController();
+
+  Stream<List<City>> get nearestCityStream => _nearestCitiesController.stream;
 
   void dispose() {
-    //TODO IMPLEMENT
+    _nearestCitiesController.close();
+  }
+
+  void retrieveNearestCities() async {
+    if (await Permission.location.request().isGranted) {
+      GeoData data = await _computeGeoData();
+      List<double> areaSizes = GeoHashComputer.areaPrecisions
+          .where((element) => element > GeoHashComputer.PRECISION_KM_5)
+          .toList();
+      areaSizes.sort();
+      List<DocumentSnapshot> snapshots = List();
+      //continue to increment radius until a city is found
+      for (int i = 0; i < areaSizes.length && snapshots.length < 2; i++) {
+        snapshots = await _retrieveCitiesInArea(data, areaSizes[i]);
+      }
+      List<City> cities = List();
+      if (snapshots.length > 0) {
+        //case some cities found nearby
+        print('here');
+        cities.addAll(_getCityOrderedByVicinity(data, snapshots));
+      } else {
+        //no city nearby, select randomly
+        Firestore.instance.collection('cities').limit(5).getDocuments().then(
+            (query) => query.documents.forEach((citySnap) => cities
+                .add(City.fromSnapshot(_convertSnapshot(citySnap.data)))));
+      }
+      _nearestCitiesController.sink.add(cities);
+    }
+
   }
 
   void setDefaultCity(FirebaseUser user) async {
@@ -38,8 +73,13 @@ class MapBloc {
       if (snapshots.length > 0) {
         DocumentSnapshot nearestCitySnap =
             _getNearestCitySnapshot(data, snapshots);
-        DocumentReference nearestCityRef = Firestore.instance.collection('cities').document(nearestCitySnap.documentID);
-        Firestore.instance.collection('users').document(user.uid).updateData({'city':nearestCityRef});
+        DocumentReference nearestCityRef = Firestore.instance
+            .collection('cities')
+            .document(nearestCitySnap.documentID);
+        Firestore.instance
+            .collection('users')
+            .document(user.uid)
+            .updateData({'city': nearestCityRef});
       }
     }
   }
@@ -88,5 +128,36 @@ class MapBloc {
         .firstWhere((key) => _citiesByDistance[key] == distances[0]);
   }
 
+  List<City> _getCityOrderedByVicinity(
+      GeoData startingPoint, List<DocumentSnapshot> snapshots) {
+    Map<DocumentSnapshot, double> _citiesByDistance = Map();
+    snapshots.forEach((citySnap) {
+      GeoPoint geoPoint = citySnap['geo_point'];
+      _citiesByDistance.putIfAbsent(
+          citySnap,
+          () => startingPoint.distance(
+              lat: geoPoint.latitude, lng: geoPoint.longitude));
+    });
+    List<double> distances = _citiesByDistance.values.toList();
+    distances.sort();
+    List<City> cities = List();
+    distances.forEach((distance) {
+      DocumentSnapshot snapshot = _citiesByDistance.keys
+          .firstWhere((key) => _citiesByDistance[key] == distance);
+      _citiesByDistance.remove(snapshot);
+      cities.add(City.fromSnapshot(_convertSnapshot(snapshot.data)));
+    });
+    return cities;
+  }
 
+  Map<String, dynamic> _convertSnapshot(Map<String, dynamic> data) {
+    Map<String, dynamic> _snapshotToGenerate = Map();
+    GeoPoint geoPoint = data['geo_point'];
+    _snapshotToGenerate.addAll(data);
+    _snapshotToGenerate.addEntries([
+      MapEntry('latitude', geoPoint.latitude),
+      MapEntry('longitude', geoPoint.longitude)
+    ]);
+    return _snapshotToGenerate;
+  }
 }
