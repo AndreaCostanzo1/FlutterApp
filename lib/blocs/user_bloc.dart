@@ -60,7 +60,7 @@ class UserBloc {
           'city_data', () => City.fromSnapshot(CityDataConverter.convertSnapshot(citySnap.data)));
       User user = User.fromSnapshot(userData);
       _authenticatedUserController.sink.add(user);
-      _retrieveProfileImage(user);
+      if(_profileImageController.hasListener)_retrieveProfileImage(user);
     });
   }
 
