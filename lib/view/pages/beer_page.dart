@@ -1,13 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/blocs/beer_bloc.dart';
 
 import 'package:flutter_beertastic/model/beer.dart';
-import 'package:flutter_beertastic/view/pages/fragments/fragments_w320max_small/beer_bottom_bar.dart';
 import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/beer_bottom_bar.dart';
 import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/beer_main_fragment.dart';
-import 'package:flutter_beertastic/view/pages/styles/w320max_small/beer_page_style.dart';
 import 'package:flutter_beertastic/view/pages/styles/wmax_medium/beer_page_style.dart';
 import 'package:flutter_beertastic/view/utils/size_computer.dart';
 
