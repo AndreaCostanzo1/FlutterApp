@@ -7,6 +7,8 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Size;
 import android.view.TextureView;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -55,6 +57,8 @@ public class ScannerActivity extends AppCompatActivity {
         if (requestCode == getResources().getInteger(R.integer.beertastic_camera_request_code)) {
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "You can't use camera without permission", Toast.LENGTH_SHORT).show();
+            } else {
+                setUpCameraX();
             }
         }
     }
@@ -67,7 +71,6 @@ public class ScannerActivity extends AppCompatActivity {
             //permission not granted
             handlePermissionRequest();
         } else {
-
             setUpCameraX();
         }
     }
@@ -106,7 +109,6 @@ public class ScannerActivity extends AppCompatActivity {
 
         PreviewConfig previewConfig = new PreviewConfig.Builder().setTargetResolution(new Size(textureView.getWidth(), textureView.getHeight())).build();
         Preview preview = new Preview(previewConfig);
-
 
         preview.setOnPreviewOutputUpdateListener(
                 previewOutput -> textureView.setSurfaceTexture(previewOutput.getSurfaceTexture()));
