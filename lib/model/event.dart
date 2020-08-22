@@ -53,4 +53,14 @@ class Event {
   String get title => _title;
 
   String get id => _id;
+
+  Map<String, dynamic> toJson() {
+    return Map.from({
+      'id':_id,
+      'date': _date,
+      'description': _description,
+      'title': _imageUrl,
+      'punch_line': _punchLine,
+    });
+  }
 }

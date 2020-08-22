@@ -118,7 +118,7 @@ class __TopPageState extends State<_TopPage> {
                                                     return [
                                                       nearestCity == null
                                                           ? PopupMenuItem(
-                                                              key: UniqueKey(),
+                                                              key: ValueKey(nearestCity.id),
                                                               enabled: false,
                                                               child: Row(
                                                                 mainAxisAlignment:
@@ -160,7 +160,7 @@ class __TopPageState extends State<_TopPage> {
                                                             ),
                                                       ...cities.map((city) =>
                                                           PopupMenuItem(
-                                                            key: UniqueKey(),
+                                                            key: ValueKey(city.id),
                                                             value: city,
                                                             child: Row(
                                                               mainAxisAlignment:

@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:auto_size_text/auto_size_text.dart';
@@ -23,6 +24,7 @@ class _HomeFragmentState extends State<HomeFragment> {
   UserBloc _userBloc;
   EventBloc _eventBloc;
   int _downloadedArticles;
+  double _scrollSize;
   User _user;
 
   @override
@@ -51,8 +53,9 @@ class _HomeFragmentState extends State<HomeFragment> {
                       )
                     : Stack(
                         children: <Widget>[
-                          Container(
-                            constraints: BoxConstraints.expand(height: 165),
+                          AnimatedContainer(
+                            duration: Duration(milliseconds: 300),
+                            constraints: BoxConstraints.expand(height: (165+_scrollSize)),
                             decoration: BoxDecoration(
                                 gradient: new LinearGradient(
                                     colors: [
@@ -69,36 +72,39 @@ class _HomeFragmentState extends State<HomeFragment> {
                           ),
                           RefreshIndicator(
                             onRefresh: ()=>_handleRefresh(),
-                            child: ListView(
-                              physics: BouncingScrollPhysics(),
-                              key: PageStorageKey('scrollingStar'),
-                              padding: EdgeInsets.all(0),
-                              //ListView has default top padding, to override it we insert padding = 0;
-                              scrollDirection: Axis.vertical,
-                              children: <Widget>[
-                                _TopPage(),
-                                SizedBox(height: 10),
-                                _TitleBar(
-                                  'This week in ' + userSnap.data.city.name,
-                                  TextStyle(
-                                      fontSize: 25,
-                                      fontFamily: 'Montserrat Bold',
-                                      color: Colors.black87),
-                                ),
-                                _Events(eventsSnap.data),
-                                _downloadedArticles == 0
-                                    ? Container(
-                                        width: MediaQuery.of(context).size.width,
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 10, vertical: 30),
-                                        child: Text(
-                                          'No events available',
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      )
-                                    : Container(),
-                                SizedBox(height: 24),
-                              ],
+                            child: NotificationListener<ScrollNotification>(
+                              onNotification: (notification)=>_handleScroll(notification),
+                              child: ListView(
+                                physics: BouncingScrollPhysics(),
+                                key: PageStorageKey('scrollingStar'),
+                                padding: EdgeInsets.all(0),
+                                //ListView has default top padding, to override it we insert padding = 0;
+                                scrollDirection: Axis.vertical,
+                                children: <Widget>[
+                                  _TopPage(),
+                                  SizedBox(height: 10),
+                                  _TitleBar(
+                                    'This week in ' + userSnap.data.city.name,
+                                    TextStyle(
+                                        fontSize: 25,
+                                        fontFamily: 'Montserrat Bold',
+                                        color: Colors.black87),
+                                  ),
+                                  _Events(eventsSnap.data),
+                                  _downloadedArticles == 0
+                                      ? Container(
+                                          width: MediaQuery.of(context).size.width,
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 30),
+                                          child: Text(
+                                            'No events available',
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        )
+                                      : Container(),
+                                  SizedBox(height: 24),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -113,6 +119,7 @@ class _HomeFragmentState extends State<HomeFragment> {
     _userBloc = UserBloc();
     _userBloc.getAuthenticatedUserData();
     _eventBloc = EventBloc();
+    _scrollSize=0;
   }
 
   @override
@@ -127,6 +134,18 @@ class _HomeFragmentState extends State<HomeFragment> {
       await _eventBloc.retrieveEventsInCity(_user.city);
     }
     return null;
+  }
+
+  _handleScroll(ScrollNotification notification) {
+    int pixels = notification.metrics.pixels.truncate();
+    if(notification.metrics.axis==Axis.vertical){
+      setState(() {
+        if(pixels<=0&&pixels>=-10&&pixels.toDouble()!=_scrollSize) _scrollSize=0;
+        else if(pixels<=-50&&pixels>=-55&&pixels.toDouble()!=_scrollSize) _scrollSize=-pixels.toDouble()+20;
+        else if(pixels<=-80&&pixels>=-85&&pixels.toDouble()!=_scrollSize) _scrollSize=-pixels.toDouble()+20;
+        else if(pixels<=-120&&pixels>=-125&&pixels.toDouble()!=_scrollSize) _scrollSize=-pixels.toDouble()+30;
+      });
+    }
   }
 }
 
@@ -225,6 +244,7 @@ class __ArticlesRowState extends State<_ArticlesRow> {
         children: widget._articles.map((article) {
           bool activePage = widget._articles.indexOf(article) == currentPage;
           return AnimatedContainer(
+            key: ValueKey(article.id),
             child: Stack(
               children: <Widget>[
                 Container(
@@ -338,7 +358,7 @@ class __ArticlesRowState extends State<_ArticlesRow> {
             duration: Duration(milliseconds: 500),
             curve: Curves.easeOutQuint,
           );
-        }).toList(), //fixme add empty boxes for when the articles are not loaded
+        }).toList(),
       ),
     );
   }
@@ -409,7 +429,7 @@ class _Events extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: events.map((event) {
-        return _EventBox(event, key: UniqueKey());
+        return _EventBox(event, key: ValueKey(event.toJson().toString()));
       }).toList(),
       crossAxisAlignment: CrossAxisAlignment.center,
     );
