@@ -21,9 +21,9 @@ abstract class AuthenticatorInterface {
 
 class Authenticator implements AuthenticatorInterface {
   final Map<String, RemoteError> errors = {
-    'ERROR_USER_NOT_FOUND': RemoteError.USER_NOT_FOUND,
-    'ERROR_WRONG_PASSWORD': RemoteError.WRONG_PASSWORD,
-    'ERROR_EMAIL_ALREADY_IN_USE': RemoteError.USER_ALREADY_EXIST,
+    'user-not-found': RemoteError.USER_NOT_FOUND,
+    'wrong-password': RemoteError.WRONG_PASSWORD,
+    'email-already-in-use': RemoteError.USER_ALREADY_EXIST,
   };
 
   RemoteError _remoteError;
@@ -42,9 +42,12 @@ class Authenticator implements AuthenticatorInterface {
     if (_staticError != null) {
       _remoteErrorController.sink.add(_staticError);
     } else {
-      FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password)
-          .catchError((error) => _handleError(error));
+      try{
+        await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: password);
+      } on FirebaseAuthException catch(error){
+        _handleError(error);
+      }
     }
   }
 
@@ -68,11 +71,9 @@ class Authenticator implements AuthenticatorInterface {
     FirebaseAuth.instance.signOut().catchError((error) => _handleError(error));
   }
 
-  //fixme when a more effective way is available
-  void _handleError(Exception error) async {
-    String errorText = error.toString().substring(
-        error.toString().indexOf('(') + 1, error.toString().indexOf(','));
-    RemoteError remoteError = errors[errorText];
+  void _handleError(FirebaseAuthException error) async {
+    print(error.code);
+    RemoteError remoteError = errors[error.code];
     if (remoteError == null) {
       remoteError = RemoteError.NOT_DEFINED;
       print(remoteError);
