@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_beertastic/blocs/event_bloc.dart';
 import 'package:flutter_beertastic/model/event.dart';
 import 'package:flutter_beertastic/blocs/articles_bloc.dart';
@@ -23,7 +24,6 @@ class HomeFragment extends StatefulWidget {
 class _HomeFragmentState extends State<HomeFragment> {
   UserBloc _userBloc;
   EventBloc _eventBloc;
-  int _downloadedArticles;
   double _scrollSize;
   User _user;
 
@@ -33,14 +33,12 @@ class _HomeFragmentState extends State<HomeFragment> {
         stream: _userBloc.authenticatedUserStream,
         builder: (context, userSnap) {
           if (userSnap.data != null) {
-            _user=userSnap.data;
+            _user = userSnap.data;
             _eventBloc.retrieveEventsInCity(userSnap.data.city);
           }
           return StreamBuilder<List<Event>>(
               stream: _eventBloc.eventsStream,
               builder: (context, eventsSnap) {
-                if (eventsSnap.data != null)
-                  _downloadedArticles = eventsSnap.data.length;
                 return eventsSnap.data == null
                     ? Container(
                         height: MediaQuery.of(context).size.height,
@@ -55,7 +53,8 @@ class _HomeFragmentState extends State<HomeFragment> {
                         children: <Widget>[
                           AnimatedContainer(
                             duration: Duration(milliseconds: 300),
-                            constraints: BoxConstraints.expand(height: (165+_scrollSize)),
+                            constraints: BoxConstraints.expand(
+                                height: (165 + _scrollSize)),
                             decoration: BoxDecoration(
                                 gradient: new LinearGradient(
                                     colors: [
@@ -71,9 +70,10 @@ class _HomeFragmentState extends State<HomeFragment> {
                                     bottomRight: Radius.circular(30))),
                           ),
                           RefreshIndicator(
-                            onRefresh: ()=>_handleRefresh(),
+                            onRefresh: () => _handleRefresh(),
                             child: NotificationListener<ScrollNotification>(
-                              onNotification: (notification)=>_handleScroll(notification),
+                              onNotification: (notification) =>
+                                  _handleScroll(notification),
                               child: ListView(
                                 physics: BouncingScrollPhysics(),
                                 key: PageStorageKey('scrollingStar'),
@@ -91,13 +91,26 @@ class _HomeFragmentState extends State<HomeFragment> {
                                         color: Colors.black87),
                                   ),
                                   _Events(eventsSnap.data),
-                                  _downloadedArticles == 0
+                                  _eventBloc.downloadedEvents == 0
                                       ? Container(
-                                          width: MediaQuery.of(context).size.width,
+                                          width:
+                                              MediaQuery.of(context).size.width,
                                           padding: EdgeInsets.symmetric(
                                               horizontal: 10, vertical: 30),
                                           child: Text(
                                             'No events available',
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        )
+                                      : Container(),
+                                  _eventBloc.noMoreEventsAvailable
+                                      ? Container(
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 30),
+                                          child: Text(
+                                            'No more events',
                                             textAlign: TextAlign.center,
                                           ),
                                         )
@@ -119,7 +132,7 @@ class _HomeFragmentState extends State<HomeFragment> {
     _userBloc = UserBloc();
     _userBloc.getAuthenticatedUserData();
     _eventBloc = EventBloc();
-    _scrollSize=0;
+    _scrollSize = 0;
   }
 
   @override
@@ -130,7 +143,7 @@ class _HomeFragmentState extends State<HomeFragment> {
   }
 
   _handleRefresh() async {
-    if(_user!=null) {
+    if (_user != null) {
       await _eventBloc.retrieveEventsInCity(_user.city);
     }
     return null;
@@ -138,14 +151,30 @@ class _HomeFragmentState extends State<HomeFragment> {
 
   _handleScroll(ScrollNotification notification) {
     int pixels = notification.metrics.pixels.truncate();
-    if(notification.metrics.axis==Axis.vertical){
-      setState(() {
-        if(pixels<=0&&pixels>=-10&&pixels.toDouble()!=_scrollSize) _scrollSize=0;
-        else if(pixels<=-50&&pixels>=-55&&pixels.toDouble()!=_scrollSize) _scrollSize=-pixels.toDouble()+20;
-        else if(pixels<=-80&&pixels>=-85&&pixels.toDouble()!=_scrollSize) _scrollSize=-pixels.toDouble()+20;
-        else if(pixels<=-120&&pixels>=-125&&pixels.toDouble()!=_scrollSize) _scrollSize=-pixels.toDouble()+30;
-      });
+    if (notification.metrics.axis == Axis.vertical) {
+      _checkBoxHeightUpdate(pixels);
+      if(!_eventBloc.noMoreEventsAvailable&&notification.metrics.pixels==notification.metrics.maxScrollExtent){
+        _eventBloc.retrieveMoreEventsInCity(_user.city);
+      }
     }
+  }
+
+  void _checkBoxHeightUpdate(int pixels) async {
+    double scrollSize = -1;
+    if (pixels <= 0 && pixels >= -10 && pixels.toDouble() != _scrollSize)
+      scrollSize = 0;
+    else if (pixels <= -50 && pixels >= -55 && pixels.toDouble() != _scrollSize)
+      scrollSize = -pixels.toDouble() + 20;
+    else if (pixels <= -80 && pixels >= -85 && pixels.toDouble() != _scrollSize)
+      scrollSize = -pixels.toDouble() + 20;
+    else if (pixels <= -120 &&
+        pixels >= -125 &&
+        pixels.toDouble() != _scrollSize) scrollSize = -pixels.toDouble() + 30;
+    if (scrollSize != -1)
+      SchedulerBinding.instance
+          .addPostFrameCallback((timeStamp) => setState(() {
+                _scrollSize = scrollSize;
+              }));
   }
 }
 
@@ -496,15 +525,15 @@ class __EventBoxState extends State<_EventBox> {
                   cardWidth,
                   cardHeight,
                   day: widget._event.date.day.toString(),
-                  monthAbbreviation: _computeMonthAbbreviation(widget._event.date),
+                  monthAbbreviation:
+                      _computeMonthAbbreviation(widget._event.date),
                 ),
                 _EventBody(
                   dateContainerSize,
                   cardWidth,
                   cardHeight,
                   title: widget._event.reducedTitle,
-                  subTitle:
-                      _computePunchLineSubstring(widget._event.punchLine),
+                  subTitle: _computePunchLineSubstring(widget._event.punchLine),
                   place: widget._event.placeName,
                 )
               ],
@@ -542,13 +571,13 @@ class __EventBoxState extends State<_EventBox> {
   }
 
   String _computePunchLineSubstring(String punchLine) {
-    if(punchLine.length<37) return punchLine;
-    int indexToCut = punchLine.indexOf(' ',30);
-    return punchLine.substring(0,indexToCut)+'...';
+    if (punchLine.length < 37) return punchLine;
+    int indexToCut = punchLine.indexOf(' ', 30);
+    return punchLine.substring(0, indexToCut) + '...';
   }
 
-  String _computeMonthAbbreviation(DateTime dateTime){
-    Map<int,String> monthAbbreviations= Map.from({
+  String _computeMonthAbbreviation(DateTime dateTime) {
+    Map<int, String> monthAbbreviations = Map.from({
       DateTime.january: 'JAN',
       DateTime.february: 'FEB',
       DateTime.march: 'MAR',
@@ -564,7 +593,6 @@ class __EventBoxState extends State<_EventBox> {
     });
 
     return monthAbbreviations[dateTime.month];
-
   }
 }
 
