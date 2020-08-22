@@ -51,7 +51,7 @@ class EventBloc {
     }
   }
 
-  void retrieveEventImages(Event event) async {
+  void retrieveEventImage(Event event) async {
     try {
       Uint8List image = await FirebaseStorage.instance
           .ref()

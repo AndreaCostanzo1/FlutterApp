@@ -1,19 +1,27 @@
 import 'dart:collection';
+import 'dart:typed_data';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_beertastic/blocs/event_bloc.dart';
+import 'package:flutter_beertastic/model/event.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class EventPage extends StatelessWidget {
+  final Event _event;
+
+  EventPage(this._event);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xf2f2f2f2),
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            _EventDetailsBackground(),
-            _EventDetailsContent(),
+            _EventDetailsBackground(_event),
+            _EventDetailsContent(_event),
           ],
         ),
       ),
@@ -21,7 +29,19 @@ class EventPage extends StatelessWidget {
   }
 }
 
-class _EventDetailsBackground extends StatelessWidget {
+class _EventDetailsBackground extends StatefulWidget {
+  final Event _event;
+
+  _EventDetailsBackground(this._event);
+
+  @override
+  __EventDetailsBackgroundState createState() => __EventDetailsBackgroundState();
+}
+
+class __EventDetailsBackgroundState extends State<_EventDetailsBackground> {
+
+  EventBloc _eventBloc;
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -31,16 +51,28 @@ class _EventDetailsBackground extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: ClipPath(
         clipper: ImageClipper(),
-        child: Image.network(
-          data[0]['image'], //fixme
-          fit: BoxFit.cover,
-          width: screenWidth,
-          color: Color(0x99000000),
-          colorBlendMode: BlendMode.darken,
-          height: screenHeight * 0.52,
+        child: StreamBuilder<Uint8List>(
+          stream: _eventBloc.eventImageStream,
+          builder: (context, snapshot) {
+            return snapshot.data==null?Container(color: Colors.black.withOpacity(0.6),):Image.memory(
+              snapshot.data,
+              fit: BoxFit.cover,
+              width: screenWidth,
+              color: Color(0x99000000),
+              colorBlendMode: BlendMode.darken,
+              height: screenHeight * 0.52,
+            );
+          }
         ),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _eventBloc=EventBloc();
+    _eventBloc.retrieveEventImage(widget._event);
   }
 }
 
@@ -67,6 +99,10 @@ class ImageClipper extends CustomClipper<Path> {
 }
 
 class _EventDetailsContent extends StatelessWidget {
+  final Event _event;
+
+  _EventDetailsContent(this._event);
+
   @override
   Widget build(BuildContext context) {
     final event = events[0]; //FIXME delete me
@@ -83,13 +119,17 @@ class _EventDetailsContent extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Container(
-                  height: _screenHeight * 0.185,
-                  margin: EdgeInsets.only(
-                      left: _screenWidth * 0.285, right: _screenWidth * 0.05),
-                  child: AutoSizeText(
-                    event.title,
-                    style: eventWhiteTitleTextStyle,
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: _screenHeight * 0.185,
+                  ),
+                  child: Container(
+                    margin: EdgeInsets.only(
+                        left: _screenWidth * 0.285, right: _screenWidth * 0.05),
+                    child: AutoSizeText(
+                      _event.title,
+                      style: eventWhiteTitleTextStyle,
+                    ),
                   ),
                 ),
                 Container(
@@ -129,7 +169,7 @@ class _EventDetailsContent extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 10.0),
             child: Text(
-              "AWARDS",
+              "SOCIAL",
               style: guestTextStyle,
             ),
           ),
@@ -157,50 +197,52 @@ class _EventDetailsContent extends StatelessWidget {
               child: AutoSizeText.rich(
                 TextSpan(children: [
                   TextSpan(
-                    text: event.punchLine1,
+                    text: _event.punchLine
+                        .substring(0, _event.punchLine.indexOf(' ')),
                     style: punchLine1TextStyle,
                   ),
                   TextSpan(text: ' ', style: punchLine1TextStyle),
                   TextSpan(
-                    text: event.punchLine2,
+                    text: _event.punchLine
+                        .substring(_event.punchLine.indexOf(' ') + 1),
                     style: punchLine2TextStyle,
                   ),
                 ]),
               )),
-          if (event.description != null)
+          if (_event.description != null)
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: Text(
-                event.description,
+                _event.description,
                 style: eventDescriptionTextStyle,
               ),
             ),
           SizedBox(
             height: 20,
           ),
-          _MapBox(45.274068, 9.093420), //fixme
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: <Widget>[
-                for (final galleryImagePath in event.galleryImages)
-                  Container(
-                    margin:
-                        const EdgeInsets.only(left: 16, right: 16, bottom: 32),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                      child: Image.network(
-                        //FIXME use async
-                        galleryImagePath,
-                        width: 180,
-                        height: 180,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
+          _MapBox(_event.latitude, _event.longitude),
+//          SingleChildScrollView(
+//            scrollDirection: Axis.horizontal,
+//            child: Row(
+//              children: <Widget>[
+//                for (final galleryImagePath in event.galleryImages)
+//                  Container(
+//                    margin:
+//                        const EdgeInsets.only(left: 16, right: 16, bottom: 32),
+//                    child: ClipRRect(
+//                      borderRadius: BorderRadius.all(Radius.circular(20)),
+//                      child: Image.network(
+//                        //FIXME use async
+//                        galleryImagePath,
+//                        width: 180,
+//                        height: 180,
+//                        fit: BoxFit.cover,
+//                      ),
+//                    ),
+//                  ),
+//              ],
+//            ),
+//          ),
         ],
       ),
     );
@@ -218,7 +260,7 @@ class _MapBox extends StatefulWidget {
 }
 
 class __MapBoxState extends State<_MapBox> {
-  Set<Marker> _markers=HashSet();
+  Set<Marker> _markers = HashSet();
 
   @override
   Widget build(BuildContext context) {

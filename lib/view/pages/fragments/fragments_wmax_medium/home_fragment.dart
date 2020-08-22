@@ -462,7 +462,7 @@ class __EventBoxState extends State<_EventBox> {
         borderRadius: BorderRadius.circular(10),
         child: Material(
           child: InkWell(
-            onTap: () => _openEventPage(context),
+            onTap: () => _openEventPage(context, widget._event),
             child: Stack(
               children: <Widget>[
                 Column(
@@ -529,14 +529,14 @@ class __EventBoxState extends State<_EventBox> {
   void initState() {
     super.initState();
     _eventBloc = EventBloc();
-    _eventBloc.retrieveEventImages(widget._event);
+    _eventBloc.retrieveEventImage(widget._event);
   }
 
-  _openEventPage(BuildContext context) {
+  _openEventPage(BuildContext context, Event event) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EventPage(),
+        builder: (context) => EventPage(event),
       ),
     );
   }
