@@ -77,6 +77,7 @@ flutter:
     - assets/images/3042.jpg
     - assets/images/milan.jpg
     - assets/animations/simple_color_bar.flr
+    - assets/map_styles/map_style_retro.json
 
   fonts:
     - family:  CustomIcons

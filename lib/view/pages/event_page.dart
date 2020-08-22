@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/blocs/event_bloc.dart';
 import 'package:flutter_beertastic/model/event.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class EventPage extends StatelessWidget {
   final Event _event;
@@ -16,7 +17,7 @@ class EventPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xf2f2f2f2),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Stack(
           children: [
@@ -261,6 +262,7 @@ class _MapBox extends StatefulWidget {
 
 class __MapBoxState extends State<_MapBox> {
   Set<Marker> _markers = HashSet();
+  String _mapStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -269,6 +271,7 @@ class __MapBoxState extends State<_MapBox> {
       child: Container(
         height: MediaQuery.of(context).size.height * 0.400,
         child: GoogleMap(
+          scrollGesturesEnabled: false,
           initialCameraPosition: CameraPosition(
             target: LatLng(widget._latitude, widget._longitude),
             zoom: 16,
@@ -280,7 +283,15 @@ class __MapBoxState extends State<_MapBox> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    rootBundle.loadString('assets/map_styles/map_style_retro.json').then((string) {
+      _mapStyle = string;
+    });
+  }
   void _onMapCreated(GoogleMapController controller) {
+    controller.setMapStyle(_mapStyle);
     setState(() {
       _markers.add(Marker(
         markerId: MarkerId('name'),
