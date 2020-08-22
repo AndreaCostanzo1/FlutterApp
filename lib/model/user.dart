@@ -1,20 +1,20 @@
 import 'city.dart';
 
-class User {
+class MyUser {
   final String _uid;
   final String _profileImagePath;
   final String _nickname;
   final String _email;
   City _city;
 
-  User.fromSnapshot(Map<String, dynamic> snapshot)
+  MyUser.fromSnapshot(Map<String, dynamic> snapshot)
       : _uid = snapshot['id'],
         _profileImagePath = snapshot['profile_image_path'],
         _nickname = snapshot['nickname'],
         _email = snapshot['email'],
         _city = snapshot['city_data'];
 
-  User.empty()
+  MyUser.empty()
       : _uid = '',
         _profileImagePath = '',
         _nickname = '',

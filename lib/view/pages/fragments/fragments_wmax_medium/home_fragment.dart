@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:auto_size_text/auto_size_text.dart';
@@ -25,11 +24,11 @@ class _HomeFragmentState extends State<HomeFragment> {
   UserBloc _userBloc;
   EventBloc _eventBloc;
   double _scrollSize;
-  User _user;
+  MyUser _user;
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User>(
+    return StreamBuilder<MyUser>(
         stream: _userBloc.authenticatedUserStream,
         builder: (context, userSnap) {
           if (userSnap.data != null) {

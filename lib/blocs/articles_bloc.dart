@@ -20,18 +20,18 @@ class ArticlesBloc {
   }
 
   void retrieveArticles() {
-    _subscriptions.add(Firestore.instance
+    _subscriptions.add(FirebaseFirestore.instance
         .collection('articles')
         .where('show', isEqualTo: true)
         .snapshots()
-        .listen((query) => _updateArticlesSink(query.documents)));
+        .listen((query) => _updateArticlesSink(query.docs)));
   }
 
   _updateArticlesSink(List<DocumentSnapshot> articlesSnapshots) {
     //get the list of articles still not retrieved
     _articles.clear();
     _articles.addAll(articlesSnapshots
-        .map((snapshots) => Article.fromSnapshot(snapshots.data))
+        .map((snapshots) => Article.fromSnapshot(snapshots.data()))
         .toList());
     _articlesController.sink.add(_articles);
   }

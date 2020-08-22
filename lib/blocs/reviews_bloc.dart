@@ -39,14 +39,14 @@ class ReviewsBloc {
       _availableDocumentsController.sink.add(true);
       localPid = ++pid;
     });
-    QuerySnapshot query = await Firestore.instance
+    QuerySnapshot query = await FirebaseFirestore.instance
         .collection('beers')
-        .document(beerId)
+        .doc(beerId)
         .collection('reviews')
         .orderBy('date', descending: true)
         .limit(limit)
-        .getDocuments();
-    if (query.documents.length > 0) {
+        .get();
+    if (query.docs.length > 0) {
       _updateStream(query, localPid);
     } else {
       _lock.synchronized(() {
@@ -64,15 +64,15 @@ class ReviewsBloc {
       _availableDocumentsController.sink.add(true);
       localPid = ++pid;
     });
-    QuerySnapshot query = await Firestore.instance
+    QuerySnapshot query = await FirebaseFirestore.instance
         .collection('beers')
-        .document(beerId)
+        .doc(beerId)
         .collection('reviews')
         .orderBy('date', descending: true)
         .where('rate', isEqualTo: vote)
         .limit(limit)
-        .getDocuments();
-    if (query.documents.length > 0) {
+        .get();
+    if (query.docs.length > 0) {
       _updateStream(query, localPid);
     } else {
       _lock.synchronized(() {
@@ -87,17 +87,17 @@ class ReviewsBloc {
   void _updateStream(QuerySnapshot query, int localPid) {
     int i = 0;
     List<Review> localReviews = List();
-    query.documents.forEach((reviewSnap) async {
-      FirebaseUser fUser= await FirebaseAuth.instance.currentUser();
-      DocumentReference userReference = reviewSnap.data['user'];
+    query.docs.forEach((reviewSnap) async {
+      User fUser= FirebaseAuth.instance.currentUser;
+      DocumentReference userReference = reviewSnap.data()['user'];
       Map<String, dynamic> reviewCompleteData = await _generateReviewData(userReference,reviewSnap);
       _lock.synchronized(() {
-        if(fUser.uid!=userReference.documentID)localReviews.add(Review.fromSnapshot(reviewCompleteData));
+        if(fUser.uid!=userReference.id)localReviews.add(Review.fromSnapshot(reviewCompleteData));
         i++;
-        if (i >= query.documents.length &&
+        if (i >= query.docs.length &&
             !_reviewStreamController.isClosed &&
             pid == localPid) {
-          _lastDocument = query.documents.last;
+          _lastDocument = query.docs.last;
           _reviews.clear();
           _reviews.addAll(localReviews);
           _reviewStreamController.sink.add(_reviews);
@@ -133,15 +133,15 @@ class ReviewsBloc {
       }
     });
     if (newDocumentsAvailable) {
-      QuerySnapshot query = await Firestore.instance
+      QuerySnapshot query = await FirebaseFirestore.instance
           .collection('beers')
-          .document(beerId)
+          .doc(beerId)
           .collection('reviews')
           .orderBy('date', descending: true)
           .limit(limit)
           .startAfterDocument(_lastDocument)
-          .getDocuments();
-      if (query.documents.length > 0) {
+          .get();
+      if (query.docs.length > 0) {
         _updateStreamWithoutClearing(query, localPid);
       } else {
         _lock.synchronized(() {
@@ -175,16 +175,16 @@ class ReviewsBloc {
       }
     });
     if (newDocumentsAvailable) {
-      QuerySnapshot query = await Firestore.instance
+      QuerySnapshot query = await FirebaseFirestore.instance
           .collection('beers')
-          .document(beerId)
+          .doc(beerId)
           .collection('reviews')
           .where('rate', isEqualTo: rate)
           .orderBy('date', descending: true)
           .limit(limit)
           .startAfterDocument(_lastDocument)
-          .getDocuments();
-      if (query.documents.length > 0) {
+          .get();
+      if (query.docs.length > 0) {
         _updateStreamWithoutClearing(query, localPid);
       } else {
         _lock.synchronized(() {
@@ -201,17 +201,17 @@ class ReviewsBloc {
   void _updateStreamWithoutClearing(QuerySnapshot query, int localPid) {
     int i = 0;
     List<Review> localReviews = List();
-    query.documents.forEach((reviewSnap) async {
-      FirebaseUser fUser= await FirebaseAuth.instance.currentUser();
-      DocumentReference reference = reviewSnap.data['user'];
+    query.docs.forEach((reviewSnap) async {
+      User fUser= FirebaseAuth.instance.currentUser;
+      DocumentReference reference = reviewSnap.data()['user'];
       Map<String, dynamic> reviewCompleteData = await _generateReviewData(reference, reviewSnap);
       _lock.synchronized(() {
-        if(fUser.uid!=reference.documentID)localReviews.add(Review.fromSnapshot(reviewCompleteData));
+        if(fUser.uid!=reference.id)localReviews.add(Review.fromSnapshot(reviewCompleteData));
         i++;
-        if (i >= query.documents.length &&
+        if (i >= query.docs.length &&
             !_reviewStreamController.isClosed &&
             pid == localPid) {
-          _lastDocument = query.documents.last;
+          _lastDocument = query.docs.last;
           _reviews.addAll(localReviews);
           _reviewStreamController.sink.add(_reviews);
           if (i < limit) _availableDocumentsController.sink.add(false);
@@ -225,9 +225,9 @@ class ReviewsBloc {
   Future<Map<String, dynamic>> _generateReviewData(DocumentReference userRef, DocumentSnapshot reviewSnap) async {
     Map<String, dynamic> reviewCompleteData = Map();
     DocumentSnapshot userSnapshot = await userRef.get();
-    reviewCompleteData.addAll(reviewSnap.data);
+    reviewCompleteData.addAll(reviewSnap.data());
     reviewCompleteData.update(
-        'user', (value) => User.fromSnapshot(userSnapshot.data));
+        'user', (value) => MyUser.fromSnapshot(userSnapshot.data()));
     return reviewCompleteData;
   }
 }

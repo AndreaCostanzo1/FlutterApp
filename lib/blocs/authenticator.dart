@@ -7,8 +7,8 @@ import 'package:flutter_beertastic/blocs/map_bloc.dart';
 abstract class AuthenticatorInterface {
   void logWithEmailAndPassword(String email, String password);
 
-  void signUpWithEmailAndPassword(String email, String password,
-      String confirm);
+  void signUpWithEmailAndPassword(
+      String email, String password, String confirm);
 
   void logOut();
 
@@ -38,7 +38,7 @@ class Authenticator implements AuthenticatorInterface {
   @override
   void logWithEmailAndPassword(String email, String password) async {
     RemoteError _staticError =
-    StaticFieldChecker().checkEmailAndPassword(email, password);
+        StaticFieldChecker().checkEmailAndPassword(email, password);
     if (_staticError != null) {
       _remoteErrorController.sink.add(_staticError);
     } else {
@@ -49,10 +49,10 @@ class Authenticator implements AuthenticatorInterface {
   }
 
   @override
-  void signUpWithEmailAndPassword(String email, String password,
-      String confirm) async {
+  void signUpWithEmailAndPassword(
+      String email, String password, String confirm) async {
     RemoteError _staticError =
-    StaticFieldChecker().checkFields(email, password, confirm);
+        StaticFieldChecker().checkFields(email, password, confirm);
     if (_staticError != null) {
       _remoteErrorController.sink.add(_staticError);
     } else {
@@ -92,38 +92,44 @@ class Authenticator implements AuthenticatorInterface {
     _remoteErrorController?.close();
   }
 
-  void _createNewUserEntry(AuthResult response) async {
-    FirebaseUser user = response.user;
+  void _createNewUserEntry(UserCredential response) async {
+    User user = response.user;
     await _createDatabaseEntry(user);
     _setUserDefaultCity(user);
     _setUserBeerAffinities(user);
   }
 
-  Future<void> _createDatabaseEntry(FirebaseUser user) async {
+  Future<void> _createDatabaseEntry(User user) async {
     Map<String, dynamic> userData = Map.from({
       'id': user.uid,
       'nickname': 'user' + user.uid.substring(16),
       'email': user.email,
       'profile_image_path': 'profile_images/' + user.uid
     });
-    DocumentReference userRef=Firestore.instance.collection('users').document(user.uid);
-    return userRef.setData(userData);
+    DocumentReference userRef =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
+    return userRef.set(userData);
   }
 
-  void _setUserDefaultCity(FirebaseUser user) {
+  void _setUserDefaultCity(User user) {
     MapBloc bloc = MapBloc();
     bloc.setDefaultCity(user);
     bloc.dispose();
   }
 
-  void _setUserBeerAffinities(FirebaseUser user) async {
-    DocumentReference userRef = Firestore.instance.collection('users').document(user.uid);
-    QuerySnapshot query = await Firestore.instance.collection('clusters').orderBy(
-        'popularity', descending: true).limit(1).getDocuments();
+  void _setUserBeerAffinities(User user) async {
+    DocumentReference userRef =
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
+    QuerySnapshot query = await FirebaseFirestore.instance
+        .collection('clusters')
+        .orderBy('popularity', descending: true)
+        .limit(1)
+        .get();
     //take the cluster with higher popularity
-    DocumentSnapshot clusterSnap = query.documents.first;
-    userRef.collection('affinities').document(clusterSnap.documentID).setData({
-      'cluster_code': Firestore.instance.collection('clusters').document(clusterSnap.documentID),
+    DocumentSnapshot clusterSnap = query.docs.first;
+    userRef.collection('affinities').doc(clusterSnap.id).set({
+      'cluster_code':
+          FirebaseFirestore.instance.collection('clusters').doc(clusterSnap.id),
       'affinity': 0.5
     });
   }

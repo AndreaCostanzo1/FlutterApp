@@ -21,10 +21,10 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    return StreamBuilder<FirebaseUser>(
-        stream: FirebaseAuth.instance.onAuthStateChanged,
+    return StreamBuilder<User>(
+        stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          return Provider<FirebaseUser>.value(
+          return Provider<User>.value(
             value: snapshot.data,
             child: MaterialApp(
               title: 'Flutter Demo',

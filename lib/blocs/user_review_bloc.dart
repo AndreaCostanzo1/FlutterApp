@@ -22,12 +22,12 @@ class UserReviewBloc {
   }
 
   void retrieveReview(Beer beer) async {
-    FirebaseUser fUser = await FirebaseAuth.instance.currentUser();
+    User fUser = FirebaseAuth.instance.currentUser;
     DocumentReference beerRef =
-        Firestore.instance.collection('beers').document(beer.id);
+    FirebaseFirestore.instance.collection('beers').doc(beer.id);
     _subscriptions.add(beerRef
         .collection('reviews')
-        .document(fUser.uid)
+        .doc(fUser.uid)
         .snapshots()
         .listen((reviewSnap) {
       if (reviewSnap.data != null) {
@@ -43,13 +43,13 @@ class UserReviewBloc {
     //clear stream
     _userReviewStreamController.sink.add(null);
     //creation process
-    FirebaseUser fUser = await FirebaseAuth.instance.currentUser();
+   User fUser = FirebaseAuth.instance.currentUser;
     DocumentReference userRef =
-        Firestore.instance.collection('users').document(fUser.uid);
+    FirebaseFirestore.instance.collection('users').doc(fUser.uid);
     DocumentReference beerRef =
-        Firestore.instance.collection('beers').document(beer.id);
+    FirebaseFirestore.instance.collection('beers').doc(beer.id);
     await _updateReviewsCount(beerRef, rate, false);
-    beerRef.collection('reviews').document(fUser.uid).setData({
+    beerRef.collection('reviews').doc(fUser.uid).set({
       'user': userRef,
       'date': DateTime.now(),
       'rate': rate,
@@ -61,20 +61,20 @@ class UserReviewBloc {
     //clear stream
     _userReviewStreamController.sink.add(null);
     //creation process
-    FirebaseUser fUser = await FirebaseAuth.instance.currentUser();
+    User fUser = FirebaseAuth.instance.currentUser;
     DocumentReference beerRef =
-        Firestore.instance.collection('beers').document(beer.id);
+    FirebaseFirestore.instance.collection('beers').doc(beer.id);
     await _updateReviewsCount(beerRef, review.rate.toDouble(), true);
-    beerRef.collection('reviews').document(fUser.uid).delete();
+    beerRef.collection('reviews').doc(fUser.uid).delete();
   }
 
   void _retrieveUserAndNotifyReview(DocumentSnapshot reviewSnap) {
-    DocumentReference userRef = reviewSnap['user'];
+    DocumentReference userRef = reviewSnap.data()['user'];
     userRef.get().then((userSnap) {
       Map<String, dynamic> reviewCompleteData = Map();
-      reviewCompleteData.addAll(reviewSnap.data);
+      reviewCompleteData.addAll(reviewSnap.data());
       reviewCompleteData.update(
-          'user', (value) => User.fromSnapshot(userSnap.data));
+          'user', (value) => MyUser.fromSnapshot(userSnap.data()));
       _userReviewStreamController.sink
           .add(Review.fromSnapshot(reviewCompleteData));
     });
@@ -83,10 +83,10 @@ class UserReviewBloc {
   Future<void> _updateReviewsCount(
       DocumentReference beerRef, double rate, bool delete) async {
     await _lock.synchronized(() async{
-      await Firestore.instance.runTransaction((transaction) async {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
         DocumentSnapshot beerSnap = await transaction.get(beerRef);
         if(beerSnap!=null&&beerSnap.exists){
-          Beer beer = Beer.fromSnapshot(beerSnap.data);
+          Beer beer = Beer.fromSnapshot(beerSnap.data());
           Map<String, int> map = Map.from(beer.ratingsByRate
               .map((key, value) => MapEntry(key.toString(), value)));
           map.update(rate.toInt().toString(),
@@ -99,7 +99,7 @@ class UserReviewBloc {
                     (entry) => averageRate += int.parse(entry.key) * entry.value);
             averageRate = (averageRate / newTotalRatings * 10).round() / 10;
           }
-          await transaction.update(beerRef, {
+          transaction.update(beerRef, {
             'ratings_by_rate': map,
             'total_ratings': newTotalRatings,
             'rating': averageRate

@@ -105,7 +105,7 @@ class __ProfileSectionState extends State<_ProfileSection> {
                 ),
               ),
               SizedBox(height: SpacingUnit.w * 2),
-              StreamBuilder<User>(
+              StreamBuilder<MyUser>(
                 stream: _profileBloc.authenticatedUserStream,
                 builder: (context, snapshot) {
                   return snapshot.data!=null? Column(

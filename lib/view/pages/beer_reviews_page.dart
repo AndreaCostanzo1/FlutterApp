@@ -536,7 +536,7 @@ class __ProgressBar extends StatelessWidget {
 class _UserRow extends StatefulWidget {
   final int _rate;
 
-  final User _user;
+  final MyUser _user;
 
   _UserRow(this._user, this._rate);
 

@@ -16,8 +16,7 @@ class MapBloc {
   final StreamController<List<City>> _nearestCitiesController =
       StreamController();
 
-  final StreamController<Uint8List> _cityImageController =
-  StreamController();
+  final StreamController<Uint8List> _cityImageController = StreamController();
 
   Stream<List<City>> get nearestCityStream => _nearestCitiesController.stream;
 
@@ -29,9 +28,13 @@ class MapBloc {
   }
 
   void retrieveCityImage(City city) async {
-    Uint8List image = await FirebaseStorage.instance.ref().child(city.imageUrl).getData(600000);
+    Uint8List image = await FirebaseStorage.instance
+        .ref()
+        .child(city.imageUrl)
+        .getData(600000);
     _cityImageController.sink.add(image);
   }
+
   void retrieveNearestCities() async {
     if (await Permission.location.request().isGranted) {
       GeoData data = await _computeGeoData();
@@ -50,27 +53,26 @@ class MapBloc {
         cities.addAll(_getCityOrderedByVicinity(data, snapshots));
       } else {
         //no city nearby, select randomly
-        Firestore.instance.collection('cities').limit(5).getDocuments().then(
-            (query) => query.documents.forEach((citySnap) => cities
-                .add(City.fromSnapshot(CityDataConverter.convertSnapshot(citySnap.data)))));
+        FirebaseFirestore.instance.collection('cities').limit(5).get().then(
+            (query) => query.docs.forEach((citySnap) => cities.add(
+                City.fromSnapshot(
+                    CityDataConverter.convertSnapshot(citySnap.data())))));
       }
       _nearestCitiesController.sink.add(cities);
     }
-
   }
 
-  void setDefaultCity(FirebaseUser user) async {
+  void setDefaultCity(User user) async {
     DocumentReference milanRef =
-        Firestore.instance.collection('city').document('Milan');
-    await Firestore.instance
+        FirebaseFirestore.instance.collection('city').doc('Milan');
+    await FirebaseFirestore.instance
         .collection('users')
-        .document(user.uid)
-        .updateData({'city': milanRef});
+        .doc(user.uid)
+        .update({'city': milanRef});
     _updateCityToNearestIfLocationPermissionGranted(user);
   }
 
-  void _updateCityToNearestIfLocationPermissionGranted(
-      FirebaseUser user) async {
+  void _updateCityToNearestIfLocationPermissionGranted(User user) async {
     if (await Permission.location.request().isGranted) {
       GeoData data = await _computeGeoData();
       List<double> areaSizes = GeoHashComputer.areaPrecisions
@@ -85,13 +87,13 @@ class MapBloc {
       if (snapshots.length > 0) {
         DocumentSnapshot nearestCitySnap =
             _getNearestCitySnapshot(data, snapshots);
-        DocumentReference nearestCityRef = Firestore.instance
+        DocumentReference nearestCityRef = FirebaseFirestore.instance
             .collection('cities')
-            .document(nearestCitySnap.documentID);
-        Firestore.instance
+            .doc(nearestCitySnap.id);
+        FirebaseFirestore.instance
             .collection('users')
-            .document(user.uid)
-            .updateData({'city': nearestCityRef});
+            .doc(user.uid)
+            .update({'city': nearestCityRef});
       }
     }
   }
@@ -102,11 +104,11 @@ class MapBloc {
   }
 
   Future<QuerySnapshot> _queryZone(String zoneHash) {
-    return Firestore.instance
+    return FirebaseFirestore.instance
         .collection('cities')
         .where('geo_hash', isGreaterThanOrEqualTo: zoneHash)
         .where('geo_hash', isLessThan: zoneHash + '~')
-        .getDocuments();
+        .get();
   }
 
   Future<List<DocumentSnapshot>> _retrieveCitiesInArea(
@@ -118,7 +120,7 @@ class MapBloc {
     area.forEach((areaHash) => queries.add(_queryZone(areaHash)));
     queries.close();
     return (await queries.future)
-        .map((e) => e.documents)
+        .map((e) => e.docs)
         .toList()
         .expand((element) => element)
         .toList();
@@ -128,7 +130,7 @@ class MapBloc {
       GeoData startingPoint, List<DocumentSnapshot> snapshots) {
     Map<DocumentSnapshot, double> _citiesByDistance = Map();
     snapshots.forEach((citySnap) {
-      GeoPoint geoPoint = citySnap['geo_point'];
+      GeoPoint geoPoint = citySnap.data()['geo_point'];
       _citiesByDistance.putIfAbsent(
           citySnap,
           () => startingPoint.distance(
@@ -144,7 +146,7 @@ class MapBloc {
       GeoData startingPoint, List<DocumentSnapshot> snapshots) {
     Map<DocumentSnapshot, double> _citiesByDistance = Map();
     snapshots.forEach((citySnap) {
-      GeoPoint geoPoint = citySnap['geo_point'];
+      GeoPoint geoPoint = citySnap.data()['geo_point'];
       _citiesByDistance.putIfAbsent(
           citySnap,
           () => startingPoint.distance(
@@ -157,7 +159,8 @@ class MapBloc {
       DocumentSnapshot snapshot = _citiesByDistance.keys
           .firstWhere((key) => _citiesByDistance[key] == distance);
       _citiesByDistance.remove(snapshot);
-      cities.add(City.fromSnapshot(CityDataConverter.convertSnapshot(snapshot.data)));
+      cities.add(City.fromSnapshot(
+          CityDataConverter.convertSnapshot(snapshot.data())));
     });
     return cities;
   }

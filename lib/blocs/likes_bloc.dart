@@ -24,12 +24,12 @@ class LikesBloc {
   }
 
   void verifyIfLiked(String id) async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    DocumentReference beerLikeRef = Firestore.instance
+    User user = FirebaseAuth.instance.currentUser;
+    DocumentReference beerLikeRef = FirebaseFirestore.instance
         .collection('users')
-        .document(user.uid)
+        .doc(user.uid)
         .collection('favourites')
-        .document(id);
+        .doc(id);
     _subscriptions.add(beerLikeRef.snapshots().listen((snapshot) {
       if (snapshot.data == null)
         _likedBeerController.sink.add(false);
@@ -40,12 +40,12 @@ class LikesBloc {
 
   void addToFavourites(Beer beer) async {
     DocumentReference reference =
-        Firestore.instance.collection('beers').document(beer.id);
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+        FirebaseFirestore.instance.collection('beers').doc(beer.id);
+    User user = FirebaseAuth.instance.currentUser;
     DocumentReference userRef =
-        Firestore.instance.collection('users').document(user.uid);
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
     try {
-      userRef.collection('favourites').document(beer.id).setData({
+      userRef.collection('favourites').doc(beer.id).set({
         'beer': reference,
         'date': DateTime.now(),
       });
@@ -55,11 +55,11 @@ class LikesBloc {
   }
 
   void removeFromFavourites(Beer beer) async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    User user = FirebaseAuth.instance.currentUser;
     DocumentReference userRef =
-        Firestore.instance.collection('users').document(user.uid);
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
     try {
-      userRef.collection('favourites').document(beer.id).delete();
+      userRef.collection('favourites').doc(beer.id).delete();
     } catch (e) {
       print(e);
     }
@@ -72,23 +72,23 @@ class LikesBloc {
   }
 
   void retrieveLikedBeers() async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    User user = FirebaseAuth.instance.currentUser;
     DocumentReference userRef =
-        Firestore.instance.collection('users').document(user.uid);
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
 
     Stream<QuerySnapshot> queryStream =
         userRef.collection('favourites').snapshots();
-    
+
     _subscriptions.add(queryStream.listen((query) {
       int i = 0;
       _likedBeers.clear();
-      query.documents.forEach((docSnapshot) =>
-          (docSnapshot.data['beer'] as DocumentReference)
+      query.docs.forEach((docSnapshot) =>
+          (docSnapshot.data()['beer'] as DocumentReference)
               .get()
               .then((beerSnap) {
             i++;
-            _likedBeers.add(Beer.fromSnapshot(beerSnap.data));
-            if (i >= query.documents.length&& !_likedBeerListController.isClosed) {
+            _likedBeers.add(Beer.fromSnapshot(beerSnap.data()));
+            if (i >= query.docs.length && !_likedBeerListController.isClosed) {
               _likedBeerListController.sink.add(_likedBeers);
             }
           }));

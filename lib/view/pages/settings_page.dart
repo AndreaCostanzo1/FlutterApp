@@ -6,7 +6,6 @@ import 'package:flutter_beertastic/blocs/map_bloc.dart';
 import 'package:flutter_beertastic/blocs/user_bloc.dart';
 import 'package:flutter_beertastic/model/city.dart';
 import 'package:flutter_beertastic/model/user.dart';
-import 'package:geolocator/geolocator.dart';
 
 class SettingsPage extends StatelessWidget {
   SettingsPage({Key key}) : super(key: key);
@@ -29,13 +28,12 @@ class _TopPage extends StatefulWidget {
 class __TopPageState extends State<_TopPage> {
   MapBloc _mapBloc;
   UserBloc _userBloc;
-  List<City> _nearCities;
   City _city;
   String _nickname;
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User>(
+    return StreamBuilder<MyUser>(
         stream: _userBloc.authenticatedUserStream,
         builder: (context, snapshot) {
           _city = _city ?? (snapshot.data != null ? snapshot.data.city : null);
@@ -272,7 +270,6 @@ class __TopPageState extends State<_TopPage> {
     super.initState();
     _mapBloc = MapBloc();
     _userBloc = UserBloc();
-    _nearCities = List();
     _userBloc.getAuthenticatedUserData();
     _mapBloc.retrieveNearestCities();
   }

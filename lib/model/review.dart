@@ -4,7 +4,7 @@ class Review {
   final String _id;
   final String _comment;
   final int _rate;
-  final User _user;
+  final MyUser _user;
 
   Review.fromSnapshot(Map<String, dynamic> snapshot)
       : _id=snapshot['id'],
@@ -15,13 +15,13 @@ class Review {
   Review.empty():_id='',
         _comment = '',
         _rate = 0,
-        _user= User.empty();
+        _user= MyUser.empty();
 
   String get comment => _comment;
 
   int get rate => _rate;
 
-  User get user => _user;
+  MyUser get user => _user;
 
   String get id =>_id;
 }

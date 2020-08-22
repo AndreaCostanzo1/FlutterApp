@@ -12,7 +12,7 @@ class UserBloc {
   final StreamController<ImageProvider> _profileImageController =
       StreamController();
 
-  final StreamController<User> _authenticatedUserController =
+  final StreamController<MyUser> _authenticatedUserController =
       StreamController.broadcast();
 
   final StreamController<ImageProvider> _userImageController =
@@ -39,7 +39,6 @@ class UserBloc {
           .then((uIntImage) =>
               _userImageController.sink.add(MemoryImage(uIntImage)))
           .catchError((error) {
-
         print('image don\'t exist');
         _userImageController.sink
             .add(AssetImage('assets/images/user_review.png'));
@@ -47,24 +46,25 @@ class UserBloc {
     }
   }
 
-  void getAuthenticatedUserData() {
-    FirebaseAuth.instance.currentUser().then((fUser) async {
-      DocumentSnapshot userSnapshot = await Firestore.instance
-          .collection('users')
-          .document(fUser.uid)
-          .get();
-      Map<String, dynamic> userData = userSnapshot.data;
-      DocumentReference cityRef = userSnapshot['city'];
-      DocumentSnapshot citySnap = await cityRef.get();
-      userData.putIfAbsent(
-          'city_data', () => City.fromSnapshot(CityDataConverter.convertSnapshot(citySnap.data)));
-      User user = User.fromSnapshot(userData);
-      _authenticatedUserController.sink.add(user);
-      if(_profileImageController.hasListener)_retrieveProfileImage(user);
-    });
+  void getAuthenticatedUserData() async {
+    User fUser = FirebaseAuth.instance.currentUser;
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(fUser.uid)
+        .get();
+    Map<String, dynamic> userData = userSnapshot.data();
+    DocumentReference cityRef = userSnapshot.data()['city'];
+    DocumentSnapshot citySnap = await cityRef.get();
+    userData.putIfAbsent(
+        'city_data',
+        () => City.fromSnapshot(
+            CityDataConverter.convertSnapshot(citySnap.data())));
+    MyUser user = MyUser.fromSnapshot(userData);
+    _authenticatedUserController.sink.add(user);
+    if (_profileImageController.hasListener) _retrieveProfileImage(user);
   }
 
-  void _retrieveProfileImage(User user) {
+  void _retrieveProfileImage(MyUser user) {
     String path = user.profileImagePath;
     if (path == null) {
       _profileImageController.sink.add(AssetImage('assets/images/user.png'));
@@ -80,19 +80,20 @@ class UserBloc {
   }
 
   Future<String> getProfileImagePath() async {
-    FirebaseUser fUser = await FirebaseAuth.instance.currentUser();
+    User fUser = FirebaseAuth.instance.currentUser;
     Future<DocumentSnapshot> futureSnap =
-        Firestore.instance.collection('users').document(fUser.uid).get();
-    return futureSnap
-        .then((userSnap) => User.fromSnapshot(userSnap.data).profileImagePath);
+        FirebaseFirestore.instance.collection('users').doc(fUser.uid).get();
+    return futureSnap.then(
+        (userSnap) => MyUser.fromSnapshot(userSnap.data()).profileImagePath);
   }
 
   Future<void> setInformation(String nickname, City city) async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    DocumentReference cityRef =Firestore.instance.collection('cities').document(city.id);
-    return Firestore.instance.collection('users').document(user.uid).updateData({
-      'nickname': nickname,
-      'city': cityRef
-    });
+    User user = FirebaseAuth.instance.currentUser;
+    DocumentReference cityRef =
+        FirebaseFirestore.instance.collection('cities').doc(city.id);
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .update({'nickname': nickname, 'city': cityRef});
   }
 }
