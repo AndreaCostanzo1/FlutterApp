@@ -257,7 +257,7 @@ class __MapBoxState extends State<_MapBox> {
 }
 
 //FIXME delete me
-class Event {
+class DummyEvent {
   final String imagePath,
       title,
       description,
@@ -267,7 +267,7 @@ class Event {
       punchLine2;
   final List categoryIds, galleryImages;
 
-  Event(
+  DummyEvent(
       {this.imagePath,
       this.title,
       this.description,
@@ -279,7 +279,7 @@ class Event {
       this.galleryImages});
 }
 
-final fiveKmRunEvent = Event(
+final fiveKmRunEvent = DummyEvent(
     imagePath: "assets/event_images/5_km_downtown_run.jpeg",
     title: "Compleanno Birrificio di Lambrate",
     description:
@@ -287,11 +287,11 @@ final fiveKmRunEvent = Event(
     location: "Birrificio di Lambrate",
     duration: "3h",
     punchLine1: "Oggi",
-    punchLine2: "faremo lorem e altre parole",
+    punchLine2: "faremo lorem e altre parole!",
     galleryImages: [],
     categoryIds: [0, 1]);
 
-final cookingEvent = Event(
+final cookingEvent = DummyEvent(
     imagePath: "assets/event_images/granite_cooking_class.jpeg",
     title: "Granite Cooking Class",
     description:
@@ -310,7 +310,7 @@ final cookingEvent = Event(
       "assets/event_images/cooking_3.jpeg"
     ]);
 
-final musicConcert = Event(
+final musicConcert = DummyEvent(
     imagePath: "assets/event_images/music_concert.jpeg",
     title: "Arijit Music Concert",
     description: "Listen to Arijit's latest compositions.",
@@ -328,7 +328,7 @@ final musicConcert = Event(
       1
     ]);
 
-final golfCompetition = Event(
+final golfCompetition = DummyEvent(
     imagePath: "assets/event_images/golf_competition.jpeg",
     title: "Season 2 Golf Estate",
     description: "",

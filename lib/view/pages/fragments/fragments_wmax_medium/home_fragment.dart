@@ -1,35 +1,132 @@
+import 'dart:typed_data';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_beertastic/blocs/event_bloc.dart';
+import 'package:flutter_beertastic/model/event.dart';
 import 'package:flutter_beertastic/blocs/articles_bloc.dart';
+import 'package:flutter_beertastic/blocs/user_bloc.dart';
 import 'package:flutter_beertastic/model/article.dart';
+import 'package:flutter_beertastic/model/user.dart';
 import 'package:flutter_beertastic/view/pages/event_page.dart';
 
 import '../../article_page.dart';
 
-class HomeFragment extends StatelessWidget {
+class HomeFragment extends StatefulWidget {
   HomeFragment({Key key}) : super(key: key);
 
   @override
+  _HomeFragmentState createState() => _HomeFragmentState();
+}
+
+class _HomeFragmentState extends State<HomeFragment> {
+  UserBloc _userBloc;
+  EventBloc _eventBloc;
+  int _downloadedArticles;
+  User _user;
+
+  @override
   Widget build(BuildContext context) {
-    return ListView(
-      key: PageStorageKey('scrollingStar'),
-      padding: EdgeInsets.all(0),
-      //ListView has default top padding, to override it we insert padding = 0;
-      scrollDirection: Axis.vertical,
-      children: <Widget>[
-        _TopPage(),
-        SizedBox(height: 10),
-        _TitleBar(
-          'This week in Milan',
-          TextStyle(
-              fontSize: 25,
-              fontFamily: 'Montserrat Bold',
-              color: Colors.black87),
-        ),
-        _Events(),
-        SizedBox(height: 24),
-      ],
-    );
+    return StreamBuilder<User>(
+        stream: _userBloc.authenticatedUserStream,
+        builder: (context, userSnap) {
+          if (userSnap.data != null) {
+            _user=userSnap.data;
+            _eventBloc.retrieveEventsInCity(userSnap.data.city);
+          }
+          return StreamBuilder<List<Event>>(
+              stream: _eventBloc.eventsStream,
+              builder: (context, eventsSnap) {
+                if (eventsSnap.data != null)
+                  _downloadedArticles = eventsSnap.data.length;
+                return eventsSnap.data == null
+                    ? Container(
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        child: Center(
+                          child: Container(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                      )
+                    : Stack(
+                        children: <Widget>[
+                          Container(
+                            constraints: BoxConstraints.expand(height: 165),
+                            decoration: BoxDecoration(
+                                gradient: new LinearGradient(
+                                    colors: [
+                                      Theme.of(context).primaryColorLight,
+                                      Theme.of(context).primaryColorDark
+                                    ],
+                                    begin: const FractionalOffset(1.0, 1.0),
+                                    end: const FractionalOffset(0.2, 0.2),
+                                    stops: [0.0, 1.0],
+                                    tileMode: TileMode.clamp),
+                                borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(30),
+                                    bottomRight: Radius.circular(30))),
+                          ),
+                          RefreshIndicator(
+                            onRefresh: ()=>_handleRefresh(),
+                            child: ListView(
+                              physics: BouncingScrollPhysics(),
+                              key: PageStorageKey('scrollingStar'),
+                              padding: EdgeInsets.all(0),
+                              //ListView has default top padding, to override it we insert padding = 0;
+                              scrollDirection: Axis.vertical,
+                              children: <Widget>[
+                                _TopPage(),
+                                SizedBox(height: 10),
+                                _TitleBar(
+                                  'This week in ' + userSnap.data.city.name,
+                                  TextStyle(
+                                      fontSize: 25,
+                                      fontFamily: 'Montserrat Bold',
+                                      color: Colors.black87),
+                                ),
+                                _Events(eventsSnap.data),
+                                _downloadedArticles == 0
+                                    ? Container(
+                                        width: MediaQuery.of(context).size.width,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 30),
+                                        child: Text(
+                                          'No events available',
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      )
+                                    : Container(),
+                                SizedBox(height: 24),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+              });
+        });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _userBloc = UserBloc();
+    _userBloc.getAuthenticatedUserData();
+    _eventBloc = EventBloc();
+  }
+
+  @override
+  void dispose() {
+    _userBloc.dispose();
+    _eventBloc.dispose();
+    super.dispose();
+  }
+
+  _handleRefresh() async {
+    if(_user!=null) {
+      await _eventBloc.retrieveEventsInCity(_user.city);
+    }
+    return null;
   }
 }
 
@@ -39,20 +136,6 @@ class _TopPage extends StatelessWidget {
     return Stack(
       children: <Widget>[
         Container(
-          constraints: BoxConstraints.expand(height: 165),
-          decoration: BoxDecoration(
-              gradient: new LinearGradient(
-                  colors: [
-                    Theme.of(context).primaryColorLight,
-                    Theme.of(context).primaryColorDark
-                  ],
-                  begin: const FractionalOffset(1.0, 1.0),
-                  end: const FractionalOffset(0.2, 0.2),
-                  stops: [0.0, 1.0],
-                  tileMode: TileMode.clamp),
-              borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30))),
           child: Container(
             padding: EdgeInsets.only(left: 10, top: 15, right: 15, bottom: 15),
             child: Column(
@@ -132,7 +215,6 @@ class __ArticlesRowState extends State<_ArticlesRow> {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       height: _containerHeight,
       margin: EdgeInsets.only(top: 8),
@@ -180,9 +262,12 @@ class __ArticlesRowState extends State<_ArticlesRow> {
                         physics: NeverScrollableScrollPhysics(),
                         //This disallow scroll with touch screen
                         child: Container(
-                          height: activePage? _containerHeight*0.9:_containerHeight*0.9-20,
+                          height: activePage
+                              ? _containerHeight * 0.9
+                              : _containerHeight * 0.9 - 20,
                           padding: EdgeInsets.only(
-                              top: _containerHeight * 0.115,left: MediaQuery.of(context).size.width*0.04),
+                              top: _containerHeight * 0.115,
+                              left: MediaQuery.of(context).size.width * 0.04),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
@@ -190,8 +275,9 @@ class __ArticlesRowState extends State<_ArticlesRow> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: <Widget>[
                                   Container(
-                                    height: _containerHeight*0.6,
-                                    width: MediaQuery.of(context).size.width*0.72,
+                                    height: _containerHeight * 0.6,
+                                    width: MediaQuery.of(context).size.width *
+                                        0.72,
                                     child: Column(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
@@ -201,7 +287,8 @@ class __ArticlesRowState extends State<_ArticlesRow> {
                                             style: TextStyle(
                                                 color: Color(0xF2F2F2F2),
                                                 fontSize: 28,
-                                                fontFamily: 'PlayfairDisplay Bold'),
+                                                fontFamily:
+                                                    'PlayfairDisplay Bold'),
                                           ),
                                         ),
                                       ],
@@ -210,13 +297,17 @@ class __ArticlesRowState extends State<_ArticlesRow> {
                                   activePage
                                       ? Container(
                                           height: 20,
-                                          width: MediaQuery.of(context).size.width*0.72,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.72,
                                           child: AutoSizeText(
                                             article.punchline,
                                             style: TextStyle(
                                                 color: Color(0xF2F2F2F2),
                                                 fontSize: 16,
-                                                fontFamily: 'Montserrat Regular'),
+                                                fontFamily:
+                                                    'Montserrat Regular'),
                                           ),
                                         )
                                       : Container(),
@@ -233,7 +324,7 @@ class __ArticlesRowState extends State<_ArticlesRow> {
             ),
             margin: EdgeInsets.only(
                 top: activePage ? 0 : 20,
-                right: MediaQuery.of(context).size.width*0.0729,
+                right: MediaQuery.of(context).size.width * 0.0729,
                 bottom: activePage ? 10 : 15),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
@@ -310,77 +401,115 @@ class _TitleBar extends StatelessWidget {
 }
 
 class _Events extends StatelessWidget {
+  final List<Event> events;
+
+  _Events(this.events);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: events.map((event) {
+        return _EventBox(event, key: UniqueKey());
+      }).toList(),
+      crossAxisAlignment: CrossAxisAlignment.center,
+    );
+  }
+}
+
+class _EventBox extends StatefulWidget {
+  final Event _event;
+
+  _EventBox(this._event, {Key key}) : super(key: key);
+
+  @override
+  __EventBoxState createState() => __EventBoxState();
+}
+
+class __EventBoxState extends State<_EventBox> {
+  EventBloc _eventBloc;
+
   @override
   Widget build(BuildContext context) {
     double cardWidth = MediaQuery.of(context).size.width * 0.87;
     double cardHeight = 240;
     double proportionImageTitle = 0.57;
     double dateContainerSize = 53;
-    return Column(
-      children: eventList.map((brewery) {
-        return Container(
-          width: cardWidth,
-          margin: EdgeInsets.symmetric(vertical: 10),
-          height: cardHeight,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Material(
-              child: InkWell(
-                onTap: () => _openEventPage(context),
-                child: Stack(
+    return Container(
+      width: cardWidth,
+      margin: EdgeInsets.symmetric(vertical: 10),
+      height: cardHeight,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Material(
+          child: InkWell(
+            onTap: () => _openEventPage(context),
+            child: Stack(
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          height: cardHeight * proportionImageTitle,
-                          width: cardWidth,
-                          child: Ink.image(
-                            image: NetworkImage(brewery['image']),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        Container(
-                          height: cardHeight * (1 - proportionImageTitle),
-                          width: cardWidth,
-                          color: Colors.transparent,
-                        ),
-                      ],
+                    Container(
+                      height: cardHeight * proportionImageTitle,
+                      width: cardWidth,
+                      child: StreamBuilder<Uint8List>(
+                          stream: _eventBloc.eventImageStream,
+                          builder: (context, snapshot) {
+                            return snapshot.data == null
+                                ? Ink(
+                                    color: Colors.grey.withOpacity(0.6),
+                                  )
+                                : Ink.image(
+                                    image: MemoryImage(snapshot.data),
+                                    fit: BoxFit.cover,
+                                  );
+                          }),
                     ),
-                    _DateBox(
-                      dateContainerSize,
-                      cardWidth,
-                      cardHeight,
-                      day: '11',
-                      monthAbbreviation: 'JEN',
+                    Container(
+                      height: cardHeight * (1 - proportionImageTitle),
+                      width: cardWidth,
+                      color: Colors.transparent,
                     ),
-                    _EventBody(
-                      dateContainerSize,
-                      cardWidth,
-                      cardHeight,
-                      title: 'Compleanno birrificio',
-                      subTitle: 'Questa piccola descrizione breve',
-                      place: 'Birrificio di Lambrate',
-                    )
                   ],
                 ),
-              ),
+                _DateBox(
+                  dateContainerSize,
+                  cardWidth,
+                  cardHeight,
+                  day: widget._event.date.day.toString(),
+                  monthAbbreviation: _computeMonthAbbreviation(widget._event.date),
+                ),
+                _EventBody(
+                  dateContainerSize,
+                  cardWidth,
+                  cardHeight,
+                  title: widget._event.reducedTitle,
+                  subTitle:
+                      _computePunchLineSubstring(widget._event.punchLine),
+                  place: widget._event.placeName,
+                )
+              ],
             ),
           ),
-          //clipRRect
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Color(0xBB000000),
-                blurRadius: 10,
-                offset: Offset(5, 5),
-              ),
-            ],
+        ),
+      ),
+      //clipRRect
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Color(0xBB000000),
+            blurRadius: 10,
+            offset: Offset(5, 5),
           ),
-        );
-      }).toList(),
-      crossAxisAlignment: CrossAxisAlignment.center,
+        ],
+      ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _eventBloc = EventBloc();
+    _eventBloc.retrieveEventImages(widget._event);
   }
 
   _openEventPage(BuildContext context) {
@@ -390,6 +519,32 @@ class _Events extends StatelessWidget {
         builder: (context) => EventPage(),
       ),
     );
+  }
+
+  String _computePunchLineSubstring(String punchLine) {
+    if(punchLine.length<37) return punchLine;
+    int indexToCut = punchLine.indexOf(' ',30);
+    return punchLine.substring(0,indexToCut)+'...';
+  }
+
+  String _computeMonthAbbreviation(DateTime dateTime){
+    Map<int,String> monthAbbreviations= Map.from({
+      DateTime.january: 'JAN',
+      DateTime.february: 'FEB',
+      DateTime.march: 'MAR',
+      DateTime.april: 'APR',
+      DateTime.may: 'MAY',
+      DateTime.june: 'JUN',
+      DateTime.july: 'JUL',
+      DateTime.august: 'AUG',
+      DateTime.september: 'SEP',
+      DateTime.october: 'OCT',
+      DateTime.november: 'NOV',
+      DateTime.december: 'DEC',
+    });
+
+    return monthAbbreviations[dateTime.month];
+
   }
 }
 
