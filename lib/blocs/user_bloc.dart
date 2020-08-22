@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/blocs/utilities/city_data_converter.dart';
 import 'package:flutter_beertastic/model/city.dart';
 import 'package:flutter_beertastic/model/user.dart';
+import 'package:synchronized/synchronized.dart';
 
 class UserBloc {
   final StreamController<ImageProvider> _profileImageController =
@@ -24,10 +25,14 @@ class UserBloc {
 
   get userImageStream => _userImageController.stream;
 
-  void dispose() {
-    _profileImageController.close();
-    _authenticatedUserController.close();
-    _userImageController.close();
+  Lock _lock = Lock();
+
+  void dispose() async {
+    await _lock.synchronized(() {
+      _profileImageController.close();
+      _authenticatedUserController.close();
+      _userImageController.close();
+    });
   }
 
   void getUserImage(String path) {
@@ -36,12 +41,17 @@ class UserBloc {
           .ref()
           .child(path)
           .getData(100000000)
-          .then((uIntImage) =>
-              _userImageController.sink.add(MemoryImage(uIntImage)))
+          .then((uIntImage) => _lock.synchronized(() {
+                if (!_userImageController.isClosed)
+                  _userImageController.sink.add(MemoryImage(uIntImage));
+              }))
           .catchError((error) {
         print('image don\'t exist');
-        _userImageController.sink
-            .add(AssetImage('assets/images/user_review.png'));
+        _lock.synchronized(() {
+          if (!_userImageController.isClosed)
+            _userImageController.sink
+                .add(AssetImage('assets/images/user_review.png'));
+        });
       });
     }
   }
@@ -66,21 +76,30 @@ class UserBloc {
         () => City.fromSnapshot(
             CityDataConverter.convertSnapshot(citySnap.data())));
     MyUser user = MyUser.fromSnapshot(userData);
-    _authenticatedUserController.sink.add(user);
+    _lock.synchronized(() {
+      if (!_authenticatedUserController.isClosed)
+        _authenticatedUserController.sink.add(user);
+    });
     if (_profileImageController.hasListener) _retrieveProfileImage(user);
   }
 
   void _retrieveProfileImage(MyUser user) {
     String path = user.profileImagePath;
     if (path == null) {
-      _profileImageController.sink.add(AssetImage('assets/images/user.png'));
+      _lock.synchronized(() {
+        if (!_profileImageController.isClosed)
+          _profileImageController.sink
+              .add(AssetImage('assets/images/user.png'));
+      });
     } else {
       FirebaseStorage.instance
           .ref()
           .child(path)
           .getData(100000000)
-          .then((uIntImage) =>
-              _profileImageController.sink.add(MemoryImage(uIntImage)))
+          .then((uIntImage) => _lock.synchronized(() {
+                if (!_profileImageController.isClosed)
+                  _profileImageController.sink.add(MemoryImage(uIntImage));
+              }))
           .catchError((error) => print('image don\'t exist'));
     }
   }

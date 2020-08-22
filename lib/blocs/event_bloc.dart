@@ -36,9 +36,11 @@ class EventBloc {
 
   bool get noMoreEventsAvailable => _noMoreEventsAvailable;
 
-  void dispose() {
-    _eventsStreamController.close();
-    _eventImageController.close();
+  void dispose() async {
+    await _lock.synchronized(() {
+      _eventsStreamController.close();
+      _eventImageController.close();
+    });
   }
 
   Future<void> retrieveEventsInCity(City city) async {
@@ -73,7 +75,9 @@ class EventBloc {
     } else {
       _downloadedEvents = 0;
     }
-    await _lock.synchronized(() => _eventsStreamController.sink.add(_events));
+    await _lock.synchronized(() {
+      if(!_eventsStreamController.isClosed) _eventsStreamController.sink.add(_events);
+    });
   }
 
   void retrieveEventImage(Event event) async {
@@ -118,7 +122,9 @@ class EventBloc {
       } else {
         _noMoreEventsAvailable = true;
       }
-      await _lock.synchronized(() => _eventsStreamController.sink.add(_events));
+      await _lock.synchronized(() {
+        if(!_eventsStreamController.isClosed) _eventsStreamController.sink.add(_events);
+      });
     }
   }
 }
