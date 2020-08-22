@@ -40,7 +40,7 @@ class UserBloc {
       FirebaseStorage.instance
           .ref()
           .child(path)
-          .getData(100000000)
+          .getData(1000000)
           .then((uIntImage) => _lock.synchronized(() {
                 if (!_userImageController.isClosed)
                   _userImageController.sink.add(MemoryImage(uIntImage));
@@ -95,7 +95,7 @@ class UserBloc {
       FirebaseStorage.instance
           .ref()
           .child(path)
-          .getData(100000000)
+          .getData(1000000)
           .then((uIntImage) => _lock.synchronized(() {
                 if (!_profileImageController.isClosed)
                   _profileImageController.sink.add(MemoryImage(uIntImage));

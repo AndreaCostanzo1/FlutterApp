@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_beertastic/blocs/beer_bloc.dart';
+import 'package:flutter_beertastic/blocs/beer_image_bloc.dart';
 import 'package:flutter_beertastic/model/beer.dart';
 import 'package:flutter_beertastic/view/components/others/list_view_items.dart';
 
@@ -346,14 +347,15 @@ class ___BeerImage extends StatefulWidget {
 }
 
 class ____BeerImageState extends State<___BeerImage> {
-  ImageProvider _beerImage;
+
+  BeerImageBloc _imageBloc;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Uint8List>(
-        stream: BeerBloc.getBeerImage(widget._beer.beerImageUrl),
+        stream: _imageBloc.beerImageStream,
         builder: (context, snapshot) {
-          if (snapshot.data != null) _beerImage = MemoryImage(snapshot.data);
+
           return snapshot.data != null
               ? Container(
                   decoration: BoxDecoration(
@@ -378,7 +380,7 @@ class ____BeerImageState extends State<___BeerImage> {
                       borderRadius: BorderRadius.circular(10),
                       child: Padding(
                           padding: EdgeInsets.all(widget.size * 0.03),
-                          child: Ink.image(image: _beerImage)),
+                          child: Ink.image(image: MemoryImage(snapshot.data))),
                     ),
                   ),
                 )
@@ -389,6 +391,19 @@ class ____BeerImageState extends State<___BeerImage> {
                   ),
                 );
         });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _imageBloc =BeerImageBloc();
+    _imageBloc.retrieveBeerImage(widget._beer);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _imageBloc.dispose();
   }
 }
 

@@ -39,15 +39,17 @@ class BeerBloc {
 
   Stream<List<Beer>> get queriedBeersStream => _queriedBeersController.stream;
 
+
   List<Beer> get suggestedBeers => _cachedBeers[_suggestedBeersController];
 
   List<Beer> get queriedBeers => _cachedBeers[_queriedBeersController];
 
+
   void dispose() async {
     _subscriptions.forEach((subscription) => subscription.cancel());
-    _suggestedBeersController?.close();
-    _singleBeerController?.close();
-    _queriedBeersController?.close();
+    _suggestedBeersController.close();
+    _singleBeerController.close();
+    _queriedBeersController.close();
   }
 
   void retrieveSuggestedBeers() async {
@@ -100,14 +102,6 @@ class BeerBloc {
     }
   }
 
-  static Stream<Uint8List> getBeerImage(String imageUrl) {
-    return FirebaseStorage.instance
-        .ref()
-        .child(imageUrl ?? 'random')
-        .getData(10000000)
-        .asStream()
-        .asBroadcastStream(); //fixme-> addReference to an ImageNotFound in firebase instead of 'random
-  }
 
   void clearQueriedBeersStream() {
     List<Beer> beerList = _cachedBeers[_queriedBeersController];

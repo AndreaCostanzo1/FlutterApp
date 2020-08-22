@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_beertastic/blocs/beer_bloc.dart';
+import 'package:flutter_beertastic/blocs/beer_image_bloc.dart';
 
 import 'package:flutter_beertastic/model/beer.dart';
 import 'package:flutter_beertastic/view/components/icons/custom_icons.dart';
@@ -37,7 +38,7 @@ class BeerMainFragmentMedium extends StatelessWidget {
               SizedBox(height: 10.0),
               _Rating(Provider.of<Beer>(context)),
               Spacer(),
-              _ButtonAndImageRow(),
+              _ButtonAndImageRow(Provider.of<Beer>(context)),
               SizedBox(height: 16.0)
             ],
           ),
@@ -137,13 +138,21 @@ class __RatingState extends State<_Rating> {
   }
 }
 
-class _ButtonAndImageRow extends StatelessWidget {
-  _ButtonAndImageRow();
+class _ButtonAndImageRow extends StatefulWidget {
+  final Beer _beer;
+
+  _ButtonAndImageRow(this._beer);
+
+  @override
+  __ButtonAndImageRowState createState() => __ButtonAndImageRowState();
+}
+
+class __ButtonAndImageRowState extends State<_ButtonAndImageRow> {
+
+  BeerImageBloc _imageBloc;
 
   @override
   Widget build(BuildContext context) {
-    Beer beer = Beer.fromBeer(Provider.of<Beer>(context));
-    // TODO: implement build
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -152,7 +161,7 @@ class _ButtonAndImageRow extends StatelessWidget {
           onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => DetailsPage(beer),
+                  builder: (context) => DetailsPage(widget._beer),
                 ),
               ),
           backgroundColor: Theme.of(context).canvasColor,
@@ -168,19 +177,28 @@ class _ButtonAndImageRow extends StatelessWidget {
             maxWidth: 220.0,
           ),
           child: StreamBuilder(
-            stream: FirebaseStorage.instance
-                .ref()
-                .child(Provider.of<Beer>(context).beerImageUrl)
-                .getDownloadURL()
-                .asStream(),
-            builder: (context, urlSnapshot) {
-              return urlSnapshot.data != null
-                  ? Image.network(urlSnapshot.data)
+            stream: _imageBloc.beerImageStream,
+            builder: (context, imageSnap) {
+              return imageSnap.data != null
+                  ? Image.memory(imageSnap.data)
                   : Container(height: 10,);
             },
           ),
         )
       ],
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _imageBloc=BeerImageBloc();
+    _imageBloc.retrieveBeerImage(widget._beer);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _imageBloc.dispose();
   }
 }

@@ -3,14 +3,22 @@ import 'dart:typed_data';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_beertastic/blocs/beer_bloc.dart';
+import 'package:flutter_beertastic/blocs/beer_image_bloc.dart';
 import 'package:flutter_beertastic/model/beer.dart';
 import 'package:flutter_beertastic/view/pages/beer_page.dart';
 
-class BeerEntry extends StatelessWidget {
+class BeerEntry extends StatefulWidget {
   final Beer _beer;
 
   BeerEntry(this._beer);
+
+  @override
+  _BeerEntryState createState() => _BeerEntryState();
+}
+
+class _BeerEntryState extends State<BeerEntry> {
+
+  BeerImageBloc _imageBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +33,7 @@ class BeerEntry extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => BeerPage(_beer.id)));
+                    MaterialPageRoute(builder: (context) => BeerPage(widget._beer.id)));
               },
               child: Container(
                 padding: EdgeInsets.only(left: containerWidth * 0.05),
@@ -34,7 +42,7 @@ class BeerEntry extends StatelessWidget {
                 child: Row(
                   children: [
                     StreamBuilder<Uint8List>(
-                        stream: BeerBloc.getBeerImage(_beer.beerImageUrl),
+                        stream: _imageBloc.beerImageStream,
                         builder: (context, snapshot) {
                           return Container(
                             width: containerWidth * 0.23,
@@ -76,7 +84,7 @@ class BeerEntry extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     AutoSizeText(
-                                      _beer.name,
+                                      widget._beer.name,
                                       style: TextStyle(fontFamily: "Campton Bold"),
                                       maxFontSize: 30,
                                       minFontSize: 25,
@@ -96,7 +104,7 @@ class BeerEntry extends StatelessWidget {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     Text(
-                                      _beer.producer,
+                                      widget._beer.producer,
                                       style: TextStyle(fontSize: 20),
                                     ),
                                   ],
@@ -114,5 +122,18 @@ class BeerEntry extends StatelessWidget {
           );
         }
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _imageBloc=BeerImageBloc();
+    _imageBloc.retrieveBeerImage(widget._beer);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _imageBloc.dispose();
   }
 }
