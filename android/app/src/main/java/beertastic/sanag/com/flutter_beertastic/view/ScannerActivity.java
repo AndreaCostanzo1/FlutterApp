@@ -7,8 +7,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Size;
 import android.view.TextureView;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,10 +23,6 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.google.common.primitives.Bytes;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 

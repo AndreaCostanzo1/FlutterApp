@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -21,33 +22,59 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    return StreamBuilder<User>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          return Provider<User>.value(
-            value: snapshot.data,
-            child: MaterialApp(
-              title: 'Flutter Demo',
-              theme: ThemeData(
-                  brightness: Brightness.light,
-                  primarySwatch: Colors.amber,
-                  backgroundColor: Colors.white,
-                  cardColor: Colors.white,
-                  primaryColorDark: Color(0xFFFF6F00),
-                  primaryColor: Colors.amber[600],
-                  primaryColorLight: Color(0xFFFFFF8D),
-                  errorColor: Color(0xffb00020),
-                  dividerColor: Colors.grey[400],
-                  textTheme: TextTheme(
-                    headline6: TextStyle(color: Colors.black),
-                    subtitle2: TextStyle(color: Colors.black45),
-                    headline4: TextStyle(color: Colors.amber[400]),
-                    headline3: TextStyle(color: Colors.white),
-                    overline: TextStyle(color: Colors.white70),
-                  )),
-              home: snapshot.data == null ? AuthenticationPage() : HomePage(),
-            ),
-          );
-        });
+    return MaterialApp(
+      title: 'Flutter Beertastic',
+      theme: ThemeData(
+          brightness: Brightness.light,
+          primarySwatch: Colors.amber,
+          backgroundColor: Colors.white,
+          cardColor: Colors.white,
+          primaryColorDark: Color(0xFFFF6F00),
+          primaryColor: Colors.amber[600],
+          primaryColorLight: Color(0xFFFFFF8D),
+          errorColor: Color(0xffb00020),
+          dividerColor: Colors.grey[400],
+          textTheme: TextTheme(
+            headline6: TextStyle(color: Colors.black),
+            subtitle2: TextStyle(color: Colors.black45),
+            headline4: TextStyle(color: Colors.amber[400]),
+            headline3: TextStyle(color: Colors.white),
+            overline: TextStyle(color: Colors.white70),
+          )),
+      home: FutureBuilder(
+          future: Firebase.initializeApp(),
+          builder: (context, firebaseSnap) {
+            if (firebaseSnap.connectionState == ConnectionState.done) {
+              return StreamBuilder<User>(
+                  stream: FirebaseAuth.instance.authStateChanges(),
+                  builder: (context, userSnap) {
+                    return Provider<User>.value(
+                      value: userSnap.data,
+                      child: userSnap.data == null
+                          ? AuthenticationPage()
+                          : HomePage(),
+                    );
+                  });
+            }
+            return LoadingScreen();
+          }),
+    );
+  }
+}
+
+class LoadingScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: Center(
+          child: Container(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      ),
+    );
   }
 }

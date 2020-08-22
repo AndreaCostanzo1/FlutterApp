@@ -48,11 +48,17 @@ class UserBloc {
 
   void getAuthenticatedUserData() async {
     User fUser = FirebaseAuth.instance.currentUser;
-    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(fUser.uid)
-        .get();
+    DocumentReference userRef =
+        FirebaseFirestore.instance.collection('users').doc(fUser.uid);
+    DocumentSnapshot userSnapshot = await userRef.get();
     Map<String, dynamic> userData = userSnapshot.data();
+    //usually skipped: may happen that, upon registration, the page is uploaded
+    //before the default city is set.
+    while (userData == null || (userData != null && userData['city'] == null)) {
+      userSnapshot = await userRef.get();
+      userData.addAll(userSnapshot.data());
+      await Future.delayed(Duration(milliseconds: 100));
+    }
     DocumentReference cityRef = userSnapshot.data()['city'];
     DocumentSnapshot citySnap = await cityRef.get();
     userData.putIfAbsent(

@@ -30,7 +30,7 @@ class UserReviewBloc {
         .doc(fUser.uid)
         .snapshots()
         .listen((reviewSnap) {
-      if (reviewSnap.data != null) {
+      if (reviewSnap.data() != null) {
         _retrieveUserAndNotifyReview(reviewSnap);
       } else {
         //notify no reviews for this beer

@@ -31,7 +31,7 @@ class LikesBloc {
         .collection('favourites')
         .doc(id);
     _subscriptions.add(beerLikeRef.snapshots().listen((snapshot) {
-      if (snapshot.data == null)
+      if (snapshot.data() == null)
         _likedBeerController.sink.add(false);
       else
         _likedBeerController.sink.add(true);

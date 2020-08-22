@@ -37,7 +37,8 @@ class __TopPageState extends State<_TopPage> {
         stream: _userBloc.authenticatedUserStream,
         builder: (context, snapshot) {
           _city = _city ?? (snapshot.data != null ? snapshot.data.city : null);
-          _nickname=_nickname??(snapshot.data != null ? snapshot.data.nickname : null);
+          _nickname = _nickname ??
+              (snapshot.data != null ? snapshot.data.nickname : null);
           if (_city != null) _mapBloc.retrieveCityImage(_city);
           return snapshot.data == null
               ? Container(
@@ -116,7 +117,7 @@ class __TopPageState extends State<_TopPage> {
                                                     return [
                                                       nearestCity == null
                                                           ? PopupMenuItem(
-                                                              key: ValueKey(nearestCity.id),
+                                                              key: UniqueKey(),
                                                               enabled: false,
                                                               child: Row(
                                                                 mainAxisAlignment:
@@ -136,7 +137,9 @@ class __TopPageState extends State<_TopPage> {
                                                               ),
                                                             )
                                                           : PopupMenuItem(
-                                                              key: UniqueKey(),
+                                                              key: ValueKey(
+                                                                  nearestCity
+                                                                      .id),
                                                               value:
                                                                   nearestCity,
                                                               child: Row(
@@ -158,7 +161,8 @@ class __TopPageState extends State<_TopPage> {
                                                             ),
                                                       ...cities.map((city) =>
                                                           PopupMenuItem(
-                                                            key: ValueKey(city.id),
+                                                            key: ValueKey(
+                                                                city.id),
                                                             value: city,
                                                             child: Row(
                                                               mainAxisAlignment:
@@ -245,7 +249,9 @@ class __TopPageState extends State<_TopPage> {
                                               )
                                             : RaisedButton(
                                                 onPressed: () async {
-                                                  await _userBloc.setInformation(_nickname, _city);
+                                                  await _userBloc
+                                                      .setInformation(
+                                                          _nickname, _city);
                                                   Navigator.of(context).pop();
                                                 },
                                                 child: Text('Confirm'),

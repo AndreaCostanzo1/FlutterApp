@@ -17,10 +17,10 @@ class ExpertReviewBloc {
   Future<void> retrieveReview(Beer beer) async {
     DocumentSnapshot beerSnap =
         await FirebaseFirestore.instance.collection('beers').doc(beer.id).get();
-    if (beerSnap.data != null) {
+    if (beerSnap.data() != null) {
       DocumentReference reviewRef = beerSnap.data()['expert_review'];
       reviewRef.get().then((snapshot) {
-        if (snapshot.data != null) {
+        if (snapshot.data() != null) {
           _reviewController.sink
               .add(ExpertReview.fromSnapshot(snapshot.data()));
         } else {

@@ -121,7 +121,7 @@ class BeerBloc {
         .doc(beerID)
         .get()
         .then((snapshot) {
-      if (snapshot.data != null) {
+      if (snapshot.data() != null) {
         _singleBeerController.sink.add(Beer.fromSnapshot(snapshot.data()));
       } else {
         _singleBeerController.sink.addError('Beer-not-found');
@@ -202,7 +202,7 @@ class BeerBloc {
         .doc(beerID)
         .snapshots()
         .listen((snapshot) {
-      if (snapshot.data != null) {
+      if (snapshot.data() != null) {
         _singleBeerController.sink.add(Beer.fromSnapshot(snapshot.data()));
       } else {
         _singleBeerController.sink.addError('Beer-not-found');

@@ -64,37 +64,38 @@ class MapBloc {
 
   void setDefaultCity(User user) async {
     DocumentReference milanRef =
-        FirebaseFirestore.instance.collection('city').doc('Milan');
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .update({'city': milanRef});
-    _updateCityToNearestIfLocationPermissionGranted(user);
+        FirebaseFirestore.instance.collection('cities').doc('Milan');
+    if (await Permission.location.request().isGranted) {
+      _setDefaultCityToNearest(user);
+    } else {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'city': milanRef});
+    }
   }
 
-  void _updateCityToNearestIfLocationPermissionGranted(User user) async {
-    if (await Permission.location.request().isGranted) {
-      GeoData data = await _computeGeoData();
-      List<double> areaSizes = GeoHashComputer.areaPrecisions
-          .where((element) => element > GeoHashComputer.PRECISION_KM_5)
-          .toList();
-      areaSizes.sort();
-      List<DocumentSnapshot> snapshots = List();
-      //continue to increment radius until a city is found
-      for (int i = 0; i < areaSizes.length && snapshots.length == 0; i++) {
-        snapshots = await _retrieveCitiesInArea(data, areaSizes[i]);
-      }
-      if (snapshots.length > 0) {
-        DocumentSnapshot nearestCitySnap =
-            _getNearestCitySnapshot(data, snapshots);
-        DocumentReference nearestCityRef = FirebaseFirestore.instance
-            .collection('cities')
-            .doc(nearestCitySnap.id);
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .update({'city': nearestCityRef});
-      }
+  void _setDefaultCityToNearest(User user) async {
+    GeoData data = await _computeGeoData();
+    List<double> areaSizes = GeoHashComputer.areaPrecisions
+        .where((element) => element > GeoHashComputer.PRECISION_KM_5)
+        .toList();
+    areaSizes.sort();
+    List<DocumentSnapshot> snapshots = List();
+    //continue to increment radius until a city is found
+    for (int i = 0; i < areaSizes.length && snapshots.length == 0; i++) {
+      snapshots = await _retrieveCitiesInArea(data, areaSizes[i]);
+    }
+    if (snapshots.length > 0) {
+      DocumentSnapshot nearestCitySnap =
+          _getNearestCitySnapshot(data, snapshots);
+      DocumentReference nearestCityRef = FirebaseFirestore.instance
+          .collection('cities')
+          .doc(nearestCitySnap.id);
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'city': nearestCityRef});
     }
   }
 
