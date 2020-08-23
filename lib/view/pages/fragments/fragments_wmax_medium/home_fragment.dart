@@ -160,10 +160,12 @@ class _HomeFragmentState extends State<HomeFragment> {
 
   void _checkBoxHeightUpdate(int pixels) async {
     double scrollSize = -1;
-    if (pixels <= 0 && pixels >= -10 && pixels.toDouble() != _scrollSize)
+    if (pixels <= 0 && pixels >= -6 && pixels.toDouble() != _scrollSize)
       scrollSize = 0;
-    else if (pixels <= -50 && pixels >= -55 && pixels.toDouble() != _scrollSize)
-      scrollSize = -pixels.toDouble() + 20;
+    else if (pixels <= -7 && pixels >= -50 && pixels.toDouble() != _scrollSize && pixels%4==0)
+      scrollSize = -pixels.toDouble();
+    else if (pixels <= -50 && pixels >= -80 && pixels.toDouble() != _scrollSize&& pixels%5==0)
+      scrollSize = -pixels.toDouble() + 10;
     else if (pixels <= -80 && pixels >= -85 && pixels.toDouble() != _scrollSize)
       scrollSize = -pixels.toDouble() + 20;
     else if (pixels <= -120 &&

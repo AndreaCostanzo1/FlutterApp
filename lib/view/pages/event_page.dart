@@ -36,11 +36,11 @@ class _EventDetailsBackground extends StatefulWidget {
   _EventDetailsBackground(this._event);
 
   @override
-  __EventDetailsBackgroundState createState() => __EventDetailsBackgroundState();
+  __EventDetailsBackgroundState createState() =>
+      __EventDetailsBackgroundState();
 }
 
 class __EventDetailsBackgroundState extends State<_EventDetailsBackground> {
-
   EventBloc _eventBloc;
 
   @override
@@ -53,18 +53,21 @@ class __EventDetailsBackgroundState extends State<_EventDetailsBackground> {
       child: ClipPath(
         clipper: ImageClipper(),
         child: StreamBuilder<Uint8List>(
-          stream: _eventBloc.eventImageStream,
-          builder: (context, snapshot) {
-            return snapshot.data==null?Container(color: Colors.black.withOpacity(0.6),):Image.memory(
-              snapshot.data,
-              fit: BoxFit.cover,
-              width: screenWidth,
-              color: Color(0x99000000),
-              colorBlendMode: BlendMode.darken,
-              height: screenHeight * 0.52,
-            );
-          }
-        ),
+            stream: _eventBloc.eventImageStream,
+            builder: (context, snapshot) {
+              return snapshot.data == null
+                  ? Container(
+                      color: Colors.black.withOpacity(0.6),
+                    )
+                  : Image.memory(
+                      snapshot.data,
+                      fit: BoxFit.cover,
+                      width: screenWidth,
+                      color: Color(0x99000000),
+                      colorBlendMode: BlendMode.darken,
+                      height: screenHeight * 0.52,
+                    );
+            }),
       ),
     );
   }
@@ -72,7 +75,7 @@ class __EventDetailsBackgroundState extends State<_EventDetailsBackground> {
   @override
   void initState() {
     super.initState();
-    _eventBloc=EventBloc();
+    _eventBloc = EventBloc();
     _eventBloc.retrieveEventImage(widget._event);
   }
 }
@@ -178,18 +181,48 @@ class _EventDetailsContent extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: <Widget>[
-                for (final guest in guests)
-                  Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: ClipOval(
-                      child: Image.network(
-                        guest.imagePath,
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Container(
+                    width: 90,
+                    height: 90,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        customBorder: CircleBorder(),
+                        onTap: () => print('tap'),
+                        child: Ink(
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                  image: AssetImage(
+                                      'assets/images/facebook.png'))),
+                        ),
                       ),
                     ),
                   ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Container(
+                    width: 90,
+                    height: 90,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        customBorder: CircleBorder(),
+                        onTap: () => print('tap'),
+                        child: Ink(
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                  image: AssetImage(
+                                      'assets/images/instagram.png'))),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -286,10 +319,13 @@ class __MapBoxState extends State<_MapBox> {
   @override
   void initState() {
     super.initState();
-    rootBundle.loadString('assets/map_styles/map_style_retro.json').then((string) {
+    rootBundle
+        .loadString('assets/map_styles/map_style_retro.json')
+        .then((string) {
       _mapStyle = string;
     });
   }
+
   void _onMapCreated(GoogleMapController controller) {
     controller.setMapStyle(_mapStyle);
     setState(() {
@@ -406,18 +442,6 @@ final events = [
   golfCompetition,
 ];
 
-//FIXME delete me
-class Guest {
-  final String imagePath;
-
-  Guest(this.imagePath);
-}
-
-final guests = [
-  Guest(data[1]['image']),
-  Guest(data[1]['image']),
-];
-
 //FIXME: MOVE THESE STYLES AWAY
 final TextStyle fadedTextStyle = TextStyle(
   fontSize: 16.0,
@@ -487,37 +511,3 @@ const TextStyle punchLine2TextStyle = TextStyle(
   fontWeight: FontWeight.w800,
   color: Color(0xFF000000),
 );
-
-//FIXME CANCEL ME
-List data = [
-  {
-    'name': 'Antelope Canyon',
-    'image':
-        'https://images.unsplash.com/photo-1527498913931-c302284a62af?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=934&q=80',
-    'description':
-        'Over the years, Lover Antelope Canyon has become a favorite gathering pace for photographers tourists, and visitors from the world.',
-    'date': 'Mar 20, 2019',
-    'rating': '4.7',
-    'cost': '\$40.00'
-  },
-  {
-    'name': 'Genteng Lembang',
-    'image':
-        'https://images.unsplash.com/photo-1548560781-a7a07d9d33db?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=581&q=80',
-    'description':
-        'Over the years, Lover Antelope Canyon has become a favorite gathering pace for photographers tourists, and visitors from the world.',
-    'date': 'Mar 24, 2019',
-    'rating': '4,83',
-    'cost': '\$50.00'
-  },
-  {
-    'name': 'Kamchatka Peninsula',
-    'image':
-        'https://images.unsplash.com/photo-1542869781-a272dedbc93e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=983&q=80',
-    'description':
-        'Over the years, Lover Antelope Canyon has become a favorite gathering pace for photographers tourists, and visitors from the world.',
-    'date': 'Apr 18, 2019',
-    'rating': '4,7',
-    'cost': '\$30.00'
-  },
-];
