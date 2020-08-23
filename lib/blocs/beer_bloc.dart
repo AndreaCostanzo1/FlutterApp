@@ -55,6 +55,7 @@ class BeerBloc {
   void retrieveSuggestedBeers() async {
     if (_suggestedBeersController.isClosed) return;
     User user = FirebaseAuth.instance.currentUser;
+    print(user.uid);
     QuerySnapshot query = await FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
@@ -63,6 +64,8 @@ class BeerBloc {
         .orderBy('affinity', descending: true)
         .limit(10)
         .get();
+    query.docs.forEach((element) {print(element.data().toString());});
+    print('length:' +query.docs.length.toString());
     List<DocumentReference> affinities = List();
     query.docs
         .forEach((element) => affinities.add(element.data()['cluster_code']));

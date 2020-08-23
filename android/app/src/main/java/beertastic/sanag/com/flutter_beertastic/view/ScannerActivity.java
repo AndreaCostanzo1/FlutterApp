@@ -10,19 +10,23 @@ import android.view.TextureView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.camera.core.CameraX;
+import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.ImageAnalysisConfig;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
-import androidx.camera.core.PreviewConfig;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.google.common.primitives.Bytes;
+import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -34,15 +38,17 @@ public class ScannerActivity extends AppCompatActivity {
 
     private TextureView textureView;
     private ScannerViewModel viewModel;
-    private ImageAnalysis imageAnalysis;
+    private PreviewView previewView;
+
+    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.beertastic_activity_camera);
         getComponents();
-        checkCameraPermission();
         setUpViewModel();
+        checkCameraPermission();
     }
 
     @Override
@@ -52,9 +58,49 @@ public class ScannerActivity extends AppCompatActivity {
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "You can't use camera without permission", Toast.LENGTH_SHORT).show();
             } else {
-                setUpCameraX();
+                setUpCamera();
             }
         }
+    }
+
+    private void setUpCamera() {
+        cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+        cameraProviderFuture.addListener(() -> {
+            try {
+                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                bindPreview(cameraProvider);
+            } catch (ExecutionException | InterruptedException e) {
+                // No errors need to be handled for this Future.
+                // This should never be reached.
+            }
+        }, ContextCompat.getMainExecutor(this));
+    }
+
+    void bindPreview(@NonNull ProcessCameraProvider cameraProvider) {
+        Executor executor = Executors.newSingleThreadExecutor();
+        Preview preview = new Preview.Builder()
+                .build();
+
+        CameraSelector cameraSelector = new CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                .build();
+
+        preview.setSurfaceProvider(previewView.createSurfaceProvider());
+
+        int deviceRotation = getWindowManager().getDefaultDisplay().getRotation();
+
+        ImageAnalysis imageAnalysis =
+                new ImageAnalysis.Builder()
+                        .setTargetResolution(new Size(1280, 720))
+                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                        .build();
+
+        imageAnalysis.setAnalyzer(executor, image -> {
+            int rotationDegrees = image.getImageInfo().getRotationDegrees();
+            analyzeImage(image, rotationDegrees, deviceRotation);
+        });
+        cameraProvider.unbindAll();
+        cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, imageAnalysis, preview);
     }
 
     private void checkCameraPermission() {
@@ -65,7 +111,7 @@ public class ScannerActivity extends AppCompatActivity {
             //permission not granted
             handlePermissionRequest();
         } else {
-            setUpCameraX();
+            setUpCamera();
         }
     }
 
@@ -82,46 +128,23 @@ public class ScannerActivity extends AppCompatActivity {
     }
 
     private void getComponents() {
-        textureView = findViewById(R.id.beertastic_scanner_preview);
+        previewView = findViewById(R.id.beertastic_scanner_preview);
     }
 
-    private void setUpCameraX() {
-        CameraX.unbindAll();
-        Executor executor = Executors.newSingleThreadExecutor();
-        ImageAnalysisConfig config =
-                new ImageAnalysisConfig.Builder()
-                        .setTargetResolution(new Size(1280, 720))
-                        .setBackgroundExecutor(executor)
-                        .setImageReaderMode(ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE)
-                        .build();
-
-        int deviceRotation = getWindowManager().getDefaultDisplay().getRotation();
-        imageAnalysis = new ImageAnalysis(config);
-
-        imageAnalysis.setAnalyzer(executor,
-                (image, rotationDegrees) -> analyzeImage(image,rotationDegrees,deviceRotation));
-
-        PreviewConfig previewConfig = new PreviewConfig.Builder().setTargetResolution(new Size(textureView.getWidth(), textureView.getHeight())).build();
-        Preview preview = new Preview(previewConfig);
-
-        preview.setOnPreviewOutputUpdateListener(
-                previewOutput -> textureView.setSurfaceTexture(previewOutput.getSurfaceTexture()));
-
-        CameraX.bindToLifecycle(this, imageAnalysis, preview);
-    }
 
     private void analyzeImage(ImageProxy image, int rotationDegrees, int deviceRotation) {
         ImageProxy.PlaneProxy[] proxyList = image.getPlanes();
-        byte[] y= new byte[proxyList[0].getBuffer().remaining()];
+        byte[] y = new byte[proxyList[0].getBuffer().remaining()];
         proxyList[0].getBuffer().get(y);
-        byte[] u= new byte[proxyList[1].getBuffer().remaining()];
+        byte[] u = new byte[proxyList[1].getBuffer().remaining()];
         proxyList[1].getBuffer().get(u);
-        byte[] v= new byte[proxyList[2].getBuffer().remaining()];
+        byte[] v = new byte[proxyList[2].getBuffer().remaining()];
         proxyList[2].getBuffer().get(v);
-        byte[] imageByteArray = Bytes.concat(y,u,v);
+        byte[] imageByteArray = Bytes.concat(y, u, v);
         BarcodesScanner.getInstance()
                 .scanYUVImage(imageByteArray, deviceRotation,
-                        (barcodesList)->viewModel.handleScanResult(barcodesList));
+                        (barcodesList) -> viewModel.handleScanResult(barcodesList));
+        image.close();
     }
 
     private void setUpViewModel() {
@@ -130,10 +153,9 @@ public class ScannerActivity extends AppCompatActivity {
     }
 
     private void setActivityResult(String qrData) {
-        CameraX.unbind(imageAnalysis);
         Intent intent = new Intent();
-        intent.putExtra(getResources().getString(R.string.qr_code_data_extra),qrData);
-        setResult(RESULT_OK,intent);
+        intent.putExtra(getResources().getString(R.string.qr_code_data_extra), qrData);
+        setResult(RESULT_OK, intent);
         finish();
     }
 
