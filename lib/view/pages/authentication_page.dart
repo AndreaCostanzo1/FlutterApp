@@ -8,6 +8,7 @@ import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/lo
 import 'package:flutter_beertastic/view/pages/fragments/fragments_wmax_medium/register_form.dart';
 
 import 'package:flutter_beertastic/blocs/authenticator.dart';
+import 'package:flutter_beertastic/view/pages/reset_page.dart';
 
 import 'package:provider/provider.dart';
 
@@ -169,7 +170,9 @@ class SignInScreen extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(top: 10.0),
             child: FlatButton(
-                onPressed: () {},
+                onPressed: () =>Navigator.push(context,  MaterialPageRoute(
+                  builder: (context) => ResetPage()),
+                ),
                 child: Text(
                   "Forgot Password?",
                   style: TextStyle(

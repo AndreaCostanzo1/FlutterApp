@@ -10,6 +10,8 @@ abstract class AuthenticatorInterface {
   void signUpWithEmailAndPassword(
       String email, String password, String confirm);
 
+  Future<bool> sendPasswordResetEmail(String email);
+
   void logOut();
 
   void resetState();
@@ -69,6 +71,24 @@ class Authenticator implements AuthenticatorInterface {
   @override
   void logOut() {
     FirebaseAuth.instance.signOut().catchError((error) => _handleError(error));
+  }
+
+  @override
+  Future<bool> sendPasswordResetEmail(String email) async{
+    RemoteError _staticError= StaticFieldChecker().checkEmail(email);
+    if (_staticError != null) {
+      _remoteErrorController.sink.add(_staticError);
+      return false;
+    } else {
+      try{
+        await FirebaseAuth.instance
+            .sendPasswordResetEmail(email: email);
+        return true;
+      } on FirebaseAuthException catch(error){
+        _handleError(error);
+        return false;
+      }
+    }
   }
 
   void _handleError(FirebaseAuthException error) async {
@@ -152,12 +172,17 @@ class StaticFieldChecker {
   final Pattern _passwordPattern =
       r'^([A-Za-z0-9~`!@#$%^&*()-_+=|}\]{[\"\:;?/>.<,]){6,}$';
 
-  RemoteError checkEmailAndPassword(String email, String password) {
+  RemoteError checkEmail(String email){
     if (email == null || !RegExp(_emailPattern).hasMatch(email))
       return RemoteError.EMAIL_FORMAT;
-    if (password == null || !RegExp(_passwordPattern).hasMatch(password))
-      return RemoteError.PASSWORD_FORMAT;
     return null;
+  }
+
+  RemoteError checkEmailAndPassword(String email, String password) {
+    RemoteError emailError= checkEmail(email);
+    return emailError != null
+        ? emailError
+        :password==null || !RegExp(_passwordPattern).hasMatch(password)?RemoteError.PASSWORD_FORMAT:null;
   }
 
   RemoteError checkFields(String email, String password, String confirm) {
