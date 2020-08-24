@@ -8,6 +8,7 @@ import 'package:flutter_beertastic/blocs/event_bloc.dart';
 import 'package:flutter_beertastic/model/event.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:url_launcher/url_launcher.dart';
 
 class EventPage extends StatelessWidget {
   final Event _event;
@@ -190,7 +191,7 @@ class _EventDetailsContent extends StatelessWidget {
                       color: Colors.transparent,
                       child: InkWell(
                         customBorder: CircleBorder(),
-                        onTap: () => print('tap'),
+                        onTap: () => _launchFacebook(),
                         child: Ink(
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
@@ -211,7 +212,7 @@ class _EventDetailsContent extends StatelessWidget {
                       color: Colors.transparent,
                       child: InkWell(
                         customBorder: CircleBorder(),
-                        onTap: () => print('tap'),
+                        onTap: () => _launchInstagram(),
                         child: Ink(
                           decoration: BoxDecoration(
                               shape: BoxShape.circle,
@@ -252,7 +253,35 @@ class _EventDetailsContent extends StatelessWidget {
               ),
             ),
           SizedBox(
-            height: 20,
+            height: 25,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal :16.0),
+            child: Container(
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.access_time),
+                  SizedBox(width: 10),
+                  Text(_generateDateTimeString(_event.date.toLocal()),style: eventDescriptionTextStyle,),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 10,),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal :16.0),
+            child: Container(
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.place),
+                  SizedBox(width: 10),
+                  Text(_event.placeName,style: eventDescriptionTextStyle,),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 30,
           ),
           _MapBox(_event.latitude, _event.longitude),
 //          SingleChildScrollView(
@@ -280,6 +309,43 @@ class _EventDetailsContent extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  _launchInstagram() {
+    launch(_event.instagramUrl);
+  }
+
+  _launchFacebook() async {
+    try {
+      bool launched = await launch(_event.fbAndroidUrl);
+
+      if (!launched) throw Exception();
+    } catch (e) {
+      await launch(_event.fbFallbackUrl);
+    }
+  }
+
+  String _generateDateTimeString(DateTime local) {
+    Map<int,String> months = Map.from({
+      DateTime.january: 'January',
+      DateTime.february: 'February',
+      DateTime.march: 'March',
+      DateTime.april: 'April',
+      DateTime.may: 'May',
+      DateTime.june: 'June',
+      DateTime.july: 'July',
+      DateTime.august: 'August',
+      DateTime.september: 'September',
+      DateTime.october: 'October',
+      DateTime.november: 'November',
+      DateTime.december: 'December',
+    });
+    String day= local.day.toString();
+    String month = months[local.month];
+    String hour=local.hour.toString();
+    String minutes=local.minute<10?('0'+local.minute.toString()):local.minute.toString();
+
+    return day+' '+month+' at '+hour+':'+minutes;
   }
 }
 
