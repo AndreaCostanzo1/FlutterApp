@@ -57,7 +57,7 @@ class __PageContainerState extends State<_PageContainer>
   Color left = Colors.black;
   FocusNode _changePageFocus;
   PageController _pageController;
-  final AuthenticatorInterface _authBLoC = Authenticator();
+  AuthenticatorInterface _authBLoC;
 
   @override
   Widget build(BuildContext context) {
@@ -126,6 +126,7 @@ class __PageContainerState extends State<_PageContainer>
   @override
   void initState() {
     super.initState();
+    _authBLoC =Authenticator();
     _changePageFocus = FocusNode();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
