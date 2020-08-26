@@ -18,6 +18,8 @@ abstract class AuthenticatorInterface {
 
   void dispose();
 
+  Future<void > deleteAccount();
+
   Stream<RemoteError> get remoteError;
 }
 
@@ -71,6 +73,11 @@ class Authenticator implements AuthenticatorInterface {
   @override
   void logOut() {
     FirebaseAuth.instance.signOut().catchError((error) => _handleError(error));
+  }
+
+  @override
+  Future<void> deleteAccount() async {
+    return FirebaseAuth.instance.currentUser.delete();
   }
 
   @override

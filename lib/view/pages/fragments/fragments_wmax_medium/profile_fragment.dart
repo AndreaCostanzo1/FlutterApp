@@ -86,7 +86,7 @@ class __ProfileSectionState extends State<_ProfileSection> {
                             height: SpacingUnit.w * 2.5,
                             width: SpacingUnit.w * 2.5,
                             child: InkWell(
-                              onTap: ()=> _changeImage(),
+                              onTap: () => _changeImage(),
                               child: Center(
                                 heightFactor: SpacingUnit.w * 1.5,
                                 widthFactor: SpacingUnit.w * 1.5,
@@ -106,31 +106,36 @@ class __ProfileSectionState extends State<_ProfileSection> {
               ),
               SizedBox(height: SpacingUnit.w * 2),
               StreamBuilder<MyUser>(
-                stream: _profileBloc.authenticatedUserStream,
-                builder: (context, snapshot) {
-                  return snapshot.data!=null? Column(
-                    children: <Widget>[
-                      Text(
-                        snapshot.data.nickname,
-                        style: titleTextStyle,
-                      ),
-                      SizedBox(height: SpacingUnit.w * 0.5),
-                      Text(
-                        snapshot.data.email,
-                        style: captionTextStyle,
-                      ),
-                    ],
-                  ):Container(height: SpacingUnit.w*2,);
-                }
-              ),
+                  stream: _profileBloc.authenticatedUserStream,
+                  builder: (context, snapshot) {
+                    return snapshot.data != null
+                        ? Column(
+                            children: <Widget>[
+                              Text(
+                                snapshot.data.nickname,
+                                style: titleTextStyle,
+                              ),
+                              SizedBox(height: SpacingUnit.w * 0.5),
+                              Text(
+                                snapshot.data.email,
+                                style: captionTextStyle,
+                              ),
+                            ],
+                          )
+                        : Container(
+                            height: SpacingUnit.w * 2,
+                          );
+                  }),
               SizedBox(height: SpacingUnit.w * 2),
               Material(
                 color: Colors.amber,
                 borderRadius: BorderRadius.circular(SpacingUnit.w * 3),
                 child: InkWell(
-                  onTap: ()=>Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => FavouritesPage(),
-                  )),
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FavouritesPage(),
+                      )),
                   borderRadius: BorderRadius.circular(SpacingUnit.w * 3),
                   child: Container(
                     height: SpacingUnit.w * 4,
@@ -167,10 +172,10 @@ class __ProfileSectionState extends State<_ProfileSection> {
   _changeImage() async {
     String string = await _profileBloc.getProfileImagePath();
     try {
-      bool uploaded = await MethodChannel('PICKER_CHANNEL').invokeMethod(
-          'STORAGE', Map.from({'path': string}));
-      if(uploaded) _profileBloc.getAuthenticatedUserData();
-    } catch(error){
+      bool uploaded = await MethodChannel('PICKER_CHANNEL')
+          .invokeMethod('STORAGE', Map.from({'path': string}));
+      if (uploaded) _profileBloc.getAuthenticatedUserData();
+    } catch (error) {
       //TODO: show upload failed
     }
   }
@@ -194,16 +199,44 @@ class _ProfileItems extends StatelessWidget {
                   icon: LineAwesomeIcons.cog,
                   text: 'Settings',
                   color: Theme.of(context).backgroundColor,
-                  onTap: () => Navigator.push(context,  MaterialPageRoute(
-                    builder: (context) => SettingsPage(),
-                  )),
-
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SettingsPage(),
+                      )),
                 ),
                 ProfileListItem(
                   icon: LineAwesomeIcons.alternate_sign_out,
                   text: 'Logout',
                   color: Theme.of(context).backgroundColor,
                   onTap: () => _authBLoC.logOut(),
+                  hasNavigation: false,
+                ),
+                ProfileListItem(
+                  icon: Icons.delete_forever,
+                  text: 'Delete account',
+                  color: Theme.of(context).backgroundColor,
+                  onTap: () => showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                            title: Text('Delete account?'),
+                            content:
+                                Text('Attention: this process is irreversible'),
+                            actions: <Widget>[
+                              FlatButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _authBLoC.deleteAccount();
+                                } ,
+                                child: Text('Yes'),
+                              ),
+                              FlatButton(
+                                onPressed: () =>Navigator.pop(context),
+                                child: Text('No'),
+                              ),
+                            ],
+                          ),
+                      barrierDismissible: false),
                   hasNavigation: false,
                 ),
               ],
@@ -214,7 +247,6 @@ class _ProfileItems extends StatelessWidget {
     );
   }
 }
-
 
 class _HideGlowBehaviour extends ScrollBehavior {
   @override
