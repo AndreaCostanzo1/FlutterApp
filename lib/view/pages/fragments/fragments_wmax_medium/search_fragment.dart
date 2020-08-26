@@ -142,9 +142,6 @@ class _SearchFragmentState extends State<SearchFragment> {
                             height: 35,
                           ),
                           _focused
-                              /*TODO: Create a class SearchResult and switch with this container
-                              * add also the BLoC with the stream for the results
-                              */
                               ? StreamBuilder<List<Beer>>(
                                   stream: _beerBloc.queriedBeersStream,
                                   builder: (context, snapshot) {

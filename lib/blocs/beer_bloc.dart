@@ -83,6 +83,7 @@ class BeerBloc {
         .collection('beers')
         .where(parameter, isGreaterThanOrEqualTo: lowerLimit)
         .where(parameter, isLessThanOrEqualTo: upperLimit)
+        .limit(5)
         .get()
         .then((query) => _updateBeersSink(_queriedBeersController, query.docs));
   }
