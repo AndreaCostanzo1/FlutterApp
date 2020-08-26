@@ -331,25 +331,24 @@ class PostSubGallery1 extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            key: UniqueKey(),
+            key: ValueKey(_beers[0].toString()),
             height: bigSize,
             width: bigSize,
             child: ___BeerImage(_beers[0], bigSize),
           ),
           Container(
-            key: UniqueKey(),
             height: bigSize,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
-                  key: UniqueKey(),
+                  key: ValueKey(_beers[1].toString()),
                   height: smallSize,
                   width: smallSize,
                   child: ___BeerImage(_beers[1], smallSize),
                 ),
                 Container(
-                  key: UniqueKey(),
+                  key: ValueKey(_beers[2].toString()),
                   height: smallSize,
                   width: smallSize,
                   child: ___BeerImage(_beers[2], smallSize),
@@ -446,19 +445,19 @@ class PostSubGallery2 extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            key: UniqueKey(),
+            key: ValueKey(_beers[0].toString()),
             height: smallSize,
             width: smallSize,
             child: ___BeerImage(_beers[0], smallSize),
           ),
           Container(
-            key: UniqueKey(),
+            key: ValueKey(_beers[1].toString()),
             height: smallSize,
             width: smallSize,
             child: ___BeerImage(_beers[1], smallSize),
           ),
           Container(
-            key: UniqueKey(),
+            key: ValueKey(_beers[2].toString()),
             height: smallSize,
             width: smallSize,
             child: ___BeerImage(_beers[2], smallSize),
@@ -489,13 +488,13 @@ class PostSubGallery3 extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
-                  key: UniqueKey(),
+                  key: ValueKey(_beers[0].toString()),
                   height: smallSize,
                   width: smallSize,
                   child: ___BeerImage(_beers[0], smallSize),
                 ),
                 Container(
-                  key: UniqueKey(),
+                  key: ValueKey(_beers[1].toString()),
                   height: smallSize,
                   width: smallSize,
                   child: ___BeerImage(_beers[1], smallSize),
@@ -504,7 +503,7 @@ class PostSubGallery3 extends StatelessWidget {
             ),
           ),
           Container(
-            key: UniqueKey(),
+            key: ValueKey(_beers[2].toString()),
             height: bigSize,
             width: bigSize,
             child: ___BeerImage(_beers[2], bigSize),

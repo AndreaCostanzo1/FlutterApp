@@ -59,7 +59,8 @@ class Beer {
         _carbonation = beer.carbonation,
         _searches = beer.searches,
         _likes = beer.likes,
-        _ratingsByRate = beer.ratingsByRate.map((key, value) => MapEntry(key.toString(),value)),
+        _ratingsByRate = beer.ratingsByRate
+            .map((key, value) => MapEntry(key.toString(), value)),
         _totalRatings = beer.totalRatings;
 
   String get id => _id;
@@ -86,12 +87,17 @@ class Beer {
 
   int get likes => _likes;
 
-  Map<int, int> get ratingsByRate => _ratingsByRate.map((key, value) => MapEntry(int.parse(key),value));
+  Map<int, int> get ratingsByRate =>
+      _ratingsByRate.map((key, value) => MapEntry(int.parse(key), value));
 
   int get totalRatings => _totalRatings;
 
   @override
   String toString() {
+    return this.toJson().toString();
+  }
+
+  Map<String, dynamic> toJson() {
     return Map.from({
       'id': _id,
       'name': _name,
@@ -105,6 +111,6 @@ class Beer {
       'carbonation': _carbonation,
       'searches': _searches,
       'likes': _likes,
-    }).toString();
+    });
   }
 }
