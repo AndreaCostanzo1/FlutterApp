@@ -6,5 +6,6 @@ jobs:
     steps:
       - checkout
       - run: flutter doctor -v
+      - run: ls
       - run: flutter test 
-      - run: flutter -v build apk
+
