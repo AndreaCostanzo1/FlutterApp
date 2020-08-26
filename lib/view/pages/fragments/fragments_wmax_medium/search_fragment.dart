@@ -25,11 +25,7 @@ class _SearchFragmentState extends State<SearchFragment> {
   BeerBloc _beerBloc;
 
   void search(String text) {
-    if (text == '')
-      unfocusSearch(); //TODO: OPTIONAL FEATURE -> load previous searches
-    else {
-      //TODO: perform search
-    }
+    if (text == '') unfocusSearch();
   }
 
   void unfocusSearch() {
@@ -46,8 +42,7 @@ class _SearchFragmentState extends State<SearchFragment> {
     _focusNode = FocusNode();
     _controller = TextEditingController();
     _beerBloc = BeerBloc();
-    if (_beerBloc.suggestedBeers.length == 0)
-      _beerBloc.retrieveSuggestedBeers();
+    _beerBloc.retrieveSuggestedBeers();
     super.initState();
   }
 
@@ -70,7 +65,10 @@ class _SearchFragmentState extends State<SearchFragment> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
-                Container(color: Colors.white,height: MediaQuery.of(context).size.height*0.35,),
+                Container(
+                  color: Colors.white,
+                  height: MediaQuery.of(context).size.height * 0.35,
+                ),
               ],
             ),
           ),
@@ -105,23 +103,28 @@ class _SearchFragmentState extends State<SearchFragment> {
                                 bottom: 10),
                             height: 50,
                             child: Padding(
-                              padding: const EdgeInsets.only(left: 20.0, right: 7),
+                              padding:
+                                  const EdgeInsets.only(left: 20.0, right: 7),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: <Widget>[
                                   Container(
-                                    width: MediaQuery.of(context).size.width * 0.65,
+                                    width: MediaQuery.of(context).size.width *
+                                        0.65,
                                     child: TextFormField(
                                       controller: _controller,
                                       focusNode: _focusNode,
-                                      onTap: () => setState(() => _focused = true),
+                                      onTap: () =>
+                                          setState(() => _focused = true),
                                       onFieldSubmitted: (text) => search(text),
                                       onChanged: (value) =>
                                           _handleSearchFieldChange(value),
                                       decoration: InputDecoration.collapsed(
                                           hintText: 'Search',
                                           hintStyle: TextStyle(
-                                              fontFamily: 'Open Sans SemiBold')),
+                                              fontFamily:
+                                                  'Open Sans SemiBold')),
                                     ),
                                   ),
                                   _focused
@@ -146,7 +149,8 @@ class _SearchFragmentState extends State<SearchFragment> {
                                   stream: _beerBloc.queriedBeersStream,
                                   builder: (context, snapshot) {
                                     return Container(
-                                      height: MediaQuery.of(context).size.height,
+                                      height:
+                                          MediaQuery.of(context).size.height,
                                       child: snapshot.data != null
                                           ? _SearchedBeerList(snapshot.data)
                                           : Container(),
@@ -222,7 +226,6 @@ class _SearchedBeerList extends StatelessWidget {
   }
 }
 
-
 class PostGallery extends StatelessWidget {
   final AsyncSnapshot<List<Beer>> snapshot;
 
@@ -232,7 +235,6 @@ class PostGallery extends StatelessWidget {
   Widget build(BuildContext context) {
     List<List<Beer>> groupsOfBeers = List();
     if (snapshot.data != null) {
-      //TODO: move this method in a separate class and test it;
       for (int i = 0; i < (snapshot.data.length / 9).truncate(); i++) {
         groupsOfBeers.add(snapshot.data.getRange(i, i + 9).toList());
       }
@@ -344,7 +346,6 @@ class ___BeerImage extends StatefulWidget {
 }
 
 class ____BeerImageState extends State<___BeerImage> {
-
   BeerImageBloc _imageBloc;
 
   @override
@@ -352,7 +353,6 @@ class ____BeerImageState extends State<___BeerImage> {
     return StreamBuilder<Uint8List>(
         stream: _imageBloc.beerImageStream,
         builder: (context, snapshot) {
-
           return snapshot.data != null
               ? Container(
                   decoration: BoxDecoration(
@@ -393,7 +393,7 @@ class ____BeerImageState extends State<___BeerImage> {
   @override
   void initState() {
     super.initState();
-    _imageBloc =BeerImageBloc();
+    _imageBloc = BeerImageBloc();
     _imageBloc.retrieveBeerImage(widget._beer);
   }
 
