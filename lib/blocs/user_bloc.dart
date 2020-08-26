@@ -19,6 +19,8 @@ class UserBloc {
   final StreamController<ImageProvider> _userImageController =
       StreamController.broadcast();
 
+  final List<StreamSubscription> _subscriptions= List();
+
   get profileImageStream => _profileImageController.stream;
 
   get authenticatedUserStream => _authenticatedUserController.stream;
@@ -29,6 +31,7 @@ class UserBloc {
 
   void dispose() async {
     await _lock.synchronized(() {
+      _subscriptions.forEach((subscription)=>subscription.cancel());
       _profileImageController.close();
       _authenticatedUserController.close();
       _userImageController.close();
@@ -120,5 +123,34 @@ class UserBloc {
         .collection('users')
         .doc(user.uid)
         .update({'nickname': nickname, 'city': cityRef});
+  }
+
+  void listenToAuthenticatedUserData() async {
+    User fUser = FirebaseAuth.instance.currentUser;
+    DocumentReference userRef =
+        FirebaseFirestore.instance.collection('users').doc(fUser.uid);
+    _subscriptions.add(userRef.snapshots().listen((userSnapshot) async {
+      Map<String, dynamic> userData = userSnapshot.data();
+      //usually skipped: may happen that, upon registration, the page is uploaded
+      //before the default city is set.
+      while (
+      userData == null || (userData != null && userData['city'] == null)) {
+        userSnapshot = await userRef.get();
+        userData.addAll(userSnapshot.data());
+        await Future.delayed(Duration(milliseconds: 100));
+      }
+      DocumentReference cityRef = userSnapshot.data()['city'];
+      DocumentSnapshot citySnap = await cityRef.get();
+      userData.putIfAbsent(
+          'city_data',
+              () => City.fromSnapshot(
+              CityDataConverter.convertSnapshot(citySnap.data())));
+      MyUser user = MyUser.fromSnapshot(userData);
+      _lock.synchronized(() {
+        if (!_authenticatedUserController.isClosed)
+          _authenticatedUserController.sink.add(user);
+      });
+      if (_profileImageController.hasListener) _retrieveProfileImage(user);
+    }));
   }
 }

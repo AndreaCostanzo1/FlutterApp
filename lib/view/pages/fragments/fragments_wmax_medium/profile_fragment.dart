@@ -160,7 +160,7 @@ class __ProfileSectionState extends State<_ProfileSection> {
   void initState() {
     super.initState();
     _profileBloc = UserBloc();
-    _profileBloc.getAuthenticatedUserData();
+    _profileBloc.listenToAuthenticatedUserData();
   }
 
   @override
