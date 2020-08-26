@@ -23,11 +23,18 @@ class BeerBloc {
 
   final Lock _lock = Lock();
 
+  DocumentSnapshot _lastDocument;
+
+  final int queryLimit=18;
+
+  bool _noMoreBeerAvailable;
+
   BeerBloc() {
     _cachedBeers.addAll({
       _suggestedBeersController: List(),
       _queriedBeersController: List(),
     });
+    _noMoreBeerAvailable=false;
   }
 
   Stream<List<Beer>> get suggestedBeersStream =>
@@ -37,11 +44,12 @@ class BeerBloc {
 
   Stream<List<Beer>> get queriedBeersStream => _queriedBeersController.stream;
 
-
   List<Beer> get suggestedBeers => _cachedBeers[_suggestedBeersController];
 
   List<Beer> get queriedBeers => _cachedBeers[_queriedBeersController];
 
+
+  bool get noMoreBeerAvailable => _noMoreBeerAvailable;
 
   void dispose() async {
     await _lock.synchronized(() {
@@ -53,6 +61,7 @@ class BeerBloc {
   }
 
   void retrieveSuggestedBeers() async {
+    _noMoreBeerAvailable=false;
     if (_suggestedBeersController.isClosed) return;
     User user = FirebaseAuth.instance.currentUser;
     QuerySnapshot query = await FirebaseFirestore.instance
@@ -69,9 +78,51 @@ class BeerBloc {
     FirebaseFirestore.instance
         .collection('beers')
         .where('cluster_code', arrayContainsAny: affinities)
+        .orderBy('id')
+        .limit(queryLimit)
         .get()
-        .then(
-            (query) => _updateBeersSink(_suggestedBeersController, query.docs));
+        .then((query) {
+      if(query.docs.length>0){
+        _lastDocument = query.docs.last;
+      }
+      if(query.docs.length<queryLimit) _noMoreBeerAvailable=true;
+      _updateBeersSink(_suggestedBeersController, query.docs);
+    });
+  }
+
+  void retrieveMoreSuggestedBeers() async {
+   if(!_noMoreBeerAvailable){
+     User user = FirebaseAuth.instance.currentUser;
+     QuerySnapshot query = await FirebaseFirestore.instance
+         .collection('users')
+         .doc(user.uid)
+         .collection('affinities')
+         .where('affinity', isGreaterThanOrEqualTo: 0.5)
+         .orderBy('affinity', descending: true)
+         .limit(10)
+         .get();
+     List<DocumentReference> affinities = List();
+     query.docs
+         .forEach((element) => affinities.add(element.data()['cluster_code']));
+     if (_lastDocument != null) {
+       FirebaseFirestore.instance
+           .collection('beers')
+           .where('cluster_code', arrayContainsAny: affinities)
+           .orderBy('id')
+           .limit(queryLimit)
+           .startAfterDocument(_lastDocument)
+           .get()
+           .then((query) {
+         if(query.docs.length>0){
+           _lastDocument = query.docs.last;
+         } else{
+           _lastDocument=null;
+         }
+         if(query.docs.length<queryLimit) _noMoreBeerAvailable=true;
+         _updateBeersSinkWithoutClear(_suggestedBeersController, query.docs);
+       });
+     }
+   }
   }
 
   //value is used to perform a "like" behaviour of SQL databases
@@ -91,26 +142,24 @@ class BeerBloc {
   }
 
   _updateBeersSink(StreamController<List<Beer>> beersStream,
-      List<DocumentSnapshot> beersSnapshots) async{
-    //get the list of articles still not retrieved
+      List<DocumentSnapshot> beersSnapshots) async {
+    //get the list of beers still not retrieved
     await _lock.synchronized(() {
       if (!beersStream.isClosed) {
-        List<Beer> beerList = _cachedBeers[beersStream];
-        beerList.clear();
-        beerList.addAll(beersSnapshots
+        _cachedBeers[beersStream].clear();
+        _cachedBeers[beersStream].addAll(beersSnapshots
             .map((snapshots) => Beer.fromSnapshot(snapshots.data()))
             .toList());
-        beersStream.sink.add(beerList);
+        beersStream.sink.add(_cachedBeers[beersStream]);
       }
     });
   }
 
-
   void clearQueriedBeersStream() async {
     await _lock.synchronized(() {
-      List<Beer> beerList = _cachedBeers[_queriedBeersController];
-      beerList.clear();
-      if(!_queriedBeersController.isClosed )_queriedBeersController.sink.add(beerList);
+      _cachedBeers[_queriedBeersController].clear();
+      if (!_queriedBeersController.isClosed)
+        _queriedBeersController.sink.add(_cachedBeers[_queriedBeersController]);
     });
   }
 
@@ -122,11 +171,12 @@ class BeerBloc {
         .then((snapshot) async {
       if (snapshot.data() != null) {
         await _lock.synchronized(() {
-          if(!_singleBeerController.isClosed)_singleBeerController.sink.add(Beer.fromSnapshot(snapshot.data()));
+          if (!_singleBeerController.isClosed)
+            _singleBeerController.sink.add(Beer.fromSnapshot(snapshot.data()));
         });
       } else {
         await _lock.synchronized(() {
-          if(!_singleBeerController.isClosed){
+          if (!_singleBeerController.isClosed) {
             _singleBeerController.sink.addError('Beer-not-found');
             _singleBeerController.sink.add(Beer.nullBeer());
           }
@@ -167,7 +217,7 @@ class BeerBloc {
     DocumentReference userRef =
         FirebaseFirestore.instance.collection('users').doc(user.uid);
     await _lock.synchronized(() async {
-      if(!_singleBeerController.isClosed) _singleBeerController.sink.add(null);
+      if (!_singleBeerController.isClosed) _singleBeerController.sink.add(null);
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         DocumentSnapshot snapshot = await transaction.get(reference);
         transaction.update(reference, {'likes': snapshot.data()['likes'] + 1});
@@ -188,7 +238,7 @@ class BeerBloc {
         FirebaseFirestore.instance.collection('beers').doc(beer.id);
     User user = FirebaseAuth.instance.currentUser;
     await _lock.synchronized(() async {
-      if(!_singleBeerController.isClosed) _singleBeerController.sink.add(null);
+      if (!_singleBeerController.isClosed) _singleBeerController.sink.add(null);
       await FirebaseFirestore.instance.runTransaction((transaction) async {
         DocumentSnapshot snapshot = await transaction.get(reference);
         transaction.update(reference, {'likes': snapshot.data()['likes'] - 1});
@@ -201,7 +251,7 @@ class BeerBloc {
     }
   }
 
-  void observeSingleBeer(String beerID){
+  void observeSingleBeer(String beerID) {
     _subscriptions.add(FirebaseFirestore.instance
         .collection('beers')
         .doc(beerID)
@@ -209,16 +259,28 @@ class BeerBloc {
         .listen((snapshot) async {
       if (snapshot.data() != null) {
         await _lock.synchronized(() {
-          if(!_singleBeerController.isClosed)_singleBeerController.sink.add(Beer.fromSnapshot(snapshot.data()));
+          if (!_singleBeerController.isClosed)
+            _singleBeerController.sink.add(Beer.fromSnapshot(snapshot.data()));
         });
       } else {
         await _lock.synchronized(() {
-          if(!_singleBeerController.isClosed){
+          if (!_singleBeerController.isClosed) {
             _singleBeerController.sink.addError('Beer-not-found');
             _singleBeerController.sink.add(Beer.nullBeer());
           }
         });
       }
     }));
+  }
+
+  void _updateBeersSinkWithoutClear(StreamController<List<Beer>> beersStreamController, List<QueryDocumentSnapshot> docs) async {
+    await _lock.synchronized(() {
+      if (!beersStreamController.isClosed) {
+        _cachedBeers[beersStreamController].addAll(docs
+            .map((snapshots) => Beer.fromSnapshot(snapshots.data()))
+            .toList());
+        beersStreamController.sink.add(_cachedBeers[beersStreamController]);
+      }
+    });
   }
 }
