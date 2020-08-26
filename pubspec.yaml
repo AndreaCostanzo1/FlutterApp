@@ -60,6 +60,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  mockito: ^4.1.1
 
   gen_lang: 0.1.0
 # The following section is specific to Flutter.

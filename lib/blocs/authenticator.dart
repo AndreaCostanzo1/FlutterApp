@@ -5,16 +5,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_beertastic/blocs/map_bloc.dart';
 
 abstract class AuthenticatorInterface {
-  void logWithEmailAndPassword(String email, String password);
+  Future<void> logWithEmailAndPassword(String email, String password);
 
-  void signUpWithEmailAndPassword(
+  Future<void> signUpWithEmailAndPassword(
       String email, String password, String confirm);
 
   Future<bool> sendPasswordResetEmail(String email);
 
-  void logOut();
+  Future<void> logOut();
 
-  void resetState();
+  Future<void> resetState();
 
   void dispose();
 
@@ -24,6 +24,9 @@ abstract class AuthenticatorInterface {
 }
 
 class Authenticator implements AuthenticatorInterface {
+
+  final FirebaseAuth _firebaseAuth;
+
   final Map<String, RemoteError> errors = {
     'user-not-found': RemoteError.USER_NOT_FOUND,
     'wrong-password': RemoteError.WRONG_PASSWORD,
@@ -35,20 +38,22 @@ class Authenticator implements AuthenticatorInterface {
   final StreamController<RemoteError> _remoteErrorController = StreamController<
       RemoteError>.broadcast(); //.broadcast used when there are multiple listeners
 
-  Authenticator();
+  Authenticator(): this._firebaseAuth=FirebaseAuth.instance;
+
+  Authenticator.testConstructor(FirebaseAuth auth):this._firebaseAuth=auth;
 
   @override
   Stream<RemoteError> get remoteError => _remoteErrorController.stream;
 
   @override
-  void logWithEmailAndPassword(String email, String password) async {
+  Future<void> logWithEmailAndPassword(String email, String password) async {
     RemoteError _staticError =
         StaticFieldChecker().checkEmailAndPassword(email, password);
     if (_staticError != null) {
       _remoteErrorController.sink.add(_staticError);
     } else {
       try{
-        await FirebaseAuth.instance
+        await _firebaseAuth
             .signInWithEmailAndPassword(email: email, password: password);
       } on FirebaseAuthException catch(error){
         _handleError(error);
@@ -57,29 +62,33 @@ class Authenticator implements AuthenticatorInterface {
   }
 
   @override
-  void signUpWithEmailAndPassword(
+  Future<void> signUpWithEmailAndPassword(
       String email, String password, String confirm) async {
     RemoteError _staticError =
         StaticFieldChecker().checkFields(email, password, confirm);
     if (_staticError != null) {
       _remoteErrorController.sink.add(_staticError);
     } else {
-      FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password)
-          .then((response) => _createNewUserEntry(response))
-          .catchError((error) => _handleError(error));
+      try{
+        _firebaseAuth
+            .createUserWithEmailAndPassword(email: email, password: password)
+            .then((response) => _createNewUserEntry(response));
+      }on FirebaseAuthException catch(error){
+        _handleError(error);
+      }
+
     }
   }
 
   @override
-  void logOut() {
-    FirebaseAuth.instance.signOut().catchError((error) => _handleError(error));
+  Future<void> logOut() {
+    return _firebaseAuth.signOut().catchError((error) => _handleError(error));
   }
 
   @override
   Future<void> deleteAccount() async {
     try{
-      await FirebaseAuth.instance.currentUser.delete();
+      await _firebaseAuth.currentUser.delete();
     } on FirebaseAuthException catch(error){
       _handleError(error);
     }
@@ -93,7 +102,7 @@ class Authenticator implements AuthenticatorInterface {
       return false;
     } else {
       try{
-        await FirebaseAuth.instance
+        await _firebaseAuth
             .sendPasswordResetEmail(email: email);
         return true;
       } on FirebaseAuthException catch(error){
@@ -116,7 +125,7 @@ class Authenticator implements AuthenticatorInterface {
   }
 
   @override
-  void resetState() async {
+  Future<void> resetState() async {
     _remoteError = null;
     _remoteErrorController.sink.add(_remoteError);
   }
