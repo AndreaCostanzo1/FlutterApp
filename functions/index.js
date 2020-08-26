@@ -106,26 +106,33 @@ async function deleteReviews(query, resolve,uid,lastDocument =null) {
 
     const lastDocRetrieved = snapshot.docs[snapshot.docs.length-1];
 
-    const batch = db.batch();
     snapshot.docs.forEach(async (beerDoc) => {
         const beerRef= beerDoc.ref;
         const reviewDoc = await beerRef.collection('reviews').doc(uid).get();
-        if(reviewDoc.exist){
+        console.log('Beer '+beerDoc.data().name+'->'+reviewDoc.exists+'/'+uid);
+        if(reviewDoc.exists){
             const rate = reviewDoc.data().rate;
             console.log('Updating beer '+beerDoc.id+' ratings...');
             await db.runTransaction(async(trans) => {
-                var beerDoc= await beerRef.get();
-                var ratings_by_rate =  beerDoc.data().ratings_by_rate;
-                var newRateCount= ratings_by_rate.get(rate)-1;
-                ratings_by_rate.set(rate,newRateCount);
-                trans.update(beerRef,{'ratings_by_rate':ratings_by_rate});
+                const beerDoc= await beerRef.get();
+                let ratings_by_rate =  beerDoc.data().ratings_by_rate;
+                ratings_by_rate[rate.toString()]=ratings_by_rate[rate.toString()] - 1;
+                const newTotalRatings = beerDoc.data().total_ratings-1;
+                let newRating=0;
+                if(newTotalRatings!==0){
+                    let weightedRates = 0;
+                    for (let rating in ratings_by_rate){
+                        weightedRates=weightedRates+parseInt(rating)*ratings_by_rate[rating];
+                    }
+                    newRating =Math.round( weightedRates/newTotalRatings*10)/10;
+                }
+                trans.update(beerRef,{'ratings_by_rate':ratings_by_rate,'total_ratings':newTotalRatings,'rating':newRating});
             });
             console.log('Updated beer '+beerDoc.id+' ratings');
-            batch.delete(reviewDoc.ref);
+            reviewDoc.ref.delete();
             console.log('Deleting review '+ reviewDoc.id+' from beer '+ beerDoc.id);
         }
     });
-    await batch.commit();
 
     // Recurse on the next process tick, to avoid
     // exploding the stack.
