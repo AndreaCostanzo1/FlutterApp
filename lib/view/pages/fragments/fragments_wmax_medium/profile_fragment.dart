@@ -181,15 +181,37 @@ class __ProfileSectionState extends State<_ProfileSection> {
   }
 }
 
-class _ProfileItems extends StatelessWidget {
-  final AuthenticatorInterface _authBLoC = Authenticator();
+class _ProfileItems extends StatefulWidget {
+  @override
+  __ProfileItemsState createState() => __ProfileItemsState();
+}
+
+class __ProfileItemsState extends State<_ProfileItems> {
+  AuthenticatorInterface _authBLoC;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: _authBLoC.remoteError,
       builder: (context, snapshot) {
-        //TODO: Manage errors (see login_form line 31)
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if(snapshot.data!=null&&snapshot.data==RemoteError.REQUIRES_RECENT_LOGIN){
+            showDialog(context: context,builder: (_)=>AlertDialog(
+              title: Text('Attention'),
+              content:
+              Text('This operation requires recent login. You will be redirected to login page'),
+              actions: <Widget>[
+                FlatButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _authBLoC.logOut();
+                  },
+                  child: Text('Ok'),
+                ),
+              ],
+            ));
+          }
+        });
         return Expanded(
           child: ScrollConfiguration(
             behavior: _HideGlowBehaviour(),
@@ -245,6 +267,18 @@ class _ProfileItems extends StatelessWidget {
         );
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _authBLoC=Authenticator();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _authBLoC.dispose();
   }
 }
 

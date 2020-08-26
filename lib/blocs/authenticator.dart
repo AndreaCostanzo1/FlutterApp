@@ -28,6 +28,7 @@ class Authenticator implements AuthenticatorInterface {
     'user-not-found': RemoteError.USER_NOT_FOUND,
     'wrong-password': RemoteError.WRONG_PASSWORD,
     'email-already-in-use': RemoteError.USER_ALREADY_EXIST,
+    'requires-recent-login': RemoteError.REQUIRES_RECENT_LOGIN,
   };
 
   RemoteError _remoteError;
@@ -77,7 +78,11 @@ class Authenticator implements AuthenticatorInterface {
 
   @override
   Future<void> deleteAccount() async {
-    return FirebaseAuth.instance.currentUser.delete();
+    try{
+      await FirebaseAuth.instance.currentUser.delete();
+    } on FirebaseAuthException catch(error){
+      _handleError(error);
+    }
   }
 
   @override
@@ -170,6 +175,7 @@ enum RemoteError {
   PASSWORD_FORMAT,
   NOT_MATCHING_PASSWORDS,
   WRONG_PASSWORD,
+  REQUIRES_RECENT_LOGIN,
   NOT_DEFINED,
 }
 
