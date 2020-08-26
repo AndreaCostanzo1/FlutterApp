@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_beertastic/blocs/map_bloc.dart';
@@ -29,6 +30,7 @@ class __TopPageState extends State<_TopPage> {
   MapBloc _mapBloc;
   UserBloc _userBloc;
   City _city;
+  bool _cityUpdated;
   String _nickname;
 
   @override
@@ -39,7 +41,10 @@ class __TopPageState extends State<_TopPage> {
           _city = _city ?? (snapshot.data != null ? snapshot.data.city : null);
           _nickname = _nickname ??
               (snapshot.data != null ? snapshot.data.nickname : null);
-          if (_city != null) _mapBloc.retrieveCityImage(_city);
+          if (_city != null&&_cityUpdated) {
+            _mapBloc.retrieveCityImage(_city);
+            _cityUpdated=false;
+          }
           return snapshot.data == null
               ? Container(
                   width: MediaQuery.of(context).size.width,
@@ -207,6 +212,9 @@ class __TopPageState extends State<_TopPage> {
                           ),
                           TextFormField(
                             initialValue: snapshot.data.nickname,
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(14),
+                            ],
                             onChanged: (text) => setState(() {
                               _nickname = text;
                             }),
@@ -278,6 +286,7 @@ class __TopPageState extends State<_TopPage> {
     _userBloc = UserBloc();
     _userBloc.getAuthenticatedUserData();
     _mapBloc.retrieveNearestCities();
+    _cityUpdated=true;
   }
 
   @override
@@ -291,7 +300,7 @@ class __TopPageState extends State<_TopPage> {
     setState(() {
       if (city.id != _city.id) {
         _city = city;
-        print(city.name);
+        _cityUpdated=true;
       }
     });
     _mapBloc.retrieveNearestCities();
