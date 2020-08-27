@@ -32,7 +32,7 @@ class _FavouritesPageState extends State<FavouritesPage> {
                       )
                     : Column(
                         children: <Widget>[
-                          ...snapshot.data.map((beer) => BeerEntry(beer)).toList(),
+                          ...snapshot.data.map((beer) => BeerEntry(beer,key: ValueKey(beer.toString()))).toList(),
                         ],
                       );
               })

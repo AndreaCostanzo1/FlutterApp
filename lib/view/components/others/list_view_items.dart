@@ -10,7 +10,7 @@ import 'package:flutter_beertastic/view/pages/beer_page.dart';
 class BeerEntry extends StatefulWidget {
   final Beer _beer;
 
-  BeerEntry(this._beer);
+  BeerEntry(this._beer, {Key key}): super(key:key);
 
   @override
   _BeerEntryState createState() => _BeerEntryState();
