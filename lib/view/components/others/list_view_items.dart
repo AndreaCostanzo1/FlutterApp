@@ -84,7 +84,7 @@ class _BeerEntryState extends State<BeerEntry> {
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     AutoSizeText(
-                                      widget._beer.name,
+                                      _reduceName(widget._beer.name),
                                       style: TextStyle(fontFamily: "Campton Bold"),
                                       maxFontSize: 30,
                                       minFontSize: 25,
@@ -135,5 +135,13 @@ class _BeerEntryState extends State<BeerEntry> {
   void dispose() {
     super.dispose();
     _imageBloc.dispose();
+  }
+
+  String _reduceName(String name) {
+    if(name.length>=16){
+      return name.substring(0,15)+'...';
+    } else {
+      return name;
+    }
   }
 }

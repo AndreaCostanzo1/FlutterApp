@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitDown,
     ]);
     return MaterialApp(
+      key:UniqueKey(),
       title: 'Flutter Beertastic',
       theme: ThemeData(
           brightness: Brightness.light,
@@ -42,6 +43,7 @@ class MyApp extends StatelessWidget {
             overline: TextStyle(color: Colors.white70),
           )),
       home: FutureBuilder(
+          key: UniqueKey(),
           future: Firebase.initializeApp(),
           builder: (context, firebaseSnap) {
             if (firebaseSnap.connectionState == ConnectionState.done) {
@@ -51,8 +53,8 @@ class MyApp extends StatelessWidget {
                     return Provider<User>.value(
                       value: userSnap.data,
                       child: userSnap.data == null
-                          ? AuthenticationPage()
-                          : HomePage(),
+                          ? AuthenticationPage(key: UniqueKey(),)
+                          : HomePage(key: UniqueKey(),),
                     );
                   });
             }
