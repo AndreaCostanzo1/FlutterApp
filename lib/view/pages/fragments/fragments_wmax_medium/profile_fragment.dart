@@ -195,21 +195,26 @@ class __ProfileItemsState extends State<_ProfileItems> {
       stream: _authBLoC.remoteError,
       builder: (context, snapshot) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if(snapshot.data!=null&&snapshot.data==RemoteError.REQUIRES_RECENT_LOGIN){
-            showDialog(context: context,builder: (_)=>AlertDialog(
-              title: Text('Attention'),
-              content:
-              Text('This operation requires recent login. You will be redirected to login page'),
-              actions: <Widget>[
-                FlatButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _authBLoC.logOut();
-                  },
-                  child: Text('Ok'),
-                ),
-              ],
-            ));
+          if (snapshot.data != null &&
+              snapshot.data == RemoteError.REQUIRES_RECENT_LOGIN) {
+            showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: Text('Attention'),
+                content: Text(
+                    'This operation requires a recent login. You will be redirected to login page'),
+                actions: <Widget>[
+                  FlatButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _authBLoC.logOut();
+                    },
+                    child: Text('Ok'),
+                  ),
+                ],
+              ),
+              barrierDismissible: false,
+            );
           }
         });
         return Expanded(
@@ -249,11 +254,11 @@ class __ProfileItemsState extends State<_ProfileItems> {
                                 onPressed: () {
                                   Navigator.pop(context);
                                   _authBLoC.deleteAccount();
-                                } ,
+                                },
                                 child: Text('Yes'),
                               ),
                               FlatButton(
-                                onPressed: () =>Navigator.pop(context),
+                                onPressed: () => Navigator.pop(context),
                                 child: Text('No'),
                               ),
                             ],
@@ -272,7 +277,7 @@ class __ProfileItemsState extends State<_ProfileItems> {
   @override
   void initState() {
     super.initState();
-    _authBLoC=Authenticator();
+    _authBLoC = Authenticator();
   }
 
   @override
