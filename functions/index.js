@@ -24,7 +24,7 @@ exports.deleteUserUponDeleteAccount = functions.auth.user().onDelete(async (user
         console.log('Deleting user\'s '+user.uid+' reference from database...');
         const userRef =db.collection('users').doc(user.uid);
         await deleteAffinities(userRef,5);
-        await deleteFavourites(userRef,5);
+        await deleteFavourites(userRef,5,user.uid);
         await userRef.delete();
         console.log('User '+user.uid+' reference deleted successfully');
         await deleteUserReviews(user.uid,5);
@@ -44,13 +44,13 @@ async function deleteUserReviews(uid,batchSize) {
     });
 }
 
-async function deleteFavourites(userRef, batchSize) {
+async function deleteFavourites(userRef, batchSize,uid) {
     const collectionRef = userRef.collection('favourites');
     const query = collectionRef.orderBy('date').limit(batchSize);
 
     console.log('Starting to delete users favourites...');
     return new Promise((resolve, reject) => {
-        deleteQueryBatch(query, resolve).catch(reject);
+        deleteFavouritesChunk(query, resolve,uid).catch(reject);
     });
 }
 async function deleteAffinities(userRef, batchSize) {
@@ -59,7 +59,7 @@ async function deleteAffinities(userRef, batchSize) {
 
     console.log('Starting to delete users affinities...');
     return new Promise((resolve, reject) => {
-        deleteQueryBatch(query, resolve).catch(reject);
+        deleteQueryBatch(query,resolve).catch(reject);
     });
 }
 
@@ -85,6 +85,42 @@ async function deleteQueryBatch(query, resolve) {
     // exploding the stack.
     process.nextTick(() => {
         deleteQueryBatch(query, resolve);
+    });
+}
+
+async function deleteFavouritesChunk(query, resolve,uid) {
+    const snapshot = await query.get();
+
+    const batchSize = snapshot.size;
+    if (batchSize === 0) {
+        // When there are no documents left, we are done
+        console.log('Documents deleted successfully!');
+        resolve();
+        return;
+    }
+
+    //Update beer likes
+    snapshot.docs.forEach(async (doc)=>{
+        const beerRef= doc.data().beer;
+        await db.runTransaction(async(trans) => {
+            const beerDoc= await beerRef.get();
+            let likes =  beerDoc.data().likes-1;
+            trans.update(beerRef,{'likes':likes});
+        });
+        beerRef.collection('favourites').doc(uid).delete();
+    });
+
+    // Delete documents in a batch
+    const batch = db.batch();
+    snapshot.docs.forEach((doc) => {
+        batch.delete(doc.ref);
+    });
+    await batch.commit();
+
+    // Recurse on the next process tick, to avoid
+    // exploding the stack.
+    process.nextTick(() => {
+        deleteFavouritesChunk(query, resolve,uid);
     });
 }
 
