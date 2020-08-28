@@ -113,11 +113,9 @@ class Authenticator implements AuthenticatorInterface {
   }
 
   void _handleError(FirebaseAuthException error) async {
-    print(error.code);
     RemoteError remoteError = errors[error.code];
     if (remoteError == null) {
       remoteError = RemoteError.NOT_DEFINED;
-      print(remoteError);
       //todo insert firebase logger
     }
     _remoteError = remoteError;

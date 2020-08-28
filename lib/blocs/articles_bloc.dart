@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_beertastic/model/article.dart';
 
 class ArticlesBloc {
+
+  final FirebaseFirestore _firestore;
+
   final List<Article> _articles = List<Article>();
 
   final List<StreamSubscription> _subscriptions = List<StreamSubscription>();
@@ -14,13 +17,18 @@ class ArticlesBloc {
 
   Stream<List<Article>> get articlesController => _articlesController.stream;
 
-  void dispose() async {
+
+  ArticlesBloc(): this._firestore = FirebaseFirestore.instance;
+
+  ArticlesBloc.testConstructor(FirebaseFirestore firestore): this._firestore=firestore;
+
+  void dispose() {
     _subscriptions.forEach((subscription) => subscription.cancel());
     _articlesController?.close();
   }
 
   void retrieveArticles() {
-    _subscriptions.add(FirebaseFirestore.instance
+    _subscriptions.add(_firestore
         .collection('articles')
         .where('show', isEqualTo: true)
         .snapshots()
