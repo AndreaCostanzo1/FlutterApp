@@ -6,6 +6,9 @@ jobs:
     steps:
       - checkout
       - run: flutter doctor -v
-      - run: ls
+      - run:
+          name: show app tree
+          command: |
+            find ./lib -type d -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
       - run: flutter test 
 
