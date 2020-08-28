@@ -8,7 +8,7 @@ import 'package:mockito/mockito.dart';
 import 'utilities/firebase_auth_mock.dart';
 
 
-void main() {
+void runTests() {
   MockFirebaseAuth firebaseMockAuth= MockFirebaseAuth();
   String existingUserEmail = 'mario.rossi@gmail.com';
   String nonExistingUserEmail = 'andrea@gmail.com';

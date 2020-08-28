@@ -7,7 +7,7 @@ import 'package:mockito/mockito.dart';
 
 import 'utilities/firebase_firestore_mock.dart';
 
-void main(){
+void runTests(){
 
   String articleMockID= '113213131231231asdasf';
   Map<String,dynamic> articleMock = {

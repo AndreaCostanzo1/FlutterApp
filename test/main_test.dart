@@ -7,9 +7,12 @@
 
 //import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'bloc/authenticator_test.dart' as authenticator_test;
+import 'bloc/articles_bloc_test.dart' as articles_test;
 import 'package:flutter_beertastic/main.dart';
 
 void main() {
-  
+  test('Start all tests', (){});
+  authenticator_test.runTests();
+  articles_test.runTests();
 }
