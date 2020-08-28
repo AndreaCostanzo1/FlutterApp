@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_beertastic/blocs/authenticator.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -8,7 +7,7 @@ import 'package:mockito/mockito.dart';
 import 'utilities/firebase_auth_mock.dart';
 
 
-void runTests() {
+void main() {
   MockFirebaseAuth firebaseMockAuth= MockFirebaseAuth();
   String existingUserEmail = 'mario.rossi@gmail.com';
   String nonExistingUserEmail = 'andrea@gmail.com';

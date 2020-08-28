@@ -13,6 +13,4 @@ import 'package:flutter_beertastic/main.dart';
 
 void main() {
   test('Start all tests', (){});
-  authenticator_test.runTests();
-  articles_test.runTests();
 }
