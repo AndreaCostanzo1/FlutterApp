@@ -82,6 +82,7 @@ class LikesBloc {
     _subscriptions.add(queryStream.listen((query) {
       int i = 0;
       _likedBeers.clear();
+      if(query.docs.length==0) _likedBeerListController.sink.add(_likedBeers);
       query.docs.forEach((docSnapshot) =>
           (docSnapshot.data()['beer'] as DocumentReference)
               .get()
