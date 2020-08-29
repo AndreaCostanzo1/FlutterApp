@@ -4,6 +4,7 @@ import 'package:flutter_beertastic/blocs/authenticator.dart';
 import 'package:flutter_beertastic/blocs/user_bloc.dart';
 import 'package:flutter_beertastic/model/user.dart';
 import 'package:flutter_beertastic/view/components/buttons/custom_profile_list_item.dart';
+import 'package:flutter_beertastic/view/pages/reset_page.dart';
 import 'package:flutter_beertastic/view/pages/styles/wmax_medium/profile_fragment_style.dart';
 import 'package:flutter_beertastic/view/pages/settings_page.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -224,12 +225,22 @@ class __ProfileItemsState extends State<_ProfileItems> {
               children: <Widget>[
                 ProfileListItem(
                   icon: LineAwesomeIcons.cog,
-                  text: 'Settings',
+                  text: 'Account information',
                   color: Theme.of(context).backgroundColor,
                   onTap: () => Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => SettingsPage(),
+                      )),
+                ),
+                ProfileListItem(
+                  icon: LineAwesomeIcons.user_shield,
+                  text: 'Update password',
+                  color: Theme.of(context).backgroundColor,
+                  onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ResetPage(),
                       )),
                 ),
                 ProfileListItem(
