@@ -4,7 +4,7 @@ import 'package:flutter_beertastic/blocs/articles_bloc.dart';
 import 'package:flutter_beertastic/model/article.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'utilities/firebase_firestore_mock.dart';
+import 'mocks/firebase_firestore_mock.dart';
 
 void main(){
 

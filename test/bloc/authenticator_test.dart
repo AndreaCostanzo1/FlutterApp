@@ -4,7 +4,7 @@ import 'package:flutter_beertastic/blocs/authenticator.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import 'utilities/firebase_auth_mock.dart';
+import 'mocks/firebase_auth_mock.dart';
 
 
 void main() {

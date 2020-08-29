@@ -11,15 +11,15 @@ class GeoHashComputer {
   static const BASE32_CODES = '0123456789bcdefghjkmnpqrstuvwxyz';
 
   ///this constants don't belong to the original code
-  static const double PRECISION_KM_9= 0.0047;
-  static const double PRECISION_KM_8= 0.0382;
-  static const double PRECISION_KM_7= 0.153;
-  static const double PRECISION_KM_6= 1.22;
-  static const double PRECISION_KM_5= 4.89;
-  static const double PRECISION_KM_4= 39.1;
-  static const double PRECISION_KM_3= 156;
-  static const double PRECISION_KM_2= 1250;
-  static const double PRECISION_KM_1= 5000;
+  static const double PRECISION_KM_9= 0.0047; // 9	≤ 4.77m	×	4.77m
+  static const double PRECISION_KM_8= 0.0382; // 8	≤ 38.2m	×	19.1m
+  static const double PRECISION_KM_7= 0.153; // 7	≤ 153m	×	153m
+  static const double PRECISION_KM_6= 1.22; // 6	≤ 1.22km	×	0.61km
+  static const double PRECISION_KM_5= 4.89; // 5	≤ 4.89km	×	4.89km
+  static const double PRECISION_KM_4= 39.1; // 4	≤ 39.1km	×	19.5km
+  static const double PRECISION_KM_3= 156; // 3	≤ 156km	×	156km
+  static const double PRECISION_KM_2= 1250; // 2	≤ 1,250km	×	625km
+  static const double PRECISION_KM_1= 5000; // 1	≤ 5,000km	×	5,000km
 
   Map<String, int> base32CodesDic = new Map();
 
