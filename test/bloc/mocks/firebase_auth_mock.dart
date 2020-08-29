@@ -1,10 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mockito/mockito.dart';
 
-class MockFirebaseAuth extends Mock implements FirebaseAuth {
+class FirebaseAuthMock extends Mock implements FirebaseAuth {
   final User _currentUser;
 
-  MockFirebaseAuth(): this._currentUser=MockUser('ahdjandjabdauwqe', 'andrea@gmail.com');
+  FirebaseAuthMock(): this._currentUser=MockUser('ahdjandjabdauwqe', 'andrea@gmail.com');
 
   @override
   User get currentUser => _currentUser;

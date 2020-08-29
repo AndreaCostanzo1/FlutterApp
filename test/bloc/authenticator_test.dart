@@ -8,7 +8,7 @@ import 'mocks/firebase_auth_mock.dart';
 
 
 void main() {
-  MockFirebaseAuth firebaseMockAuth= MockFirebaseAuth();
+  FirebaseAuthMock firebaseMockAuth= FirebaseAuthMock();
   String existingUserEmail = 'mario.rossi@gmail.com';
   String nonExistingUserEmail = 'andrea@gmail.com';
   String validButWrongPassword = '123445';

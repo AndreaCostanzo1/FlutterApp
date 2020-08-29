@@ -7,10 +7,16 @@ class FirebaseFirestoreMock extends Mock implements FirebaseFirestore{
 
   FirebaseFirestoreMock.fromResult(this._result);
 
+
+  set result(value) {
+    _result = value;
+  }
+
   @override
   CollectionReference collection(String collectionPath) {
     return CollectionReferenceMock(_result);
   }
+
 }
 
 class DocumentReferenceMock extends Mock implements DocumentReference{
@@ -19,13 +25,18 @@ class DocumentReferenceMock extends Mock implements DocumentReference{
   DocumentReferenceMock(this._result);
 
   @override
+  CollectionReference collection(String collectionPath) {
+    return CollectionReferenceMock(_result);
+  }
+
+  @override
   Stream<DocumentSnapshot> snapshots({bool includeMetadataChanges = false}) {
-    return Stream.value(_result);
+    return Stream.value(DocumentSnapshotMock(_result));
   }
 
   @override
   Future<DocumentSnapshot> get([GetOptions options]) {
-    return Future(_result);
+    return Future.value(DocumentSnapshotMock(_result));
   }
 }
 
@@ -33,6 +44,26 @@ class QueryMock extends Mock implements Query{
   var _result;
 
   QueryMock(this._result);
+
+  @override
+  Query where(field, {isEqualTo, isLessThan, isLessThanOrEqualTo, isGreaterThan, isGreaterThanOrEqualTo, arrayContains, List arrayContainsAny, List whereIn, bool isNull}) {
+    return this;
+  }
+
+  @override
+  Query orderBy(field, {bool descending = false}) {
+    return this;
+  }
+
+  @override
+  Query limit(int limit) {
+    return this;
+  }
+
+  @override
+  Query startAfterDocument(DocumentSnapshot documentSnapshot) {
+    return this;
+  }
 
   @override
   Stream<QuerySnapshot> snapshots({bool includeMetadataChanges = false}) {
@@ -45,7 +76,11 @@ class QueryMock extends Mock implements Query{
 
   @override
   Future<QuerySnapshot> get([GetOptions options]) {
-    return Future(_result);
+    List<QueryDocumentSnapshot> snapshots = List();
+    for(int i=0; i<_result.length; i++){
+      snapshots.add(QueryDocumentSnapshotMock(_result[i]));
+    }
+    return Future.value(QuerySnapshotMock(snapshots));
   }
 
 }
