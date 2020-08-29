@@ -9,6 +9,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'bloc/authenticator_test.dart' as authenticator_test;
 import 'bloc/articles_bloc_test.dart' as articles_test;
+import 'bloc/beer_bloc_test.dart' as beer_test;
 import 'package:flutter_beertastic/main.dart';
 
 void main() {
