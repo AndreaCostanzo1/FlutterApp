@@ -251,7 +251,7 @@ class PostGallery extends StatelessWidget {
     List<List<Beer>> groupsOfBeers = List();
     if (snapshot.data != null) {
       for (int i = 0; i < (snapshot.data.length / 9).truncate(); i++) {
-        groupsOfBeers.add(snapshot.data.getRange(i, i + 9).toList());
+        groupsOfBeers.add(snapshot.data.getRange(9*i, 9*(i+1)).toList());
       }
       //Return a block of beers for each group, otherwise a white container to fill the space below
       return groupsOfBeers.length > 0
