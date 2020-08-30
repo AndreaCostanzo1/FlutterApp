@@ -53,7 +53,6 @@ class EventBloc {
   }
 
   Future<void> retrieveEventsInCity(City city) async {
-    _noMoreEventsAvailable = false;
     DocumentReference cityRef =
         _firestore.collection('cities').doc(city.id);
     QuerySnapshot _eventsQuery = await cityRef
@@ -62,9 +61,8 @@ class EventBloc {
         .orderBy('date')
         .limit(queryLimit)
         .get();
+    List<Event> events = List();
     if (_eventsQuery.docs.length > 0) {
-      _lastDocument = _eventsQuery.docs.last;
-      List<Event> events = List();
       _eventsQuery.docs.forEach((eventSnap) {
         Map<String, dynamic> eventData = Map.from(eventSnap.data());
         GeoPoint geoPoint = eventSnap.data()['coordinates'];
@@ -76,17 +74,13 @@ class EventBloc {
         });
         events.add(Event.fromSnapshot(eventData));
       });
-
-      _downloadedEvents = events.length;
-      await _lock.synchronized(() {
-        _events.clear();
-        _events.addAll(events);
-      });
-    } else {
-      _downloadedEvents = 0;
     }
     await _lock.synchronized(() {
-      if(_downloadedEvents<queryLimit) _noMoreEventsAvailable =true;
+      _events.clear();
+      _events.addAll(events);
+      _downloadedEvents=events.length;
+      if(_eventsQuery.docs.length>0) _lastDocument = _eventsQuery.docs.last;
+      _noMoreEventsAvailable=_eventsQuery.docs.length<queryLimit;
       if(!_eventsStreamController.isClosed) _eventsStreamController.sink.add(_events);
     });
   }
@@ -121,9 +115,8 @@ class EventBloc {
           .startAfterDocument(lastDoc)
           .limit(queryLimit)
           .get();
+      List<Event> events = List();
       if (_eventsQuery.docs.length > 0) {
-        _lastDocument = _eventsQuery.docs.last;
-        List<Event> events = List();
         _eventsQuery.docs.forEach((eventSnap) {
           Map<String, dynamic> eventData = Map.from(eventSnap.data());
           GeoPoint geoPoint = eventSnap.data()['coordinates'];
@@ -135,10 +128,11 @@ class EventBloc {
           });
           events.add(Event.fromSnapshot(eventData));
         });
-        _downloadedEvents = _downloadedEvents + events.length;
-        await _lock.synchronized(() => _events.addAll(events));
       }
       await _lock.synchronized(() {
+        _events.addAll(events);
+        _downloadedEvents = _downloadedEvents + events.length;
+        if(_eventsQuery.docs.length>0) _lastDocument = _eventsQuery.docs.last;
         if(_eventsQuery.docs.length<queryLimit)_noMoreEventsAvailable = true;
         if(!_eventsStreamController.isClosed) _eventsStreamController.sink.add(_events);
       });
