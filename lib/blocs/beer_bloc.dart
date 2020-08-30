@@ -29,7 +29,7 @@ class BeerBloc {
 
   final FirebaseAuth _firebaseAuth;
 
-  static const int _queryLimit = 18;
+  static const int _queryLimit = 9;
 
   bool _noMoreBeerAvailable;
 
@@ -109,7 +109,14 @@ class BeerBloc {
   }
 
   void retrieveMoreSuggestedBeers() async {
-    if (!_noMoreBeerAvailable) {
+    DocumentSnapshot lastDoc;
+    await _lock.synchronized(() {
+      if (_lastDocument != null) {
+        lastDoc = _lastDocument;
+        _lastDocument = null;
+      }
+    });
+    if (!_noMoreBeerAvailable && lastDoc != null) {
       User user = _firebaseAuth.currentUser;
       QuerySnapshot query = await _firestore
           .collection('users')
@@ -122,24 +129,22 @@ class BeerBloc {
       List<DocumentReference> affinities = List();
       query.docs
           .forEach((element) => affinities.add(element.data()['cluster_code']));
-      if (_lastDocument != null) {
-        _firestore
-            .collection('beers')
-            .where('cluster_code', arrayContainsAny: affinities)
-            .orderBy('id')
-            .limit(_queryLimit)
-            .startAfterDocument(_lastDocument)
-            .get()
-            .then((query) {
-          if (query.docs.length > 0) {
-            _lastDocument = query.docs.last;
-          } else {
-            _lastDocument = null;
-          }
-          if (query.docs.length < _queryLimit) _noMoreBeerAvailable = true;
-          _updateBeersSinkWithoutClear(_suggestedBeersController, query.docs);
-        });
-      }
+      _firestore
+          .collection('beers')
+          .where('cluster_code', arrayContainsAny: affinities)
+          .orderBy('id')
+          .limit(_queryLimit)
+          .startAfterDocument(_lastDocument)
+          .get()
+          .then((query) {
+        if (query.docs.length > 0) {
+          _lastDocument = query.docs.last;
+        } else {
+          _lastDocument = null;
+        }
+        if (query.docs.length < _queryLimit) _noMoreBeerAvailable = true;
+        _updateBeersSinkWithoutClear(_suggestedBeersController, query.docs);
+      });
     }
   }
 
@@ -182,11 +187,7 @@ class BeerBloc {
   }
 
   void retrieveSingleBeer(String beerID) {
-    _firestore
-        .collection('beers')
-        .doc(beerID)
-        .get()
-        .then((snapshot) async {
+    _firestore.collection('beers').doc(beerID).get().then((snapshot) async {
       if (snapshot.data() != null) {
         await _lock.synchronized(() {
           if (!_singleBeerController.isClosed)
@@ -204,11 +205,9 @@ class BeerBloc {
   }
 
   void updateSearches(String id) async {
-    DocumentReference reference =
-        _firestore.collection('beers').doc(id);
+    DocumentReference reference = _firestore.collection('beers').doc(id);
     User user = _firebaseAuth.currentUser;
-    DocumentReference userRef =
-        _firestore.collection('users').doc(user.uid);
+    DocumentReference userRef = _firestore.collection('users').doc(user.uid);
     QuerySnapshot query = await reference
         .collection('searches')
         .where('user', isEqualTo: userRef)
@@ -229,11 +228,9 @@ class BeerBloc {
   }
 
   void addToFavourites(Beer beer) async {
-    DocumentReference reference =
-        _firestore.collection('beers').doc(beer.id);
+    DocumentReference reference = _firestore.collection('beers').doc(beer.id);
     User user = _firebaseAuth.currentUser;
-    DocumentReference userRef =
-        _firestore.collection('users').doc(user.uid);
+    DocumentReference userRef = _firestore.collection('users').doc(user.uid);
     await _lock.synchronized(() async {
       if (!_singleBeerController.isClosed) _singleBeerController.sink.add(null);
       await _firestore.runTransaction((transaction) async {
@@ -252,8 +249,7 @@ class BeerBloc {
   }
 
   void removeFromFavourites(Beer beer) async {
-    DocumentReference reference =
-        _firestore.collection('beers').doc(beer.id);
+    DocumentReference reference = _firestore.collection('beers').doc(beer.id);
     User user = _firebaseAuth.currentUser;
     await _lock.synchronized(() async {
       if (!_singleBeerController.isClosed) _singleBeerController.sink.add(null);
