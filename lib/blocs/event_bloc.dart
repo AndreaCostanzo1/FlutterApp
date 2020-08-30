@@ -29,7 +29,7 @@ class EventBloc {
 
   final FirebaseFirestore _firestore;
 
-  static const queryLimit = 10;
+  static const queryLimit = 2;
 
   int _downloadedEvents;
 
@@ -76,6 +76,7 @@ class EventBloc {
         });
         events.add(Event.fromSnapshot(eventData));
       });
+
       _downloadedEvents = events.length;
       await _lock.synchronized(() {
         _events.clear();
@@ -103,14 +104,21 @@ class EventBloc {
   }
 
   void retrieveMoreEventsInCity(City city) async {
-    if (!_noMoreEventsAvailable&&_lastDocument!=null) {
+    DocumentSnapshot lastDoc;
+    await _lock.synchronized(() {
+      if(_lastDocument!=null){
+        lastDoc=_lastDocument;
+        _lastDocument=null;
+      }
+    });
+    if (!_noMoreEventsAvailable&&lastDoc!=null) {
       DocumentReference cityRef =
           _firestore.collection('cities').doc(city.id);
       QuerySnapshot _eventsQuery = await cityRef
           .collection('events')
           .where('date', isGreaterThanOrEqualTo: DateTime.now())
           .orderBy('date')
-          .startAfterDocument(_lastDocument)
+          .startAfterDocument(lastDoc)
           .limit(queryLimit)
           .get();
       if (_eventsQuery.docs.length > 0) {

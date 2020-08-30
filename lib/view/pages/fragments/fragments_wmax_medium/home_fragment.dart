@@ -25,6 +25,7 @@ class _HomeFragmentState extends State<HomeFragment> {
   EventBloc _eventBloc;
   double _scrollSize;
   MyUser _user;
+  bool _firstLoad;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,10 @@ class _HomeFragmentState extends State<HomeFragment> {
         builder: (context, userSnap) {
           if (userSnap.data != null) {
             _user = userSnap.data;
-            _eventBloc.retrieveEventsInCity(userSnap.data.city);
+            if(_firstLoad) {
+              _eventBloc.retrieveEventsInCity(userSnap.data.city);
+              _firstLoad=false;
+            }
           }
           return StreamBuilder<List<Event>>(
               stream: _eventBloc.eventsStream,
@@ -132,6 +136,7 @@ class _HomeFragmentState extends State<HomeFragment> {
     _userBloc.getAuthenticatedUserData();
     _eventBloc = EventBloc();
     _scrollSize = 0;
+    _firstLoad=true;
   }
 
   @override
