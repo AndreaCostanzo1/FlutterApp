@@ -26,6 +26,7 @@ class _HomeFragmentState extends State<HomeFragment> {
   double _scrollSize;
   MyUser _user;
   bool _firstLoad;
+  bool _loadingNewEvents;
 
   @override
   Widget build(BuildContext context) {
@@ -34,9 +35,9 @@ class _HomeFragmentState extends State<HomeFragment> {
         builder: (context, userSnap) {
           if (userSnap.data != null) {
             _user = userSnap.data;
-            if(_firstLoad) {
+            if (_firstLoad) {
               _eventBloc.retrieveEventsInCity(userSnap.data.city);
-              _firstLoad=false;
+              _firstLoad = false;
             }
           }
           return StreamBuilder<List<Event>>(
@@ -118,6 +119,19 @@ class _HomeFragmentState extends State<HomeFragment> {
                                           ),
                                         )
                                       : Container(),
+                                  _loadingNewEvents
+                                      ? Column(
+                                          children: [
+                                            Container(
+                                                margin: EdgeInsets.symmetric(
+                                                    horizontal: 10, vertical: 30),
+                                                width: 30,
+                                                height: 30,
+                                                child:
+                                                CircularProgressIndicator())
+                                          ],
+                                        )
+                                      : Container(),
                                   SizedBox(height: 24),
                                 ],
                               ),
@@ -136,7 +150,8 @@ class _HomeFragmentState extends State<HomeFragment> {
     _userBloc.getAuthenticatedUserData();
     _eventBloc = EventBloc();
     _scrollSize = 0;
-    _firstLoad=true;
+    _firstLoad = true;
+    _loadingNewEvents = false;
   }
 
   @override
@@ -157,8 +172,9 @@ class _HomeFragmentState extends State<HomeFragment> {
     int pixels = notification.metrics.pixels.truncate();
     if (notification.metrics.axis == Axis.vertical) {
       _checkBoxHeightUpdate(pixels);
-      if(!_eventBloc.noMoreEventsAvailable&&notification.metrics.pixels==notification.metrics.maxScrollExtent){
-        _eventBloc.retrieveMoreEventsInCity(_user.city);
+      if (!_eventBloc.noMoreEventsAvailable &&
+          notification.metrics.pixels == notification.metrics.maxScrollExtent) {
+        _loadOtherEvents();
       }
     }
   }
@@ -167,9 +183,15 @@ class _HomeFragmentState extends State<HomeFragment> {
     double scrollSize = -1;
     if (pixels <= 0 && pixels >= -6 && pixels.toDouble() != _scrollSize)
       scrollSize = 0;
-    else if (pixels <= -7 && pixels >= -50 && pixels.toDouble() != _scrollSize && pixels%4==0)
+    else if (pixels <= -7 &&
+        pixels >= -50 &&
+        pixels.toDouble() != _scrollSize &&
+        pixels % 4 == 0)
       scrollSize = -pixels.toDouble();
-    else if (pixels <= -50 && pixels >= -80 && pixels.toDouble() != _scrollSize&& pixels%5==0)
+    else if (pixels <= -50 &&
+        pixels >= -80 &&
+        pixels.toDouble() != _scrollSize &&
+        pixels % 5 == 0)
       scrollSize = -pixels.toDouble() + 10;
     else if (pixels <= -80 && pixels >= -85 && pixels.toDouble() != _scrollSize)
       scrollSize = -pixels.toDouble() + 20;
@@ -181,6 +203,14 @@ class _HomeFragmentState extends State<HomeFragment> {
           .addPostFrameCallback((timeStamp) => setState(() {
                 _scrollSize = scrollSize;
               }));
+  }
+
+  void _loadOtherEvents() async {
+    setState(() => _loadingNewEvents = true);
+    Future<List<Event>> newEvents = _eventBloc.eventsStream.first;
+    _eventBloc.retrieveMoreEventsInCity(_user.city);
+    await newEvents;
+    setState(() => _loadingNewEvents = false);
   }
 }
 
