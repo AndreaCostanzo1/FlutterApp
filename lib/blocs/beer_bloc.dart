@@ -21,7 +21,7 @@ class BeerBloc {
   final StreamController<Beer> _singleBeerController =
       StreamController.broadcast();
 
-  final Lock _lock = Lock();
+  final Lock _lock = Lock(reentrant: true);
 
   DocumentSnapshot _lastDocument;
 
@@ -79,7 +79,6 @@ class BeerBloc {
   }
 
   void retrieveSuggestedBeers() async {
-    _noMoreBeerAvailable = false;
     if (_suggestedBeersController.isClosed) return;
     User user = _firebaseAuth.currentUser;
     QuerySnapshot query = await _firestore
@@ -99,12 +98,14 @@ class BeerBloc {
         .orderBy('id')
         .limit(_queryLimit)
         .get()
-        .then((query) {
-      if (query.docs.length > 0) {
-        _lastDocument = query.docs.last;
-      }
-      if (query.docs.length < _queryLimit) _noMoreBeerAvailable = true;
-      _updateBeersSink(_suggestedBeersController, query.docs);
+        .then((query) async {
+      await _lock.synchronized((){
+        if (query.docs.length > 0) {
+          _lastDocument = query.docs.last;
+        }
+        _noMoreBeerAvailable = query.docs.length < _queryLimit;
+        _updateBeersSink(_suggestedBeersController, query.docs);
+      });
     });
   }
 
@@ -134,16 +135,14 @@ class BeerBloc {
           .where('cluster_code', arrayContainsAny: affinities)
           .orderBy('id')
           .limit(_queryLimit)
-          .startAfterDocument(_lastDocument)
+          .startAfterDocument(lastDoc)
           .get()
-          .then((query) {
-        if (query.docs.length > 0) {
-          _lastDocument = query.docs.last;
-        } else {
-          _lastDocument = null;
-        }
-        if (query.docs.length < _queryLimit) _noMoreBeerAvailable = true;
-        _updateBeersSinkWithoutClear(_suggestedBeersController, query.docs);
+          .then((query) async {
+        await _lock.synchronized(() {
+          if(query.docs.length > 0) _lastDocument = query.docs.last;
+          if (query.docs.length < _queryLimit) _noMoreBeerAvailable = true;
+          _updateBeersSinkWithoutClear(_suggestedBeersController, query.docs);
+        });
       });
     }
   }
