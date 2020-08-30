@@ -208,7 +208,6 @@ class __RatingsState extends State<_Ratings> {
                       StreamBuilder<bool>(
                         stream: _reviewBloc.availableDocumentsStream,
                         builder: (context, snapshot) {
-                          print('executed');
                           return snapshot.data == null || snapshot.data
                               ? Container(
                                   height: 1,

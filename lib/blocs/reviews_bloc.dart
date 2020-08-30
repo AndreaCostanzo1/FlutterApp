@@ -99,6 +99,7 @@ class ReviewsBloc {
             pid == localPid) {
           _lastDocument = query.docs.last;
           _reviews.clear();
+          localReviews.sort((review1,review2)=>review1.date.isAfter(review2.date)?1:-1);
           _reviews.addAll(localReviews);
           _reviewStreamController.sink.add(_reviews);
           if (i < limit) _availableDocumentsController.sink.add(false);
@@ -212,6 +213,7 @@ class ReviewsBloc {
             !_reviewStreamController.isClosed &&
             pid == localPid) {
           _lastDocument = query.docs.last;
+          localReviews.sort((review1,review2)=>review1.date.isAfter(review2.date)?1:-1);
           _reviews.addAll(localReviews);
           _reviewStreamController.sink.add(_reviews);
           if (i < limit) _availableDocumentsController.sink.add(false);
@@ -226,6 +228,8 @@ class ReviewsBloc {
     Map<String, dynamic> reviewCompleteData = Map();
     DocumentSnapshot userSnapshot = await userRef.get();
     reviewCompleteData.addAll(reviewSnap.data());
+    Timestamp timestamp = reviewSnap.data()['date'];
+    reviewCompleteData.update('date', (value) => timestamp.toDate());
     reviewCompleteData.update(
         'user', (value) => MyUser.fromSnapshot(userSnapshot.data()));
     return reviewCompleteData;
