@@ -8,12 +8,17 @@ import 'package:flutter_beertastic/model/event.dart';
 import 'package:synchronized/synchronized.dart';
 
 class EventBloc {
-  EventBloc() {
+  EventBloc() : this._firestore=FirebaseFirestore.instance{
     _downloadedEvents = 0;
     _noMoreEventsAvailable = false;
   }
 
-  StreamController<List<Event>> _eventsStreamController = StreamController();
+  EventBloc.testConstructor(FirebaseFirestore firestore) : this._firestore=firestore{
+    _downloadedEvents = 0;
+    _noMoreEventsAvailable = false;
+  }
+
+  StreamController<List<Event>> _eventsStreamController = StreamController.broadcast();
 
   StreamController<Uint8List> _eventImageController =
       StreamController.broadcast();
@@ -21,6 +26,10 @@ class EventBloc {
   List<Event> _events = List();
 
   DocumentSnapshot _lastDocument;
+
+  final FirebaseFirestore _firestore;
+
+  static const queryLimit = 10;
 
   int _downloadedEvents;
 
@@ -46,12 +55,12 @@ class EventBloc {
   Future<void> retrieveEventsInCity(City city) async {
     _noMoreEventsAvailable = false;
     DocumentReference cityRef =
-        FirebaseFirestore.instance.collection('cities').doc(city.id);
+        _firestore.collection('cities').doc(city.id);
     QuerySnapshot _eventsQuery = await cityRef
         .collection('events')
         .where('date', isGreaterThanOrEqualTo: DateTime.now())
         .orderBy('date')
-        .limit(10)
+        .limit(queryLimit)
         .get();
     if (_eventsQuery.docs.length > 0) {
       _lastDocument = _eventsQuery.docs.last;
@@ -76,6 +85,7 @@ class EventBloc {
       _downloadedEvents = 0;
     }
     await _lock.synchronized(() {
+      if(_downloadedEvents<queryLimit) _noMoreEventsAvailable =true;
       if(!_eventsStreamController.isClosed) _eventsStreamController.sink.add(_events);
     });
   }
@@ -93,15 +103,15 @@ class EventBloc {
   }
 
   void retrieveMoreEventsInCity(City city) async {
-    if (_lastDocument != null) {
+    if (!_noMoreEventsAvailable&&_lastDocument!=null) {
       DocumentReference cityRef =
-          FirebaseFirestore.instance.collection('cities').doc(city.id);
+          _firestore.collection('cities').doc(city.id);
       QuerySnapshot _eventsQuery = await cityRef
           .collection('events')
           .where('date', isGreaterThanOrEqualTo: DateTime.now())
           .orderBy('date')
           .startAfterDocument(_lastDocument)
-          .limit(10)
+          .limit(queryLimit)
           .get();
       if (_eventsQuery.docs.length > 0) {
         _lastDocument = _eventsQuery.docs.last;
@@ -119,10 +129,9 @@ class EventBloc {
         });
         _downloadedEvents = _downloadedEvents + events.length;
         await _lock.synchronized(() => _events.addAll(events));
-      } else {
-        _noMoreEventsAvailable = true;
       }
       await _lock.synchronized(() {
+        if(_eventsQuery.docs.length<queryLimit)_noMoreEventsAvailable = true;
         if(!_eventsStreamController.isClosed) _eventsStreamController.sink.add(_events);
       });
     }
