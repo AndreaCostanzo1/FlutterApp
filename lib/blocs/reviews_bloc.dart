@@ -99,7 +99,7 @@ class ReviewsBloc {
             pid == localPid) {
           _lastDocument = query.docs.last;
           _reviews.clear();
-          localReviews.sort((review1,review2)=>review1.date.isAfter(review2.date)?1:-1);
+          localReviews.sort((review1,review2)=>review1.date.isBefore(review2.date)?1:-1);
           _reviews.addAll(localReviews);
           _reviewStreamController.sink.add(_reviews);
           if (i < limit) _availableDocumentsController.sink.add(false);
@@ -213,7 +213,7 @@ class ReviewsBloc {
             !_reviewStreamController.isClosed &&
             pid == localPid) {
           _lastDocument = query.docs.last;
-          localReviews.sort((review1,review2)=>review1.date.isAfter(review2.date)?1:-1);
+          localReviews.sort((review1,review2)=>review1.date.isBefore(review2.date)?1:-1);
           _reviews.addAll(localReviews);
           _reviewStreamController.sink.add(_reviews);
           if (i < limit) _availableDocumentsController.sink.add(false);
