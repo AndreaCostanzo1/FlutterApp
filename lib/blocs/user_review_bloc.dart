@@ -75,6 +75,8 @@ class UserReviewBloc {
       reviewCompleteData.addAll(reviewSnap.data());
       reviewCompleteData.update(
           'user', (value) => MyUser.fromSnapshot(userSnap.data()));
+      Timestamp timestamp = reviewSnap.data()['date'];
+      reviewCompleteData.update('date', (value) => timestamp.toDate());
       _userReviewStreamController.sink
           .add(Review.fromSnapshot(reviewCompleteData));
     });
