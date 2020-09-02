@@ -7,6 +7,7 @@ import 'package:flutter_beertastic/blocs/map_bloc.dart';
 import 'package:flutter_beertastic/blocs/user_bloc.dart';
 import 'package:flutter_beertastic/model/city.dart';
 import 'package:flutter_beertastic/model/user.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SettingsPage extends StatelessWidget {
   SettingsPage({Key key}) : super(key: key);
@@ -124,21 +125,32 @@ class __TopPageState extends State<_TopPage> {
                                                           ? PopupMenuItem(
                                                               key: UniqueKey(),
                                                               enabled: false,
-                                                              child: Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .spaceBetween,
-                                                                children: <
-                                                                    Widget>[
-                                                                  Text(
-                                                                      'Close to refresh'),
-                                                                  Icon(
-                                                                    Icons
-                                                                        .cloud_download,
-                                                                    color: Colors
-                                                                        .black,
-                                                                  )
-                                                                ],
+                                                              child: FutureBuilder<bool>(
+                                                                future: Permission.location.isGranted,
+                                                                builder: (context, snapshot) {
+                                                                  return Row(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceBetween,
+                                                                    children: <
+                                                                        Widget>[
+                                                                      snapshot.data!=null&&!snapshot.data? Text(
+                                                                          'Permissions required'): Text(
+                                                                          'Close to refresh'),
+                                                                      snapshot.data!=null&&!snapshot.data?Icon(
+                                                                        Icons
+                                                                            .close,
+                                                                        color: Colors
+                                                                            .black,
+                                                                      ):Icon(
+                                                                        Icons
+                                                                            .cloud_download,
+                                                                        color: Colors
+                                                                            .black,
+                                                                      ),
+                                                                    ],
+                                                                  );
+                                                                }
                                                               ),
                                                             )
                                                           : PopupMenuItem(
