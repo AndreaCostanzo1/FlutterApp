@@ -21,7 +21,7 @@ class DetailsPage extends StatefulWidget {
 }
 
 class _DetailsPageState extends State<DetailsPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin<DetailsPage> {
   BeerBloc _beerBloc;
   LikesBloc _likesBloc;
   bool _showStats;

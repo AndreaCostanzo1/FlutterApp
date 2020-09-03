@@ -14,7 +14,7 @@ description: Beertastic application
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.2.2 <3.0.0"
+  sdk: ">=2.9.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -61,6 +61,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mockito: ^4.1.1
+  cloud_firestore_mocks:
+    git:
+      url: https://github.com/sensuikan1973/cloud_firestore_mocks.git
+      ref: support_cloud_firesote_0.14.0
 
   gen_lang: 0.1.0
 # The following section is specific to Flutter.

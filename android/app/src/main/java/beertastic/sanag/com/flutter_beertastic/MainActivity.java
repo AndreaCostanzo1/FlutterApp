@@ -10,9 +10,12 @@ import com.google.firebase.storage.FirebaseStorage;
 import java.util.function.BiFunction;
 
 import beertastic.sanag.com.flutter_beertastic.view.ScannerActivity;
-import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
+
+import androidx.annotation.NonNull;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.FlutterEngine;
 
 public class MainActivity extends FlutterActivity {
 
@@ -29,18 +32,16 @@ public class MainActivity extends FlutterActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getComponents();
-        setUpResultsHandlers();
-        new MethodChannel(getFlutterView(), CAMERA_X_CHANNEL).setMethodCallHandler((call, result) -> {
+    public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+        GeneratedPluginRegistrant.registerWith(flutterEngine);
+        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CAMERA_X_CHANNEL).setMethodCallHandler((call, result) -> {
             if (call.method.equals(SCAN_METHOD)) {
                 Intent intent = new Intent(this, ScannerActivity.class);
                 this.result = result;
                 startActivityForResult(intent, qrRequestCode);
             }
         });
-        new MethodChannel(getFlutterView(), IMAGE_PICKER_CHANNEL).setMethodCallHandler((call, result) -> {
+        new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), IMAGE_PICKER_CHANNEL).setMethodCallHandler((call, result) -> {
             if (call.method.equals(PICK_STORAGE)) {
                 Intent intent = new Intent();
                 intent.setType("image/*");
@@ -51,7 +52,6 @@ public class MainActivity extends FlutterActivity {
                 startActivityForResult(intent, storageRequestCode);
             }
         });
-        GeneratedPluginRegistrant.registerWith(this);
     }
 
 
