@@ -88,7 +88,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                                   _TopPage(),
                                   SizedBox(height: 10),
                                   _TitleBar(
-                                    'This week in ' + userSnap.data.city.name,
+                                    'Next events in ' + userSnap.data.city.name,
                                     TextStyle(
                                         fontSize: 25,
                                         fontFamily: 'Montserrat Bold',

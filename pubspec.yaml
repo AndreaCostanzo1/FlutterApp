@@ -36,7 +36,7 @@ dependencies:
   rxdart: ^0.24.1
   async: ^2.4.1
 
-  url_launcher: ^5.5.0
+  url_launcher: ^5.5.2
 
   provider: ^4.3.2
 
