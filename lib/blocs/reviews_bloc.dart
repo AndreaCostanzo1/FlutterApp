@@ -48,7 +48,7 @@ class ReviewsBloc {
       _availableDocumentsController.sink.add(true);
       localPid = ++pid;
     });
-    QuerySnapshot query = await FirebaseFirestore.instance
+    QuerySnapshot query = await _firestore
         .collection('beers')
         .doc(beerId)
         .collection('reviews')
