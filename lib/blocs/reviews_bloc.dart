@@ -13,6 +13,10 @@ class ReviewsBloc {
 
   final int limit = 5;
 
+  final FirebaseAuth _firebaseAuth;
+
+  final FirebaseFirestore _firestore;
+
   int pid = 0;
 
   final Lock _lock = Lock();
@@ -22,6 +26,11 @@ class ReviewsBloc {
 
   final StreamController<bool> _availableDocumentsController =
       StreamController();
+
+  ReviewsBloc():this._firestore=FirebaseFirestore.instance, this._firebaseAuth=FirebaseAuth.instance;
+
+  ReviewsBloc.testConstructor(FirebaseAuth auth, FirebaseFirestore firestore):
+      this._firebaseAuth= auth,this._firestore=firestore;
 
   Stream<List<Review>> get reviewsStream => _reviewStreamController.stream;
 
@@ -64,7 +73,7 @@ class ReviewsBloc {
       _availableDocumentsController.sink.add(true);
       localPid = ++pid;
     });
-    QuerySnapshot query = await FirebaseFirestore.instance
+    QuerySnapshot query = await _firestore
         .collection('beers')
         .doc(beerId)
         .collection('reviews')
@@ -88,7 +97,7 @@ class ReviewsBloc {
     int i = 0;
     List<Review> localReviews = List();
     query.docs.forEach((reviewSnap) async {
-      User fUser= FirebaseAuth.instance.currentUser;
+      User fUser= _firebaseAuth.currentUser;
       DocumentReference userReference = reviewSnap.data()['user'];
       Map<String, dynamic> reviewCompleteData = await _generateReviewData(userReference,reviewSnap);
       _lock.synchronized(() {
@@ -134,7 +143,7 @@ class ReviewsBloc {
       }
     });
     if (newDocumentsAvailable) {
-      QuerySnapshot query = await FirebaseFirestore.instance
+      QuerySnapshot query = await _firestore
           .collection('beers')
           .doc(beerId)
           .collection('reviews')
@@ -176,7 +185,7 @@ class ReviewsBloc {
       }
     });
     if (newDocumentsAvailable) {
-      QuerySnapshot query = await FirebaseFirestore.instance
+      QuerySnapshot query = await _firestore
           .collection('beers')
           .doc(beerId)
           .collection('reviews')
@@ -203,7 +212,7 @@ class ReviewsBloc {
     int i = 0;
     List<Review> localReviews = List();
     query.docs.forEach((reviewSnap) async {
-      User fUser= FirebaseAuth.instance.currentUser;
+      User fUser= _firebaseAuth.currentUser;
       DocumentReference reference = reviewSnap.data()['user'];
       Map<String, dynamic> reviewCompleteData = await _generateReviewData(reference, reviewSnap);
       _lock.synchronized(() {
