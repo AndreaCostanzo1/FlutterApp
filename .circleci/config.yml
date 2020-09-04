@@ -11,5 +11,7 @@ jobs:
           command: |
             find ./lib -type d -print | sed -e 's;[^/]*/;|____;g;s;____|; |;g'
       - run: flutter test
-      - run: flutter build apk
+      - run: flutter build apk --debug --split-per-abi
+      - run: flutter build apk --profile --split-per-abi
+      - run: flutter build apk --split-per-abi
 
