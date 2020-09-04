@@ -262,6 +262,23 @@ void main() {
       expect(likedBeerList.length, likes);
       expect(likedBeerList.map((e) => e.id).contains(beerMockID), true);
       expect(likedBeerList.map((e) => e.id).contains(beerMock2ndID), true);
+
+
+      //AFTER: FREE DB
+      //GIVEN: SOME LIKED BEERS
+      //ADD LIKES TO DB
+      await firestoreMock.collection('users')
+          .doc(authMock.currentUser.uid)
+          .collection('favourites')
+          .doc(beerMockID).delete();
+      await firestoreMock.collection('users')
+          .doc(authMock.currentUser.uid)
+          .collection('favourites')
+          .doc(beerMock2ndID).delete();
+      await firestoreMock.collection('beers')
+          .doc(beerMockID).delete();
+      await firestoreMock.collection('beers')
+          .doc(beerMock2ndID).delete();
     });
   });
 
