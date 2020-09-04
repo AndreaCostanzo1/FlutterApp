@@ -73,13 +73,14 @@ class BeerBloc {
 
   bool get noMoreBeerAvailable => _noMoreBeerAvailable;
 
-  void dispose() async {
+  Future<void> dispose() async {
     await _lock.synchronized(() {
       _subscriptions.forEach((subscription) => subscription.cancel());
       _suggestedBeersController.close();
       _singleBeerController.close();
       _queriedBeersController.close();
     });
+    return null;
   }
 
   Future<void> retrieveSuggestedBeers() async {

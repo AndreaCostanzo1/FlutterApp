@@ -265,8 +265,6 @@ void main() {
 
 
       //AFTER: FREE DB
-      //GIVEN: SOME LIKED BEERS
-      //ADD LIKES TO DB
       await firestoreMock.collection('users')
           .doc(authMock.currentUser.uid)
           .collection('favourites')

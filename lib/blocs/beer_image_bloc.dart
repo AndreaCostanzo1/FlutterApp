@@ -12,6 +12,12 @@ class BeerImageBloc {
 
   Stream<Uint8List> get beerImageStream => _beerImageController.stream;
 
+  final FirebaseStorage _firebaseStorage;
+
+  BeerImageBloc(): _firebaseStorage= FirebaseStorage.instance;
+
+  BeerImageBloc.testConstructor(FirebaseStorage storage): _firebaseStorage= storage;
+
   Lock _lock = Lock();
 
   void dispose()async{
@@ -19,12 +25,13 @@ class BeerImageBloc {
   }
 
   Future<void> retrieveBeerImage(Beer beer) async {
-    Uint8List image = await FirebaseStorage.instance
+    Uint8List image = await _firebaseStorage
         .ref()
         .child(beer.beerImageUrl ?? 'beer_images/beer_generic.jpg')
         .getData(10000000);
     await _lock.synchronized(() {
       if(!_beerImageController.isClosed) _beerImageController.sink.add(image);
     });
+    return null;
   }
 }
