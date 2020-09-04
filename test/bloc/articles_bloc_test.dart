@@ -22,9 +22,14 @@ void main(){
   'subsections' : []
   };
 
-  FirebaseFirestoreMock firestoreMock = FirebaseFirestoreMock.fromResult([articleMock]);
+  List<Map<String,dynamic>> articleMocks = [articleMock];
+  FirebaseFirestoreMock firestoreMock = FirebaseFirestoreMock.fromResult(articleMocks);
 
+  group('article bloc tests', () {
     test('get articles',() async {
+      //GIVEN: AN ARTICLE IN DATABASE
+
+      //WHEN: THE USER RETRIEVE ARTICLES
       ArticlesBloc _bloc =ArticlesBloc.testConstructor(firestoreMock);
       Future<Null> run;
       Completer<Null> completer = Completer();
@@ -36,7 +41,31 @@ void main(){
       Future<List<Article>> futureArticleList =_bloc.articlesController.first;
       completer.complete();
       List<Article> articleList = await futureArticleList;
-      expect(articleList.length, 1);
-      expect(articleList[0].id, articleMockID);
+      expect(articleList.length, articleMocks.length);
+      expect(articleList.map((e) => e.id).contains(articleMockID), true);
     });
+
+    test('dispose',() async {
+      //GIVEN: AN ARTICLE BLOC
+      ArticlesBloc _bloc =ArticlesBloc.testConstructor(firestoreMock);
+      Future<Null> run;
+      Completer<Null> completer = Completer();
+      run = completer.future;
+      Future.delayed(Duration(milliseconds: 100), () async {
+        await run;
+        _bloc.dispose();
+      });
+      Future<List<Article>> futureArticleList =_bloc.articlesController.last;
+      _bloc.retrieveArticles();
+      //WHEN: THE ARTICLE BLOC IS DISPOSED
+      completer.complete();
+
+      //ASSERT: THE RESULT IS RETRIEVED CORRECTLY WITHOUT TIMEOUT ERRORS
+      //NOTICE: calling last on a stream send the result only after the stream
+      //is closed
+      List<Article> articleList = await futureArticleList.timeout(Duration(seconds: 10));
+      expect(articleList.length, articleMocks.length);
+      expect(articleList.map((e) => e.id).contains(articleMockID), true);
+    });
+  });
 }
