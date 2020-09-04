@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'mocks/firebase_auth_mock.dart';
 import 'mocks/firebase_firestore_mock.dart';
+import 'mocks/firebase_functions_mock.dart';
 
 void main(){
 
@@ -25,13 +26,14 @@ void main(){
     'likes': 0,
   };
 
-
+  FirebaseFunctionsMock functionsMock = FirebaseFunctionsMock();
 
   group('suggested beer queries', (){
     test('get only one beer',() async {
-      FirebaseFirestoreMock firestoreMock = FirebaseFirestoreMock.fromResult([beerMock]);
+      List<Map<String,dynamic>> beerMocks = [beerMock];
+      FirebaseFirestoreMock firestoreMock = FirebaseFirestoreMock.fromResult(beerMocks);
       FirebaseAuthMock firebaseAuthMock = FirebaseAuthMock();
-      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock);
+      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock,functionsMock);
       Future<Null> run;
       Completer<Null> completer = Completer();
       run = completer.future;
@@ -42,8 +44,8 @@ void main(){
       Future<List<Beer>> futureBeerList =_bloc.suggestedBeersStream.first;
       completer.complete();
       List<Beer> beerList = await futureBeerList;
-      expect(beerList.length, 1);
-      expect(beerList[0].id, beerMockID);
+      expect(beerList.length, beerMocks.length);
+      expect(beerList.map((e) => e.id).contains(beerMockID), true);
       if(beerList.length<BeerBloc.queryLimit){
         expect(_bloc.noMoreBeerAvailable,true);
       }
@@ -54,7 +56,7 @@ void main(){
       for(int i =0;i<BeerBloc.queryLimit;i++) beers.add(Map.from(beerMock));
       FirebaseFirestoreMock firestoreMock = FirebaseFirestoreMock.fromResult(beers);
       FirebaseAuthMock firebaseAuthMock = FirebaseAuthMock();
-      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock);
+      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock,functionsMock);
       Future<Null> run;
       Completer<Null> completer = Completer();
       run = completer.future;
@@ -76,7 +78,7 @@ void main(){
       for(int i =0;i<BeerBloc.queryLimit;i++) beers.add(Map.from(beerMock));
       FirebaseFirestoreMock firestoreMock = FirebaseFirestoreMock.fromResult(beers);
       FirebaseAuthMock firebaseAuthMock = FirebaseAuthMock();
-      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock);
+      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock,functionsMock);
       Future<Null> setup;
       Completer<Null> setupCompleter = Completer();
       setup = setupCompleter.future;
@@ -112,7 +114,7 @@ void main(){
       for(int i =0;i<BeerBloc.queryLimit;i++) beers.add(Map.from(beerMock));
       FirebaseFirestoreMock firestoreMock = FirebaseFirestoreMock.fromResult(beers);
       FirebaseAuthMock firebaseAuthMock = FirebaseAuthMock();
-      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock);
+      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock,functionsMock);
       Future<Null> setup;
       Completer<Null> setupCompleter = Completer();
       setup = setupCompleter.future;
@@ -144,7 +146,7 @@ void main(){
     test('search bar query',()async{
       FirebaseFirestoreMock firestoreMock = FirebaseFirestoreMock.fromResult([beerMock]);
       FirebaseAuthMock firebaseAuthMock = FirebaseAuthMock();
-      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock);
+      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock,functionsMock);
       Future<Null> run;
       Completer<Null> completer = Completer();
       run = completer.future;
@@ -163,7 +165,7 @@ void main(){
       List<Map> beerMockList = [beerMock];
       FirebaseFirestoreMock firestoreMock = FirebaseFirestoreMock.fromResult(beerMockList);
       FirebaseAuthMock firebaseAuthMock = FirebaseAuthMock();
-      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock);
+      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock,functionsMock);
       Future<Null> run;
       Future<Null> setup;
       Completer<Null> completer1 = Completer();
@@ -193,7 +195,7 @@ void main(){
     test('retrieve single beer',() async {
       FirebaseFirestoreMock firestoreMock = FirebaseFirestoreMock.fromResult(beerMock);
       FirebaseAuthMock firebaseAuthMock = FirebaseAuthMock();
-      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock);
+      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock,functionsMock);
       Future<Null> run;
       Completer<Null> completer = Completer();
       run = completer.future;
@@ -210,7 +212,7 @@ void main(){
     test('observe single beer',() async {
       FirebaseFirestoreMock firestoreMock = FirebaseFirestoreMock.fromResult(beerMock);
       FirebaseAuthMock firebaseAuthMock = FirebaseAuthMock();
-      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock);
+      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock,functionsMock);
       Future<Null> run;
       Completer<Null> completer = Completer();
       run = completer.future;
@@ -222,6 +224,35 @@ void main(){
       completer.complete();
       Beer beer = await futureBeer;
       expect(beer.id, beerMock['id']);
+    });
+  });
+
+  group('other tests', () {
+    test('dispose',() async {
+      //GIVEN: A BEER BLOC
+      List<Map<String,dynamic>> beerMocks = [beerMock];
+      FirebaseFirestoreMock firestoreMock = FirebaseFirestoreMock.fromResult(beerMocks);
+      FirebaseAuthMock firebaseAuthMock = FirebaseAuthMock();
+      BeerBloc _bloc =BeerBloc.testConstructor(firestoreMock,firebaseAuthMock,functionsMock);
+      Future<Null> run;
+      Completer<Null> completer = Completer();
+      run = completer.future;
+      Future.delayed(Duration(milliseconds: 100), () async {
+        await run;
+        _bloc.dispose();
+      });
+      Future<List<Beer>> futureBeerList =_bloc.suggestedBeersStream.last;
+      await _bloc.retrieveSuggestedBeers();
+      //WHEN: THE ARTICLE BLOC IS DISPOSED (AFTER COMPLETER.COMPLETE)
+      completer.complete();
+
+
+      //ASSERT: THE RESULT IS RETRIEVED CORRECTLY WITHOUT TIMEOUT ERRORS
+      //NOTICE: calling last on a stream send the result only after the stream
+      //is closed
+      List<Beer> beerList = await futureBeerList.timeout(Duration(seconds: 10));
+      expect(beerList.length, beerMocks.length);
+      expect(beerList.map((e) => e.id).contains(beerMockID), true);
     });
   });
 }

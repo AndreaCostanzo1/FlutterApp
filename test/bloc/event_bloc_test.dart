@@ -37,8 +37,9 @@ void main() {
 
   group('retrieve beer in city tests', () {
     test('get only one beer', () async {
+      List<Map<String,dynamic>> eventMocks = [eventMock];
       FirebaseFirestore firestoreMock =
-          FirebaseFirestoreMock.fromResult([eventMock]);
+          FirebaseFirestoreMock.fromResult(eventMocks);
       EventBloc _bloc = EventBloc.testConstructor(firestoreMock);
       Future<Null> run;
       Completer<Null> completer = Completer();
@@ -50,8 +51,8 @@ void main() {
       Future<List<Event>> futureEventList = _bloc.eventsStream.first;
       completer.complete();
       List<Event> eventList = await futureEventList;
-      expect(eventList.length, 1);
-      expect(eventList[0].id, eventMockId);
+      expect(eventList.length, eventMocks.length);
+      expect(eventList.map((e) => e.id).contains(eventMockId), true);
       if (eventList.length < EventBloc.queryLimit) {
         expect(_bloc.noMoreEventsAvailable, true);
       }
@@ -151,6 +152,37 @@ void main() {
       List<Event> eventList = await futureEventList;
       expect(eventList.length, EventBloc.queryLimit*2);
       expect(_bloc.noMoreEventsAvailable, false);
+    });
+  });
+
+
+  group('additional tests', () {
+    test('dispose',() async{
+      List<Map<String,dynamic>> eventMocks = [eventMock];
+      FirebaseFirestore firestoreMock =
+      FirebaseFirestoreMock.fromResult(eventMocks);
+      EventBloc _bloc = EventBloc.testConstructor(firestoreMock);
+      Future<Null> run;
+      Completer<Null> completer = Completer();
+      run = completer.future;
+      Future.delayed(Duration(milliseconds: 100), () async {
+        await run;
+        _bloc.dispose();
+      });
+
+
+      Future<List<Event>> futureEventList = _bloc.eventsStream.last;
+      _bloc.retrieveEventsInCity(City.fromSnapshot(cityMock));
+      //WHEN: THE ARTICLE BLOC IS DISPOSED (AFTER COMPLETER.COMPLETE)
+      completer.complete();
+
+
+      //ASSERT: THE RESULT IS RETRIEVED CORRECTLY WITHOUT TIMEOUT ERRORS
+      //NOTICE: calling last on a stream send the result only after the stream
+      //is closed
+      List<Event> eventList = await futureEventList.timeout(Duration(seconds: 10));
+      expect(eventList.length, eventMocks.length);
+      expect(eventList.map((e) => e.id).contains(eventMockId), true);
     });
   });
 }

@@ -264,4 +264,33 @@ void main() {
       expect(likedBeerList.map((e) => e.id).contains(beerMock2ndID), true);
     });
   });
+
+  group('additional tests', () {
+    test('dispose',() async{
+      //GIVEN: NO LIKED BEERS
+
+      //WHEN: USERS RETRIEVE LIKED BEERS
+      LikesBloc _bloc = LikesBloc.testConstructor(authMock, firestoreMock);
+      Future<Null> run;
+      Completer<Null> completer = Completer();
+      run = completer.future;
+      Future.delayed(Duration(milliseconds: 100), () async {
+        await run;
+        _bloc.dispose();
+      });
+
+
+      Future<List<Beer>> futureLikedBeerList = _bloc.likedBeerListStream.last;
+      _bloc.retrieveLikedBeers();
+      //WHEN: THE ARTICLE BLOC IS DISPOSED (AFTER COMPLETER.COMPLETE)
+      completer.complete();
+
+
+      //ASSERT: THE RESULT IS RETRIEVED CORRECTLY WITHOUT TIMEOUT ERRORS
+      //NOTICE: calling last on a stream send the result only after the stream
+      //is closed
+      List<Beer> likedBeerList = await futureLikedBeerList.timeout(Duration(seconds: 10));
+      expect(likedBeerList.length, 0);
+    });
+  });
 }
