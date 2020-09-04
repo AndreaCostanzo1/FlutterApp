@@ -14,4 +14,10 @@ jobs:
       - run: flutter build apk --debug --split-per-abi
       - run: flutter build apk --profile --split-per-abi
       - run: flutter build apk --split-per-abi
+      - run:
+          name: coverage
+          command: |
+            flutter test --coverage
+            bash <(curl -s https://codecov.io/bash) -t ${codecov_token}
+
 

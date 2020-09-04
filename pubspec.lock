@@ -111,7 +111,7 @@ packages:
     description:
       path: "."
       ref: "support_cloud_firesote_0.14.0"
-      resolved-ref: d93b96de00e41ff4670fcacb0f4e76add3fec6b5
+      resolved-ref: "731260a1cdc4e40970abd02b2096a85dcb9b9685"
       url: "https://github.com/sensuikan1973/cloud_firestore_mocks.git"
     source: git
     version: "0.4.6+1"
