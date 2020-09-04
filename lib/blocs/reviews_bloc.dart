@@ -11,7 +11,7 @@ class ReviewsBloc {
 
   DocumentSnapshot _lastDocument;
 
-  final int limit = 5;
+  static const int _queryLimit = 5;
 
   final FirebaseAuth _firebaseAuth;
 
@@ -37,6 +37,8 @@ class ReviewsBloc {
   Stream<bool> get availableDocumentsStream =>
       _availableDocumentsController.stream;
 
+  static get queryLimit =>_queryLimit;
+
   void dispose() {
     _reviewStreamController.close();
     _availableDocumentsController.close();
@@ -53,7 +55,7 @@ class ReviewsBloc {
         .doc(beerId)
         .collection('reviews')
         .orderBy('date', descending: true)
-        .limit(limit)
+        .limit(_queryLimit)
         .get();
     if (query.docs.length > 0) {
       _updateStream(query, localPid);
@@ -67,7 +69,7 @@ class ReviewsBloc {
     }
   }
 
-  void retrieveReviewsWithVote(String beerId, int vote) async {
+  Future<void> retrieveReviewsWithVote(String beerId, int vote) async {
     int localPid;
     _lock.synchronized(() {
       _availableDocumentsController.sink.add(true);
@@ -79,7 +81,7 @@ class ReviewsBloc {
         .collection('reviews')
         .orderBy('date', descending: true)
         .where('rate', isEqualTo: vote)
-        .limit(limit)
+        .limit(_queryLimit)
         .get();
     if (query.docs.length > 0) {
       _updateStream(query, localPid);
@@ -91,6 +93,7 @@ class ReviewsBloc {
         _availableDocumentsController.sink.add(false);
       });
     }
+    return null;
   }
 
   void _updateStream(QuerySnapshot query, int localPid) {
@@ -111,7 +114,7 @@ class ReviewsBloc {
           localReviews.sort((review1,review2)=>review1.date.isBefore(review2.date)?1:-1);
           _reviews.addAll(localReviews);
           _reviewStreamController.sink.add(_reviews);
-          if (i < limit) _availableDocumentsController.sink.add(false);
+          if (i < _queryLimit) _availableDocumentsController.sink.add(false);
         }
       });
     });
@@ -124,7 +127,7 @@ class ReviewsBloc {
     });
   }
 
-  void retrieveMoreReviews(String beerId) async {
+  Future<void> retrieveMoreReviews(String beerId) async {
     bool newDocumentsAvailable;
     int localPid;
     _lock.synchronized(() {
@@ -134,7 +137,7 @@ class ReviewsBloc {
       //the result would have been != 0.
       //if _lastDocument==null in the last query the length was equal to 0
       newDocumentsAvailable =
-          (_lastDocument != null && _reviews.length % limit == 0);
+          (_lastDocument != null && _reviews.length % _queryLimit == 0);
       if (!newDocumentsAvailable &&
           localPid == pid &&
           !_reviewStreamController.isClosed) {
@@ -148,8 +151,8 @@ class ReviewsBloc {
           .doc(beerId)
           .collection('reviews')
           .orderBy('date', descending: true)
-          .limit(limit)
           .startAfterDocument(_lastDocument)
+          .limit(_queryLimit)
           .get();
       if (query.docs.length > 0) {
         _updateStreamWithoutClearing(query, localPid);
@@ -163,6 +166,7 @@ class ReviewsBloc {
         });
       }
     }
+    return null;
   }
 
   void retrieveMoreReviewsWithRate(int rate, String beerId) async {
@@ -176,7 +180,7 @@ class ReviewsBloc {
       //the result would have been != 0.
       //if _lastDocument==null in the last query the length was equal to 0
       newDocumentsAvailable =
-      (_lastDocument != null && _reviews.length % limit == 0);
+      (_lastDocument != null && _reviews.length % _queryLimit == 0);
       if (!newDocumentsAvailable &&
           localPid == pid &&
           !_reviewStreamController.isClosed) {
@@ -191,8 +195,8 @@ class ReviewsBloc {
           .collection('reviews')
           .where('rate', isEqualTo: rate)
           .orderBy('date', descending: true)
-          .limit(limit)
           .startAfterDocument(_lastDocument)
+          .limit(_queryLimit)
           .get();
       if (query.docs.length > 0) {
         _updateStreamWithoutClearing(query, localPid);
@@ -225,7 +229,7 @@ class ReviewsBloc {
           localReviews.sort((review1,review2)=>review1.date.isBefore(review2.date)?1:-1);
           _reviews.addAll(localReviews);
           _reviewStreamController.sink.add(_reviews);
-          if (i < limit) _availableDocumentsController.sink.add(false);
+          if (i < _queryLimit) _availableDocumentsController.sink.add(false);
         }
       });
     });
