@@ -19,7 +19,7 @@ class UserBloc {
   final StreamController<ImageProvider> _userImageController =
       StreamController.broadcast();
 
-  final List<StreamSubscription> _subscriptions= List();
+  final List<StreamSubscription> _subscriptions = List();
 
   get profileImageStream => _profileImageController.stream;
 
@@ -29,9 +29,26 @@ class UserBloc {
 
   Lock _lock = Lock();
 
+  final FirebaseAuth _auth;
+
+  final FirebaseFirestore _firestore;
+
+  final FirebaseStorage _storage;
+
+  UserBloc()
+      : _firestore = FirebaseFirestore.instance,
+        _storage = FirebaseStorage.instance,
+        _auth = FirebaseAuth.instance;
+
+  UserBloc.testConstructor(
+      FirebaseAuth auth, FirebaseFirestore firestore, FirebaseStorage storage)
+      : _firestore = firestore,
+        _storage = storage,
+        _auth = auth;
+
   void dispose() async {
     await _lock.synchronized(() {
-      _subscriptions.forEach((subscription)=>subscription.cancel());
+      _subscriptions.forEach((subscription) => subscription.cancel());
       _profileImageController.close();
       _authenticatedUserController.close();
       _userImageController.close();
@@ -40,7 +57,7 @@ class UserBloc {
 
   void getUserImage(String path) {
     if (path != null) {
-      FirebaseStorage.instance
+      _storage
           .ref()
           .child(path)
           .getData(1000000)
@@ -60,9 +77,8 @@ class UserBloc {
   }
 
   void getAuthenticatedUserData() async {
-    User fUser = FirebaseAuth.instance.currentUser;
-    DocumentReference userRef =
-        FirebaseFirestore.instance.collection('users').doc(fUser.uid);
+    User fUser = _auth.currentUser;
+    DocumentReference userRef = _firestore.collection('users').doc(fUser.uid);
     DocumentSnapshot userSnapshot = await userRef.get();
     Map<String, dynamic> userData = userSnapshot.data();
     //usually skipped: may happen that, upon registration, the page is uploaded
@@ -95,7 +111,7 @@ class UserBloc {
               .add(AssetImage('assets/images/user.png'));
       });
     } else {
-      FirebaseStorage.instance
+      _storage
           .ref()
           .child(path)
           .getData(1000000)
@@ -108,33 +124,31 @@ class UserBloc {
   }
 
   Future<String> getProfileImagePath() async {
-    User fUser = FirebaseAuth.instance.currentUser;
+    User fUser = _auth.currentUser;
     Future<DocumentSnapshot> futureSnap =
-        FirebaseFirestore.instance.collection('users').doc(fUser.uid).get();
+        _firestore.collection('users').doc(fUser.uid).get();
     return futureSnap.then(
         (userSnap) => MyUser.fromSnapshot(userSnap.data()).profileImagePath);
   }
 
   Future<void> setInformation(String nickname, City city) async {
-    User user = FirebaseAuth.instance.currentUser;
-    DocumentReference cityRef =
-        FirebaseFirestore.instance.collection('cities').doc(city.id);
-    return FirebaseFirestore.instance
+    User user = _auth.currentUser;
+    DocumentReference cityRef = _firestore.collection('cities').doc(city.id);
+    return _firestore
         .collection('users')
         .doc(user.uid)
         .update({'nickname': nickname, 'city': cityRef});
   }
 
   void listenToAuthenticatedUserData() async {
-    User fUser = FirebaseAuth.instance.currentUser;
-    DocumentReference userRef =
-        FirebaseFirestore.instance.collection('users').doc(fUser.uid);
+    User fUser = _auth.currentUser;
+    DocumentReference userRef = _firestore.collection('users').doc(fUser.uid);
     _subscriptions.add(userRef.snapshots().listen((userSnapshot) async {
       Map<String, dynamic> userData = userSnapshot.data();
       //usually skipped: may happen that, upon registration, the page is uploaded
       //before the default city is set.
       while (
-      userData == null || (userData != null && userData['city'] == null)) {
+          userData == null || (userData != null && userData['city'] == null)) {
         userSnapshot = await userRef.get();
         userData.addAll(userSnapshot.data());
         await Future.delayed(Duration(milliseconds: 100));
@@ -143,7 +157,7 @@ class UserBloc {
       DocumentSnapshot citySnap = await cityRef.get();
       userData.putIfAbsent(
           'city_data',
-              () => City.fromSnapshot(
+          () => City.fromSnapshot(
               CityDataConverter.convertSnapshot(citySnap.data())));
       MyUser user = MyUser.fromSnapshot(userData);
       _lock.synchronized(() {
