@@ -7,6 +7,8 @@ class Review {
   final int _rate;
   final MyUser _user;
 
+  static const String _emptyReviewID ='';
+
   Review.fromSnapshot(Map<String, dynamic> snapshot)
       : _id = snapshot['id'],
         _comment = snapshot['comment'],
@@ -15,7 +17,7 @@ class Review {
         _user = snapshot['user'];
 
   Review.empty()
-      : _id = '',
+      : _id = _emptyReviewID,
         _comment = '',
         _rate = 0,
         _date = DateTime.now(),
@@ -30,4 +32,8 @@ class Review {
   String get id => _id;
 
   DateTime get date => _date;
+
+  static isEmpty(Review review) {
+    return review.id==_emptyReviewID;
+  }
 }

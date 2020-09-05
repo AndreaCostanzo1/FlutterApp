@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_beertastic/blocs/utilities/review_data_converter.dart';
 import 'package:flutter_beertastic/model/beer.dart';
 import 'package:flutter_beertastic/model/review.dart';
-import 'package:flutter_beertastic/model/user.dart';
 import 'package:synchronized/synchronized.dart';
 
 class UserReviewBloc {
@@ -23,6 +23,10 @@ class UserReviewBloc {
   UserReviewBloc()
       : _auth = FirebaseAuth.instance,
         _firestore = FirebaseFirestore.instance;
+
+  UserReviewBloc.testConstructor(FirebaseAuth auth, FirebaseFirestore firestore)
+      : _auth = auth,
+        _firestore = firestore;
 
   void dispose() {
     _userReviewStreamController.close();
@@ -79,12 +83,7 @@ class UserReviewBloc {
   void _retrieveUserAndNotifyReview(DocumentSnapshot reviewSnap) {
     DocumentReference userRef = reviewSnap.data()['user'];
     userRef.get().then((userSnap) {
-      Map<String, dynamic> reviewCompleteData = Map();
-      reviewCompleteData.addAll(reviewSnap.data());
-      reviewCompleteData.update(
-          'user', (value) => MyUser.fromSnapshot(userSnap.data()));
-      Timestamp timestamp = reviewSnap.data()['date'];
-      reviewCompleteData.update('date', (value) => timestamp.toDate());
+      Map<String, dynamic> reviewCompleteData = ReviewDataConverter.convertSnapshot(reviewSnap.data(), userSnap.data());
       _userReviewStreamController.sink
           .add(Review.fromSnapshot(reviewCompleteData));
     });

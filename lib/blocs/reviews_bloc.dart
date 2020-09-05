@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_beertastic/blocs/utilities/review_data_converter.dart';
 import 'package:flutter_beertastic/model/review.dart';
-import 'package:flutter_beertastic/model/user.dart';
 import 'package:synchronized/synchronized.dart';
 
 class ReviewsBloc {
@@ -238,13 +238,8 @@ class ReviewsBloc {
 
 
   Future<Map<String, dynamic>> _generateReviewData(DocumentReference userRef, DocumentSnapshot reviewSnap) async {
-    Map<String, dynamic> reviewCompleteData = Map();
     DocumentSnapshot userSnapshot = await userRef.get();
-    reviewCompleteData.addAll(reviewSnap.data());
-    Timestamp timestamp = reviewSnap.data()['date'];
-    reviewCompleteData.update('date', (value) => timestamp.toDate());
-    reviewCompleteData.update(
-        'user', (value) => MyUser.fromSnapshot(userSnapshot.data()));
+    Map<String, dynamic> reviewCompleteData = ReviewDataConverter.convertSnapshot(reviewSnap.data(), userSnapshot.data());
     return reviewCompleteData;
   }
 }
