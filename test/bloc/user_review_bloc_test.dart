@@ -24,9 +24,9 @@ void main() {
     'beerImageUrl': '_beerImageUrl',
     'style': '_style',
     'color': '_color',
-    'rate':0.0,
+    'rate': 0.0,
     'ratings_by_rate': {'1': 0, '2': 0, '3': 0, '4': 0, '5': 0},
-    'total_ratings':0,
+    'total_ratings': 0,
     'carbonation': 2.1,
     'searches': 0,
     'likes': 0,
@@ -123,7 +123,7 @@ void main() {
         .doc(authMock.currentUser.uid)
         .set(mockUser);
     DocumentReference beerRef =
-    firestoreMock.collection('beers').doc(beerMockID);
+        firestoreMock.collection('beers').doc(beerMockID);
     await beerRef.set(beerMock);
     Beer mockBeerInstance = Beer.fromSnapshot(beerMock);
 
@@ -132,7 +132,7 @@ void main() {
     Completer<Null> completer = Completer();
     run = completer.future;
     UserReviewBloc reviewBloc =
-    UserReviewBloc.testConstructor(authMock, firestoreMock);
+        UserReviewBloc.testConstructor(authMock, firestoreMock);
     Future.delayed(Duration(milliseconds: 100), () async {
       await run;
       reviewBloc.dispose();
@@ -153,29 +153,79 @@ void main() {
         .delete();
   });
 
-  test('Create review',() async{
+  test('Create review', () async {
     //GIVEN A BEER IN DATABASE
-    DocumentReference beerRef = firestoreMock.collection('beers').doc(beerMockID);
+    DocumentReference beerRef =
+        firestoreMock.collection('beers').doc(beerMockID);
     await beerRef.set(beerMock);
-    await firestoreMock.collection('users').doc(authMock.currentUser.uid).set(mockUser);
+    await firestoreMock
+        .collection('users')
+        .doc(authMock.currentUser.uid)
+        .set(mockUser);
     Beer beerMockInstance = Beer.fromSnapshot(beerMock);
 
     //WHEN CREATE A REVIEW
-    double grade =3;
-    UserReviewBloc bloc =UserReviewBloc.testConstructor(authMock, firestoreMock);
+    double grade = 3;
+    UserReviewBloc bloc =
+        UserReviewBloc.testConstructor(authMock, firestoreMock);
     await bloc.createReview(beerMockInstance, '', grade);
 
     //ASSERT: REVIEW CREATED
-    DocumentReference reviewRef= beerRef.collection('reviews').doc(authMock.currentUser.uid);
-    Map<String,dynamic> reviewSnap = (await reviewRef.get()).data();
+    DocumentReference reviewRef =
+        beerRef.collection('reviews').doc(authMock.currentUser.uid);
+    Map<String, dynamic> reviewSnap = (await reviewRef.get()).data();
     expect(reviewSnap['rate'], grade);
 
     //ASSERT BEER UPDATED
-    Map<String,dynamic> beerUpdatedSnap = (await beerRef.get()).data();
-    String gradeIndex=grade.truncate().toString();
-    expect(beerUpdatedSnap['ratings_by_rate'][gradeIndex], beerMock['ratings_by_rate'][gradeIndex]+1);
+    Map<String, dynamic> beerUpdatedSnap = (await beerRef.get()).data();
+    String gradeIndex = grade.truncate().toString();
+    expect(beerUpdatedSnap['ratings_by_rate'][gradeIndex],
+        beerMock['ratings_by_rate'][gradeIndex] + 1);
 
     //AFTER CLEAR DB
-    await firestoreMock.collection('users').doc(authMock.currentUser.uid).set(mockUser);
+    await firestoreMock
+        .collection('users')
+        .doc(authMock.currentUser.uid)
+        .delete();
+    await reviewRef.delete();
+    await beerRef.delete();
+  });
+
+  test('delete review', () async {
+    //GIVEN A BEER IN DATABASE AND A REVIEW FOR THE AUTHENTICATED USER
+    DocumentReference beerRef =
+    firestoreMock.collection('beers').doc(beerMockID);
+    await beerRef.set(beerMock);
+    await firestoreMock
+        .collection('users')
+        .doc(authMock.currentUser.uid)
+        .set(mockUser);
+    await beerRef.collection('reviews').doc(authMock.currentUser.uid).set(reviewMock);
+    Beer beerMockInstance = Beer.fromSnapshot(beerMock);
+    Review review = Review.fromSnapshot(ReviewDataConverter.convertSnapshot(reviewMock, mockUser));
+
+    //WHEN DELETE A REVIEW
+    UserReviewBloc bloc =
+    UserReviewBloc.testConstructor(authMock, firestoreMock);
+    await bloc.deleteReview(beerMockInstance, review);
+
+    //ASSERT: REVIEW DELETED
+    DocumentReference reviewRef =
+    beerRef.collection('reviews').doc(authMock.currentUser.uid);
+    Map<String, dynamic> reviewSnap = (await reviewRef.get()).data();
+    expect(reviewSnap, null);
+
+    //ASSERT BEER UPDATED
+    Map<String, dynamic> beerUpdatedSnap = (await beerRef.get()).data();
+    String gradeIndex = review.rate.truncate().toString();
+    expect(beerUpdatedSnap['ratings_by_rate'][gradeIndex],
+        beerMock['ratings_by_rate'][gradeIndex] - 1);
+
+    //AFTER CLEAR DB
+    await firestoreMock
+        .collection('users')
+        .doc(authMock.currentUser.uid)
+        .delete();
+    await beerRef.delete();
   });
 }

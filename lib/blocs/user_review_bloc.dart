@@ -70,7 +70,7 @@ class UserReviewBloc {
     return null;
   }
 
-  void deleteReview(Beer beer, Review review) async {
+  Future<void> deleteReview(Beer beer, Review review) async {
     //clear stream
     _userReviewStreamController.sink.add(null);
     //creation process
@@ -78,7 +78,8 @@ class UserReviewBloc {
     DocumentReference beerRef =
         _firestore.collection('beers').doc(beer.id);
     await _updateReviewsCount(beerRef, review.rate.toDouble(), true);
-    beerRef.collection('reviews').doc(fUser.uid).delete();
+    await beerRef.collection('reviews').doc(fUser.uid).delete();
+    return null;
   }
 
   void _retrieveUserAndNotifyReview(DocumentSnapshot reviewSnap) {
