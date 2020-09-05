@@ -22,16 +22,31 @@ class MapBloc {
 
   Stream<Uint8List> get cityImageStream => _cityImageController.stream;
 
+  final FirebaseFirestore _firestore;
+
+  final FirebaseStorage _storage;
+
+  final Geolocator _geoLocator;
+
+
+  MapBloc.testConstructor(FirebaseFirestore firestore, FirebaseStorage storage,
+      Geolocator geoLocator)
+      : _firestore = firestore,
+        _storage = storage,
+        _geoLocator = geoLocator;
+
+  MapBloc()
+      : _firestore = FirebaseFirestore.instance,
+        _storage = FirebaseStorage.instance,
+        _geoLocator = Geolocator();
+
   void dispose() {
     _nearestCitiesController.close();
     _cityImageController.close();
   }
 
   void retrieveCityImage(City city) async {
-    Uint8List image = await FirebaseStorage.instance
-        .ref()
-        .child(city.imageUrl)
-        .getData(600000);
+    Uint8List image = await _storage.ref().child(city.imageUrl).getData(600000);
     _cityImageController.sink.add(image);
   }
 
@@ -53,22 +68,20 @@ class MapBloc {
         cities.addAll(_getCityOrderedByVicinity(data, snapshots));
       } else {
         //no city nearby, select randomly
-        FirebaseFirestore.instance.collection('cities').limit(5).get().then(
-            (query) => query.docs.forEach((citySnap) => cities.add(
-                City.fromSnapshot(
-                    CityDataConverter.convertSnapshot(citySnap.data())))));
+        _firestore.collection('cities').limit(5).get().then((query) =>
+            query.docs.forEach((citySnap) => cities.add(City.fromSnapshot(
+                CityDataConverter.convertSnapshot(citySnap.data())))));
       }
       _nearestCitiesController.sink.add(cities);
     }
   }
 
   void setDefaultCity(User user) async {
-    DocumentReference milanRef =
-        FirebaseFirestore.instance.collection('cities').doc('Milan');
+    DocumentReference milanRef = _firestore.collection('cities').doc('Milan');
     if (await Permission.location.request().isGranted) {
       _setDefaultCityToNearest(user);
     } else {
-      await FirebaseFirestore.instance
+      await _firestore
           .collection('users')
           .doc(user.uid)
           .update({'city': milanRef});
@@ -89,10 +102,9 @@ class MapBloc {
     if (snapshots.length > 0) {
       DocumentSnapshot nearestCitySnap =
           _getNearestCitySnapshot(data, snapshots);
-      DocumentReference nearestCityRef = FirebaseFirestore.instance
-          .collection('cities')
-          .doc(nearestCitySnap.id);
-      FirebaseFirestore.instance
+      DocumentReference nearestCityRef =
+          _firestore.collection('cities').doc(nearestCitySnap.id);
+      _firestore
           .collection('users')
           .doc(user.uid)
           .update({'city': nearestCityRef});
@@ -100,12 +112,12 @@ class MapBloc {
   }
 
   Future<GeoData> _computeGeoData() async {
-    Position position = await Geolocator().getCurrentPosition();
+    Position position = await _geoLocator.getCurrentPosition();
     return GeoData(position.latitude, position.longitude);
   }
 
   Future<QuerySnapshot> _queryZone(String zoneHash) {
-    return FirebaseFirestore.instance
+    return _firestore
         .collection('cities')
         .where('geo_hash', isGreaterThanOrEqualTo: zoneHash)
         .where('geo_hash', isLessThan: zoneHash + '~')
