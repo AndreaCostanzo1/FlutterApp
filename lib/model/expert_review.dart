@@ -1,4 +1,7 @@
 class ExpertReview {
+
+  static const String _emptyId = '';
+
   final String _id;
 
   final String _author;
@@ -25,7 +28,7 @@ class ExpertReview {
             .toList();
 
   ExpertReview.empty()
-      : _id = '',
+      : _id = _emptyId,
         _title = '',
         _text = '',
         _author = '',
@@ -46,6 +49,8 @@ class ExpertReview {
   List<Subsection> get subsections => _subsections;
 
   String get source => _source;
+
+  static String get emptyId=> _emptyId;
 }
 
 class Subsection {
