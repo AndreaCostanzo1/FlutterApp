@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_firestore_mocks/cloud_firestore_mocks.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -7,7 +9,6 @@ import 'package:flutter_beertastic/blocs/utilities/city_data_converter.dart';
 import 'package:flutter_beertastic/model/city.dart';
 import 'package:flutter_beertastic/model/user.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 import 'mocks/firebase_auth_mock.dart';
 import 'mocks/firebase_storage_mock.dart';
@@ -104,6 +105,32 @@ void main() {
       expect(user.uid, authMock.currentUser.uid);
       expect(user.city.id,cityMockID);
       expect(provider.runtimeType,MemoryImage);
+
+      //AFTER: CLEAR DB
+      await firestoreMock.collection('cities').doc(cityMockID).delete();
+      await firestoreMock.collection('users').doc(authMock.currentUser.uid).delete();
+    });
+
+    test('get authenticated user data without image path in user',()async{
+      //GIVEN A USER WITH CITY AND NO IMAGE PATH
+      firestoreMock.collection('cities').doc(cityMockID).set(mockCity);
+      Map<String,dynamic> mockUserWithoutPath = Map.from(mockUser);
+      mockUserWithoutPath.remove('profile_image_path');
+      firestoreMock.collection('users').doc(authMock.currentUser.uid).set(mockUserWithoutPath);
+      final FirebaseStorage storageMock = FirebaseStorageMock();
+
+      //WHEN: GET AUTHENTICATED USER DATA
+      UserBloc bloc = UserBloc.testConstructor(authMock, firestoreMock, storageMock);
+      Future<MyUser> futureUser = bloc.authenticatedUserStream.first;
+      Future<ImageProvider> futureProvider= bloc.profileImageStream.first;
+      bloc.getAuthenticatedUserData();
+      MyUser user = await futureUser;
+      ImageProvider provider = await futureProvider;
+
+      //ASSERT: USER ID AND CITY ID MATCH.
+      expect(user.uid, authMock.currentUser.uid);
+      expect(user.city.id,cityMockID);
+      expect(provider.runtimeType,AssetImage);
 
       //AFTER: CLEAR DB
       await firestoreMock.collection('cities').doc(cityMockID).delete();
@@ -262,5 +289,27 @@ void main() {
       await firestoreMock.collection('cities').doc(cityMockID).delete();
       await firestoreMock.collection('users').doc(authMock.currentUser.uid).delete();
     });
+  });
+
+  test('dispose',()async{
+    //GIVEN AN IMAGE IN STORAGE
+    final FirebaseStorage storageMock = FirebaseStorageMock();
+
+    //WHEN: DISPOSE
+    Future<Null> run;
+    Completer<Null> completer = Completer();
+    run = completer.future;
+    UserBloc userBloc =
+    UserBloc.testConstructor(authMock, firestoreMock, storageMock);
+    Future.delayed(Duration(milliseconds: 100), () async {
+      await run;
+      userBloc.dispose();
+    });
+    Future<ImageProvider> futureProvider = userBloc.userImageStream.last;
+    userBloc.getUserImage('..');
+    completer.complete();
+    ImageProvider provider = await futureProvider.timeout(Duration(seconds: 10));
+    //ASSERT: MEMORY IMAGE TYPE && STREAM DISPOSED WITHOUT TIMEOUT
+    expect(provider.runtimeType, MemoryImage);
   });
 }

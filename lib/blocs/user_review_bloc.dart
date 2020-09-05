@@ -16,15 +16,23 @@ class UserReviewBloc {
 
   Stream<Review> get reviewStream => _userReviewStreamController.stream;
 
+  final FirebaseAuth _auth;
+
+  final FirebaseFirestore _firestore;
+
+  UserReviewBloc()
+      : _auth = FirebaseAuth.instance,
+        _firestore = FirebaseFirestore.instance;
+
   void dispose() {
     _userReviewStreamController.close();
     _subscriptions.forEach((subscription) => subscription.cancel());
   }
 
   void retrieveReview(Beer beer) async {
-    User fUser = FirebaseAuth.instance.currentUser;
+    User fUser = _auth.currentUser;
     DocumentReference beerRef =
-    FirebaseFirestore.instance.collection('beers').doc(beer.id);
+        _firestore.collection('beers').doc(beer.id);
     _subscriptions.add(beerRef
         .collection('reviews')
         .doc(fUser.uid)
@@ -43,11 +51,11 @@ class UserReviewBloc {
     //clear stream
     _userReviewStreamController.sink.add(null);
     //creation process
-   User fUser = FirebaseAuth.instance.currentUser;
+    User fUser = _auth.currentUser;
     DocumentReference userRef =
-    FirebaseFirestore.instance.collection('users').doc(fUser.uid);
+        _firestore.collection('users').doc(fUser.uid);
     DocumentReference beerRef =
-    FirebaseFirestore.instance.collection('beers').doc(beer.id);
+        _firestore.collection('beers').doc(beer.id);
     await _updateReviewsCount(beerRef, rate, false);
     beerRef.collection('reviews').doc(fUser.uid).set({
       'user': userRef,
@@ -61,9 +69,9 @@ class UserReviewBloc {
     //clear stream
     _userReviewStreamController.sink.add(null);
     //creation process
-    User fUser = FirebaseAuth.instance.currentUser;
+    User fUser = _auth.currentUser;
     DocumentReference beerRef =
-    FirebaseFirestore.instance.collection('beers').doc(beer.id);
+        _firestore.collection('beers').doc(beer.id);
     await _updateReviewsCount(beerRef, review.rate.toDouble(), true);
     beerRef.collection('reviews').doc(fUser.uid).delete();
   }
@@ -84,21 +92,21 @@ class UserReviewBloc {
 
   Future<void> _updateReviewsCount(
       DocumentReference beerRef, double rate, bool delete) async {
-    await _lock.synchronized(() async{
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
+    await _lock.synchronized(() async {
+      await _firestore.runTransaction((transaction) async {
         DocumentSnapshot beerSnap = await transaction.get(beerRef);
-        if(beerSnap!=null&&beerSnap.exists){
+        if (beerSnap != null && beerSnap.exists) {
           Beer beer = Beer.fromSnapshot(beerSnap.data());
           Map<String, int> map = Map.from(beer.ratingsByRate
               .map((key, value) => MapEntry(key.toString(), value)));
           map.update(rate.toInt().toString(),
-                  (value) => delete ? value - 1 : value + 1);
+              (value) => delete ? value - 1 : value + 1);
           int newTotalRatings =
-          delete ? beer.totalRatings - 1 : beer.totalRatings + 1;
+              delete ? beer.totalRatings - 1 : beer.totalRatings + 1;
           double averageRate = 0;
           if (newTotalRatings != 0) {
             map.entries.forEach(
-                    (entry) => averageRate += int.parse(entry.key) * entry.value);
+                (entry) => averageRate += int.parse(entry.key) * entry.value);
             averageRate = (averageRate / newTotalRatings * 10).round() / 10;
           }
           transaction.update(beerRef, {
