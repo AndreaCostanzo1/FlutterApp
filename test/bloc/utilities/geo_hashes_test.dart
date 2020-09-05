@@ -4,7 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   double latitude = 48.668983;
   double longitude =-4.329021;
+  double zeroLat=0;
+  double zeroLong=0;
   GeoData geoData = GeoData(latitude, longitude);
+  GeoData zeroCoord= GeoData(zeroLat, zeroLong);
   String geoHash= 'gbsuv7ztq';
   List<String> expectedNeighbors = [
     'gbsuv7ztt',
@@ -27,5 +30,10 @@ void main() {
     List<String> actualNeighbors = geoData.neighbors;
     actualNeighbors.sort();
     expect(actualNeighbors, expectedNeighbors);
+  });
+
+  test('distance',(){
+    double distance = geoData.distance(lat: zeroLat, lng: zeroLong);
+    expect(distance>=5420&&distance<=5430, true);
   });
 }
