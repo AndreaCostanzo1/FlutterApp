@@ -21,6 +21,10 @@ class UserBloc {
 
   final List<StreamSubscription> _subscriptions = List();
 
+  static const String _imageNotExistError = 'image don\'t exist';
+
+  static String get imageNotFoundError => _imageNotExistError;
+
   get profileImageStream => _profileImageController.stream;
 
   get authenticatedUserStream => _authenticatedUserController.stream;
@@ -107,6 +111,7 @@ class UserBloc {
     if (path == null) {
       _lock.synchronized(() {
         if (!_profileImageController.isClosed)
+          print('here');
           _profileImageController.sink
               .add(AssetImage('assets/images/user.png'));
       });
@@ -119,7 +124,10 @@ class UserBloc {
                 if (!_profileImageController.isClosed)
                   _profileImageController.sink.add(MemoryImage(uIntImage));
               }))
-          .catchError((error) => print('image don\'t exist'));
+          .catchError((error) => _lock.synchronized(() {
+        if (!_profileImageController.isClosed)
+          _profileImageController.sink.addError(_imageNotExistError);
+      }));
     }
   }
 
