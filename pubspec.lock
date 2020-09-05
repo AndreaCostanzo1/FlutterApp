@@ -109,12 +109,10 @@ packages:
   cloud_firestore_mocks:
     dependency: "direct dev"
     description:
-      path: "."
-      ref: "support_cloud_firesote_0.14.0"
-      resolved-ref: "731260a1cdc4e40970abd02b2096a85dcb9b9685"
-      url: "https://github.com/sensuikan1973/cloud_firestore_mocks.git"
-    source: git
-    version: "0.4.6+1"
+      name: cloud_firestore_mocks
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.0"
   cloud_firestore_platform_interface:
     dependency: transitive
     description:

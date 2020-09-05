@@ -61,10 +61,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mockito: ^4.1.1
-  cloud_firestore_mocks:
-    git:
-      url: https://github.com/sensuikan1973/cloud_firestore_mocks.git
-      ref: support_cloud_firesote_0.14.0
+  cloud_firestore_mocks: ^0.5.0
 
   gen_lang: 0.1.0
 # The following section is specific to Flutter.
