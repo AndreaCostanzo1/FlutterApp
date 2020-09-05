@@ -51,7 +51,7 @@ class UserReviewBloc {
     }));
   }
 
-  void createReview(Beer beer, String comment, double rate) async {
+  Future<void> createReview(Beer beer, String comment, double rate) async {
     //clear stream
     _userReviewStreamController.sink.add(null);
     //creation process
@@ -61,12 +61,13 @@ class UserReviewBloc {
     DocumentReference beerRef =
         _firestore.collection('beers').doc(beer.id);
     await _updateReviewsCount(beerRef, rate, false);
-    beerRef.collection('reviews').doc(fUser.uid).set({
+    await beerRef.collection('reviews').doc(fUser.uid).set({
       'user': userRef,
       'date': DateTime.now(),
       'rate': rate,
       'comment': comment ?? ''
     });
+    return null;
   }
 
   void deleteReview(Beer beer, Review review) async {
