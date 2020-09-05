@@ -240,7 +240,9 @@ class BeerBloc {
       if (!_singleBeerController.isClosed) _singleBeerController.sink.add(null);
       await _firestore.runTransaction((transaction) async {
         DocumentSnapshot snapshot = await transaction.get(reference);
-        transaction.update(reference, {'likes': snapshot.data()['likes'] + 1});
+        int newLikes = snapshot.data()['likes'] + 1;
+        transaction.update(reference, {'likes': newLikes});
+        return newLikes;
       });
     });
     try {
@@ -254,14 +256,16 @@ class BeerBloc {
     return null;
   }
 
-  void removeFromFavourites(Beer beer) async {
+  Future<void> removeFromFavourites(Beer beer) async {
     DocumentReference reference = _firestore.collection('beers').doc(beer.id);
     User user = _firebaseAuth.currentUser;
     await _lock.synchronized(() async {
       if (!_singleBeerController.isClosed) _singleBeerController.sink.add(null);
       await _firestore.runTransaction((transaction) async {
         DocumentSnapshot snapshot = await transaction.get(reference);
-        transaction.update(reference, {'likes': snapshot.data()['likes'] - 1});
+        int newLikes = snapshot.data()['likes'] - 1;
+        transaction.update(reference, {'likes': newLikes});
+        return newLikes;
       });
     });
     try {
@@ -269,6 +273,7 @@ class BeerBloc {
     } catch (e) {
       print(e);
     }
+    return null;
   }
 
   void observeSingleBeer(String beerID) {
