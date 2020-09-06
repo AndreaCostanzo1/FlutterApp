@@ -312,10 +312,10 @@ class __TopPageState extends State<_TopPage> {
     setState(() {
       if (city.id != _city.id) {
         _city = city;
-        _cityUpdated=true;
       }
+      _cityUpdated=true;
+      _mapBloc.retrieveNearestCities();
     });
-    _mapBloc.retrieveNearestCities();
   }
 }
 
