@@ -5,6 +5,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.Size;
 import android.view.TextureView;
 import android.widget.Toast;
@@ -13,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ExperimentalGetImage;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
@@ -21,6 +23,7 @@ import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.google.common.primitives.Bytes;
@@ -36,13 +39,12 @@ import beertastic.sanag.com.flutter_beertastic.view_model.tools.BarcodesScanner;
 
 public class ScannerActivity extends AppCompatActivity {
 
-    private TextureView textureView;
     private ScannerViewModel viewModel;
     private PreviewView previewView;
 
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
 
-    @Override
+    @Override @ExperimentalGetImage
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.beertastic_activity_camera);
@@ -51,7 +53,7 @@ public class ScannerActivity extends AppCompatActivity {
         checkCameraPermission();
     }
 
-    @Override
+    @Override @ExperimentalGetImage
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         //check if the result code is equal to the one used for camera request
         if (requestCode == getResources().getInteger(R.integer.beertastic_camera_request_code)) {
@@ -63,6 +65,7 @@ public class ScannerActivity extends AppCompatActivity {
         }
     }
 
+    @ExperimentalGetImage
     private void setUpCamera() {
         cameraProviderFuture = ProcessCameraProvider.getInstance(this);
         cameraProviderFuture.addListener(() -> {
@@ -76,6 +79,7 @@ public class ScannerActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
+    @ExperimentalGetImage
     void bindPreview(@NonNull ProcessCameraProvider cameraProvider) {
         Executor executor = Executors.newSingleThreadExecutor();
         Preview preview = new Preview.Builder()
@@ -87,22 +91,18 @@ public class ScannerActivity extends AppCompatActivity {
 
         preview.setSurfaceProvider(previewView.createSurfaceProvider());
 
-        int deviceRotation = getWindowManager().getDefaultDisplay().getRotation();
-
         ImageAnalysis imageAnalysis =
                 new ImageAnalysis.Builder()
                         .setTargetResolution(new Size(1280, 720))
                         .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                         .build();
 
-        imageAnalysis.setAnalyzer(executor, image -> {
-            int rotationDegrees = image.getImageInfo().getRotationDegrees();
-            analyzeImage(image, rotationDegrees, deviceRotation);
-        });
+        imageAnalysis.setAnalyzer(executor, this::analyzeImage);
         cameraProvider.unbindAll();
         cameraProvider.bindToLifecycle((LifecycleOwner) this, cameraSelector, imageAnalysis, preview);
     }
 
+    @ExperimentalGetImage
     private void checkCameraPermission() {
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(this,
@@ -132,23 +132,15 @@ public class ScannerActivity extends AppCompatActivity {
     }
 
 
-    private void analyzeImage(ImageProxy image, int rotationDegrees, int deviceRotation) {
-        ImageProxy.PlaneProxy[] proxyList = image.getPlanes();
-        byte[] y = new byte[proxyList[0].getBuffer().remaining()];
-        proxyList[0].getBuffer().get(y);
-        byte[] u = new byte[proxyList[1].getBuffer().remaining()];
-        proxyList[1].getBuffer().get(u);
-        byte[] v = new byte[proxyList[2].getBuffer().remaining()];
-        proxyList[2].getBuffer().get(v);
-        byte[] imageByteArray = Bytes.concat(y, u, v);
+    @ExperimentalGetImage
+    private void analyzeImage(ImageProxy image) {
         BarcodesScanner.getInstance()
-                .scanYUVImage(imageByteArray, deviceRotation,
+                .scanYUVImage(image,
                         (barcodesList) -> viewModel.handleScanResult(barcodesList));
-        image.close();
     }
 
     private void setUpViewModel() {
-        viewModel = ViewModelProviders.of(this).get(ScannerViewModel.class);
+        viewModel = new ViewModelProvider(this).get(ScannerViewModel.class);
         viewModel.getQrData().observe(this, this::setActivityResult);
     }
 

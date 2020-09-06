@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
+import com.google.mlkit.vision.barcode.Barcode;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ public class ScannerViewModel extends ViewModel {
         return qrData;
     }
 
-    public void handleScanResult(Task<List<FirebaseVisionBarcode>> listener) {
+    public void handleScanResult(Task<List<Barcode>> listener) {
         if (listener.isSuccessful()) {
             Optional.ofNullable(listener.getResult())
                     .ifPresent(result -> {

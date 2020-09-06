@@ -1,39 +1,52 @@
 package beertastic.sanag.com.flutter_beertastic.view_model.tools;
 
-import android.graphics.Bitmap;
-import android.util.Log;
+import android.media.Image;
 import android.util.SparseIntArray;
 import android.view.Surface;
 
-import androidx.annotation.NonNull;
+import androidx.camera.core.ExperimentalGetImage;
+import androidx.camera.core.ImageProxy;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.firebase.ml.vision.FirebaseVision;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetector;
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions;
-import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
+import com.google.mlkit.vision.barcode.Barcode;
+import com.google.mlkit.vision.barcode.BarcodeScanner;
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
+import com.google.mlkit.vision.barcode.BarcodeScanning;
+import com.google.mlkit.vision.common.InputImage;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
 public class BarcodesScanner {
 
     private static final String TAG = "Barcode scanner";
     private static BarcodesScanner instance;
-    private FirebaseVisionBarcodeDetector detector;
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     static {
-        ORIENTATIONS.append(Surface.ROTATION_0, FirebaseVisionImageMetadata.ROTATION_0);
-        ORIENTATIONS.append(Surface.ROTATION_90, FirebaseVisionImageMetadata.ROTATION_270);
-        ORIENTATIONS.append(Surface.ROTATION_180, FirebaseVisionImageMetadata.ROTATION_180);
-        ORIENTATIONS.append(Surface.ROTATION_270, FirebaseVisionImageMetadata.ROTATION_90);
+        ORIENTATIONS.append(Surface.ROTATION_0, 0);
+        ORIENTATIONS.append(Surface.ROTATION_90, 90);
+        ORIENTATIONS.append(Surface.ROTATION_180, 180);
+        ORIENTATIONS.append(Surface.ROTATION_270, 270);
+    }
+
+    private static final SparseIntArray DEGREES_TO_FIREBASE_ORIENTATION = new SparseIntArray();
+    static {
+        DEGREES_TO_FIREBASE_ORIENTATION.append(0, FirebaseVisionImageMetadata.ROTATION_0);
+        DEGREES_TO_FIREBASE_ORIENTATION.append(90, FirebaseVisionImageMetadata.ROTATION_270);
+        DEGREES_TO_FIREBASE_ORIENTATION.append(180, FirebaseVisionImageMetadata.ROTATION_180);
+        DEGREES_TO_FIREBASE_ORIENTATION.append(270, FirebaseVisionImageMetadata.ROTATION_90);
     }
 
     private BarcodesScanner(){
-        detector=getDetector();
+        BarcodeScannerOptions options =
+                new BarcodeScannerOptions.Builder()
+                        .setBarcodeFormats(
+                                Barcode.FORMAT_QR_CODE,
+                                Barcode.FORMAT_EAN_8,
+                                Barcode.FORMAT_EAN_13)
+                        .build();
+
     }
 
     /**
@@ -44,44 +57,12 @@ public class BarcodesScanner {
         return instance;
     }
 
-    /**
-     * @return the barcode detector
-     */
-    private FirebaseVisionBarcodeDetector getDetector() {
-        Log.d(TAG,"Getting detector");
-        FirebaseVisionBarcodeDetectorOptions options = new FirebaseVisionBarcodeDetectorOptions.Builder()
-                .setBarcodeFormats(
-                        //QR CODE
-                        FirebaseVisionBarcode.FORMAT_QR_CODE,
-                        //EUROPEAN BARCODE
-                        FirebaseVisionBarcode.FORMAT_EAN_8,
-                        FirebaseVisionBarcode.FORMAT_EAN_13)
-                .build();
-        return FirebaseVision.getInstance().getVisionBarcodeDetector(options);
-    }
-
-    /**
-     * This method scans an image and search for barcode
-     */
-    public void scanOfBitmapImage(@NonNull Bitmap image, OnCompleteListener<List<FirebaseVisionBarcode>> listener){
-        Log.d(TAG,"Barcode detect request received");
-        //scan the given image
-        detector.detectInImage(FirebaseVisionImage.fromBitmap(image))
-                //add a listener to handle positive result
-                .addOnCompleteListener(listener);
-
-    }
-
-    public void scanYUVImage(byte[] imageBuffer, int surfaceOrientation,  OnCompleteListener<List<FirebaseVisionBarcode>> listener){
-        int rotation = ORIENTATIONS.get(surfaceOrientation);
-        FirebaseVisionImageMetadata metadata = new FirebaseVisionImageMetadata.Builder()
-                .setWidth(1280)   // 480x360 is typically sufficient for  image recognition
-                .setHeight(720)
-                .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21)
-                .setRotation(rotation)
-                .build();
-        detector.detectInImage(FirebaseVisionImage.fromByteArray(imageBuffer,metadata))
-                //add a listener to handle positive result
-                .addOnCompleteListener(listener);
+    @ExperimentalGetImage
+    public void scanYUVImage(ImageProxy mediaImage, OnCompleteListener<List<Barcode>> listener){
+        if(mediaImage.getImage()!=null){
+            InputImage image = InputImage.fromMediaImage(mediaImage.getImage(),mediaImage.getImageInfo().getRotationDegrees());
+            BarcodeScanner scanner = BarcodeScanning.getClient();
+            scanner.process(image).addOnCompleteListener(listener).addOnCompleteListener((e)->mediaImage.close());
+        }
     }
 }
