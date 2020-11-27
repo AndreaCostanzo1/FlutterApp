@@ -26,3 +26,10 @@ This document presents a functional specification of the architectural component
 
 *The usage of these technologies is further detailed in the design document*
 
+
+*Some UIs have been inspired from:*
+- https://www.youtube.com/watch?v=pAYGLroI1DI&t=135s [Event Page]
+- https://www.youtube.com/watch?v=K8pG0Lo4f1o [Beer Page]
+- https://www.youtube.com/watch?v=x77Ijv0kCJc [Settings]
+
+
