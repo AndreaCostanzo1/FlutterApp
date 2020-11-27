@@ -19,7 +19,7 @@ This document presents a functional specification of the architectural component
   - Flutter
   - Android (Java) for the ML part related to barcodes and QR codes
 - **Backend**
-  - Firebase [Authentication, Functions, Firestore (Database), Storage]
+  - Firebase [Authentication, Functions, Firestore (Database), Storage, ML]
 - **Continuous integration**
   - CircleCI
   - Codecov
